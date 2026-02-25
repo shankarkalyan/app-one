@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Loan Process - LangGraph Architecture</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0e17;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      color: #c8d6e5;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #5dade2;
+      margin: 30px 0 10px;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #6b7f94;
+      margin-bottom: 20px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #8899aa;
+    }
+
+    .legend-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 3px;
+    }
+
+    .mermaid-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 30px;
+      max-width: 100%;
+      overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      margin-bottom: 30px;
+    }
+
+    .section {
+      max-width: 900px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .info-box {
+      background: #141c2b;
+      border: 1px solid #1e2d42;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .info-box strong {
+      color: #5dade2;
+    }
+
+    .info-box code {
+      background: #1e2d42;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: #e67e22;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 0.82rem;
+    }
+
+    th {
+      background: #1a2744;
+      color: #5dade2;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #1e2d42;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .tag-agent {
+      background: #1a5276;
+      color: #fff;
+    }
+
+    .tag-tool {
+      background: #e67e22;
+      color: #fff;
+    }
+
+    .tag-human {
+      background: #c0392b;
+      color: #fff;
+    }
+
+    .tag-sq {
+      background: #27ae60;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Agentic Loan Assumption Workflow</h1>
+  <p class="subtitle">LangGraph StateGraph Architecture with Supervisor Routing, Reusable SQ Review Node, and
+    Human-in-the-Loop</p>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#1a5276"></div> Agent Node
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#e67e22"></div> Supervisor Router
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#27ae60"></div> SQ Review Node (Reusable)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#8e44ad"></div> Human-in-the-Loop
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#c0392b"></div> End States
+    </div>
+  </div>
+
+  <!-- ========== MAIN AGENTIC FLOW DIAGRAM ========== -->
+  <div class="mermaid-container">
+    <pre class="mermaid">
+flowchart TD
+    START((START)):::startStyle
+    START --> SUP
+
+    SUP{Supervisor Router}:::supStyle
+
+    subgraph INTAKE [Phase 1: Intake]
+        direction TB
+        IA[IntakeAgent - Verify caller and run Case Optimizer]:::agentStyle
+        ELIG{Eligible?}:::decStyle
+        IA --> ELIG
+    end
+
+    SUP --> IA
+    ELIG -- No --> NA1
+    NA1[NotifyAgent - Send Ineligible Letter]:::notifyStyle
+    NA1 --> END1((END - Ineligible)):::endStyle
+
+    ELIG -- Yes --> SUP2{Supervisor Router}:::supStyle
+
+    subgraph APPLICATION [Phase 2: Application]
+        direction TB
+        AA[ApplicationAgent - Send app via DocuSign and track SLA]:::agentStyle
+        COMP{Complete or less than 25 days?}:::decStyle
+        AA --> COMP
+    end
+
+    SUP2 --> AA
+    COMP -- No --> NA2[NotifyAgent - Send Incomplete Closure Letter]:::notifyStyle
+    NA2 --> END2((END - Incomplete)):::endStyle
+
+    COMP -- Yes --> SUP3{Supervisor Router}:::supStyle
+
+    subgraph DISCLOSURE [Phase 3: Disclosure]
+        direction TB
+        DA[DisclosureAgent - Create and Send Disclosure Package]:::agentStyle
+        SQ1[SQ Review Node]:::sqStyle
+        DA --> SQ1
+        SQ1 -- Fail --> DA
+    end
+
+    SUP3 --> DA
+    SQ1 -- Pass --> SUP4{Supervisor Router}:::supStyle
+
+    subgraph LOANREVIEW [Phase 4: Loan Review and Document Collection]
+        direction TB
+        LRA[LoanReviewAgent - Check if documents needed]:::agentStyle
+        DOCCHECK{Documents needed?}:::decStyle
+        LRA --> DOCCHECK
+        DOCML[DocLetterAgent - Create Missing Docs Letter]:::agentStyle
+        SQ2[SQ Review Node]:::sqStyle
+        SNDL[NotifyAgent - Send Letter to Customer]:::notifyStyle
+        DRTN{Documents Returned?}:::decStyle
+        DOCCHECK -- Yes --> DOCML
+        DOCML --> SQ2
+        SQ2 -- Fail --> DOCML
+        SQ2 -- Pass --> SNDL
+        SNDL --> DRTN
+        DRTN -- Received --> LRA
+    end
+
+    SUP4 --> LRA
+    DRTN -- Not Received --> CW[NotifyAgent - Customer Withdrawn]:::notifyStyle
+    CW --> END3((END - Withdrawn)):::endStyle
+
+    DOCCHECK -- No docs needed --> SUP5{Supervisor Router}:::supStyle
+
+    subgraph UNDERWRITING [Phase 5: Underwriting]
+        direction TB
+        UWA[UnderwritingAgent - Checklist and Assign]:::agentStyle
+        UWR[UnderwriterReviewAgent - Review for Completeness]:::agentStyle
+        READY{Ready?}:::decStyle
+        UWA --> UWR
+        UWR --> READY
+        READY -- Not Ready --> UWR
+    end
+
+    SUP5 --> UWA
+    READY -- Ready --> HIL1
+
+    HIL1[HUMAN-IN-THE-LOOP - Underwriter Decision]:::hilStyle
+    HIL1 --> DEC{Yes or No Decision}:::decStyle
+
+    DEC -- No --> DENY
+
+    subgraph DENIAL [Phase 6a: Denial Path]
+        direction TB
+        DENY[DenialAgent - Make Denial Letter]:::denyAgentStyle
+        SQ7[SQ Review Node]:::sqStyle
+        DENY --> SQ7
+        SQ7 -- Fail --> DENY
+        SLD[NotifyAgent - Send Denial Letter]:::notifyStyle
+        SQ7 -- Pass --> SLD
+    end
+
+    SLD --> END5((END - Denied)):::endStyle
+
+    DEC -- Yes --> SUP6{Supervisor Router}:::supStyle
+
+    subgraph COMMITMENT [Phase 6b: Commitment]
+        direction TB
+        CMA[CommitmentAgent - Make Commitment Letter]:::agentStyle
+        SQ3[SQ Review Node]:::sqStyle
+        CMA --> SQ3
+        SQ3 -- Fail --> CMA
+        SL1[NotifyAgent - Send Letter]:::notifyStyle
+        SQ3 -- Pass --> SL1
+        CALL[CallAgent - Assign to Call Agent]:::agentStyle
+        SL1 --> CALL
+        REVA[ReviewAgent - Review With Agent]:::agentStyle
+        CALL --> REVA
+    end
+
+    SUP6 --> CMA
+    REVA --> SUP7{Supervisor Router}:::supStyle
+
+    subgraph CLOSING [Phase 7: Closing]
+        direction TB
+        CPA[ClosingPacketAgent - Create and Complete Closing Packet]:::agentStyle
+        SQ4[SQ Review Node]:::sqStyle
+        CPA --> SQ4
+        SQ4 -- Fail --> CPA
+        SEND[NotifyAgent - Send Closing Packet to Title Agency]:::notifyStyle
+        SQ4 -- Pass --> SEND
+    end
+
+    SUP7 --> CPA
+
+    subgraph POSTCLOSING [Phase 8: Post-Closing]
+        direction TB
+        RVCP[ReviewClosingAgent - Review Closing Packet]:::agentStyle
+        SQ5[SQ Review Node]:::sqStyle
+        RVCP --> SQ5
+        SQ5 -- Fail --> RVCP
+        MAINT[MaintenanceAgent - Complete System Maintenance MSP]:::agentStyle
+        SQ5 -- Pass --> MAINT
+        SQ6[SQ Review Node]:::sqStyle
+        MAINT --> SQ6
+        SQ6 -- Fail --> MAINT
+    end
+
+    SEND --> RVCP
+    SQ6 -- Pass --> END4((END - Loan Closed)):::successStyle
+
+    classDef startStyle fill:#5dade2,color:#fff,stroke:#2e86c1,stroke-width:3px
+    classDef supStyle fill:#e67e22,color:#fff,stroke:#d35400,stroke-width:2px
+    classDef agentStyle fill:#1a5276,color:#fff,stroke:#154360,stroke-width:2px
+    classDef sqStyle fill:#27ae60,color:#fff,stroke:#1e8449,stroke-width:2px
+    classDef decStyle fill:#2c3e50,color:#fff,stroke:#1a252f,stroke-width:2px
+    classDef notifyStyle fill:#2874a6,color:#fff,stroke:#1a5276,stroke-width:1px
+    classDef hilStyle fill:#8e44ad,color:#fff,stroke:#6c3483,stroke-width:3px
+    classDef denyAgentStyle fill:#c0392b,color:#fff,stroke:#96281b,stroke-width:2px
+    classDef endStyle fill:#7f8c8d,color:#fff,stroke:#616a6b,stroke-width:2px
+    classDef successStyle fill:#1b5e20,color:#fff,stroke:#145218,stroke-width:3px
+
+    style INTAKE fill:#0d253f,color:#fff,stroke:#1a5276
+    style APPLICATION fill:#0d253f,color:#fff,stroke:#1a5276
+    style DISCLOSURE fill:#0d253f,color:#fff,stroke:#27ae60
+    style LOANREVIEW fill:#0d253f,color:#fff,stroke:#1a5276
+    style UNDERWRITING fill:#0d253f,color:#fff,stroke:#8e44ad
+    style DENIAL fill:#1a0a0a,color:#fff,stroke:#c0392b
+    style COMMITMENT fill:#0d253f,color:#fff,stroke:#e67e22
+    style CLOSING fill:#0d253f,color:#fff,stroke:#e67e22
+    style POSTCLOSING fill:#0d253f,color:#fff,stroke:#1b5e20
+</pre>
+  </div>
+
+  <!-- ========== ARCHITECTURE WRITEUP ========== -->
+  <div class="section">
+    <h2>LangGraph Design Patterns Used</h2>
+
+    <div class="info-box">
+      <strong>1. Supervisor Pattern (Conditional Edge Routing)</strong><br>
+      The <code>Supervisor Router</code> is not a standalone agent — it is implemented as <strong>conditional
+        edges</strong> in LangGraph's <code>StateGraph</code>. After each agent node completes, the supervisor inspects
+      the shared <code>State</code> dict and uses <code>Command(goto=...)</code> to route to the next node dynamically.
+      This replaces hard-coded linear flows with intelligent, state-aware routing.
+    </div>
+
+    <div class="info-box">
+      <strong>2. Reusable SQ Review Node (Subgraph Pattern)</strong><br>
+      The <code>SQ Review</code> appears <strong>7 times</strong> in the flow. Instead of duplicating logic, it is
+      implemented as a <strong>single reusable subgraph</strong> that reads <code>state["sq_review_context"]</code> to
+      know which checkpoint it is evaluating. It writes <code>pass/fail</code> back to state, and the supervisor routes
+      accordingly. This follows LangGraph's <strong>subgraph-as-node</strong> pattern.
+    </div>
+
+    <div class="info-box">
+      <strong>3. Human-in-the-Loop (interrupt_before)</strong><br>
+      At the <strong>Underwriting Decision</strong> checkpoint, <code>interrupt_before=["decision_node"]</code> pauses
+      the graph execution and surfaces the decision to a human underwriter. The human provides
+      <code>Command(resume={"decision": "yes"/"no"})</code> to continue the flow. This is also recommended before
+      sending the Denial Letter.
+    </div>
+
+    <div class="info-box">
+      <strong>4. Command Pattern for Dynamic Routing</strong><br>
+      Agents return <code>Command(goto="next_node", update={"key": "value"})</code> instead of plain state updates. This
+      lets each agent explicitly control where the flow goes next, which is critical for the branching logic (Yes/No
+      decisions, SQ pass/fail loops, document-needed checks).
+    </div>
+
+    <div class="info-box">
+      <strong>5. Shared State with TypedDict + Annotated Reducers</strong><br>
+      All agents read/write to a single <code>LoanState(TypedDict)</code>. Fields use
+      <code>Annotated[list, add_messages]</code> reducers for message history and simple overwrites for status fields.
+      This ensures consistency across all nodes without side effects.
+    </div>
+  </div>
+
+  <!-- ========== AGENT TABLE ========== -->
+  <div class="section">
+    <h2>Agent Definitions (10 Agents)</h2>
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Agent</th>
+        <th>Phase</th>
+        <th>Responsibility</th>
+        <th>Outputs to State</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td><span class="tag tag-agent">IntakeAgent</span></td>
+        <td>1</td>
+        <td>Verify caller identity, run Case Optimizer Q&A, determine eligibility</td>
+        <td><code>eligibility_status</code></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><span class="tag tag-agent">ApplicationAgent</span></td>
+        <td>2</td>
+        <td>Send application via DocuSign, track SLA, monitor return, check completeness</td>
+        <td><code>app_status, sla_days</code></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><span class="tag tag-agent">DisclosureAgent</span></td>
+        <td>3</td>
+        <td>Create and send disclosure package</td>
+        <td><code>disclosure_package</code></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><span class="tag tag-agent">LoanReviewAgent</span></td>
+        <td>4</td>
+        <td>Evaluate if documents are needed, manage document collection loop</td>
+        <td><code>docs_needed, doc_status</code></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><span class="tag tag-agent">DocLetterAgent</span></td>
+        <td>4</td>
+        <td>Create letter for missing documents</td>
+        <td><code>missing_docs_letter</code></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><span class="tag tag-agent">UnderwritingAgent</span></td>
+        <td>5</td>
+        <td>Run checklist, assign underwriter, review completeness</td>
+        <td><code>uw_readiness</code></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td><span class="tag tag-agent">CommitmentAgent</span></td>
+        <td>6b</td>
+        <td>Make commitment letter</td>
+        <td><code>commitment_letter</code></td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td><span class="tag tag-agent">DenialAgent</span></td>
+        <td>6a</td>
+        <td>Make denial letter</td>
+        <td><code>denial_letter</code></td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td><span class="tag tag-agent">ClosingPacketAgent</span></td>
+        <td>7</td>
+        <td>Create closing packet, send to Title Agency, review closing</td>
+        <td><code>closing_packet</code></td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td><span class="tag tag-agent">MaintenanceAgent</span></td>
+        <td>8</td>
+        <td>Complete system maintenance MSP</td>
+        <td><code>msp_status</code></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== UTILITY NODES ========== -->
+  <div class="section">
+    <h2>Utility Nodes</h2>
+    <table>
+      <tr>
+        <th>Node</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td><span class="tag tag-sq">SQ Review Node</span></td>
+        <td>Reusable Subgraph</td>
+        <td>Single implementation invoked 7 times. Reads <code>sq_review_context</code> to know which document to
+          review. Returns <code>pass/fail</code>. Max 3 retries before human escalation.</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-agent">NotifyAgent</span></td>
+        <td>Utility Node</td>
+        <td>Centralized notification handler. Sends all letters — ineligible, incomplete, missing docs, commitment,
+          denial, closure. Reads <code>notification_type</code> from state.</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-agent">CallAgent</span></td>
+        <td>Task Node</td>
+        <td>Assigns to call agent and facilitates review with applicant.</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-human">Human-in-the-Loop</span></td>
+        <td>Interrupt</td>
+        <td>Pauses graph at underwriting decision. Uses <code>interrupt_before</code>. Human provides Yes/No via
+          <code>Command(resume=...)</code>.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== SHARED STATE ========== -->
+  <div class="section">
+    <h2>Shared State Object</h2>
+    <table>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td><code>application_id</code></td>
+        <td>str</td>
+        <td>Unique loan application ID</td>
+      </tr>
+      <tr>
+        <td><code>customer_profile</code></td>
+        <td>dict</td>
+        <td>Caller info, authorization status</td>
+      </tr>
+      <tr>
+        <td><code>eligibility_status</code></td>
+        <td>str</td>
+        <td>eligible / ineligible</td>
+      </tr>
+      <tr>
+        <td><code>app_status</code></td>
+        <td>str</td>
+        <td>sent / returned / complete / incomplete</td>
+      </tr>
+      <tr>
+        <td><code>sla_days</code></td>
+        <td>int</td>
+        <td>Days elapsed since application sent</td>
+      </tr>
+      <tr>
+        <td><code>disclosure_package</code></td>
+        <td>dict</td>
+        <td>Disclosure documents</td>
+      </tr>
+      <tr>
+        <td><code>docs_needed</code></td>
+        <td>bool</td>
+        <td>Whether missing documents exist</td>
+      </tr>
+      <tr>
+        <td><code>doc_status</code></td>
+        <td>str</td>
+        <td>returned / not_received / withdrawn</td>
+      </tr>
+      <tr>
+        <td><code>uw_readiness</code></td>
+        <td>str</td>
+        <td>ready / not_ready</td>
+      </tr>
+      <tr>
+        <td><code>uw_decision</code></td>
+        <td>str</td>
+        <td>yes / no (from human-in-the-loop)</td>
+      </tr>
+      <tr>
+        <td><code>commitment_letter</code></td>
+        <td>dict</td>
+        <td>Generated commitment letter</td>
+      </tr>
+      <tr>
+        <td><code>denial_letter</code></td>
+        <td>dict</td>
+        <td>Generated denial letter</td>
+      </tr>
+      <tr>
+        <td><code>closing_packet</code></td>
+        <td>dict</td>
+        <td>Assembled closing documents</td>
+      </tr>
+      <tr>
+        <td><code>msp_status</code></td>
+        <td>str</td>
+        <td>complete / pending</td>
+      </tr>
+      <tr>
+        <td><code>sq_review_context</code></td>
+        <td>str</td>
+        <td>Which checkpoint: disclosure / missing_docs / commitment / denial / closing / review_closing / maintenance
+        </td>
+      </tr>
+      <tr>
+        <td><code>sq_review_result</code></td>
+        <td>str</td>
+        <td>pass / fail</td>
+      </tr>
+      <tr>
+        <td><code>sq_retry_count</code></td>
+        <td>int</td>
+        <td>Current retry count for SQ loop guard</td>
+      </tr>
+      <tr>
+        <td><code>notification_type</code></td>
+        <td>str</td>
+        <td>Type of letter to send</td>
+      </tr>
+      <tr>
+        <td><code>current_phase</code></td>
+        <td>str</td>
+        <td>Tracks active phase</td>
+      </tr>
+      <tr>
+        <td><code>messages</code></td>
+        <td>list</td>
+        <td>Running message history for agent reasoning</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== SQ REVIEW DETAIL ========== -->
+  <div class="section">
+    <h2>SQ Review Node - 7 Checkpoints</h2>
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Checkpoint</th>
+        <th>On Pass</th>
+        <th>On Fail</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Disclosure Package</td>
+        <td>Application assigned for Loan Review</td>
+        <td>Loop back to DisclosureAgent</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Missing Documents Letter</td>
+        <td>Send Letter to Customer</td>
+        <td>Loop back to DocLetterAgent</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Commitment Letter</td>
+        <td>Send Letter via NotifyAgent</td>
+        <td>Loop back to CommitmentAgent</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Closing Packet</td>
+        <td>Send Closing Packet to Title Agency</td>
+        <td>Loop back to ClosingPacketAgent</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Review Closing Packet</td>
+        <td>Complete System Maintenance</td>
+        <td>Loop back to ReviewClosingAgent</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>System Maintenance MSP</td>
+        <td>END - Loan Closed</td>
+        <td>Loop back to MaintenanceAgent</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Denial Letter</td>
+        <td>Send Denial Letter via NotifyAgent</td>
+        <td>Loop back to DenialAgent</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== LOOP GUARDS ========== -->
+  <div class="section">
+    <h2>Loop Guards and Safety</h2>
+    <div class="info-box">
+      <strong>SQ Review Loops:</strong> Max <strong>3 retries</strong> per checkpoint. After 3 failures, escalate to
+      <span class="tag tag-human">Human Reviewer</span> via <code>interrupt_before</code>.<br><br>
+      <strong>Document Collection Loop:</strong> Max <strong>2 re-requests</strong> for missing docs. After 2 cycles
+      with no return, auto-transition to Customer Withdrawn path.<br><br>
+      <strong>Underwriter Readiness Loop:</strong> Max <strong>3 review cycles</strong>. After 3 not-ready results,
+      escalate to senior underwriter.<br><br>
+      <strong>All loops</strong> tracked via <code>sq_retry_count</code> in state, reset to 0 when entering a new
+      checkpoint.
+    </div>
+  </div>
+
+  <!-- ========== HUMAN IN THE LOOP ========== -->
+  <div class="section">
+    <h2>Human-in-the-Loop Checkpoints</h2>
+    <table>
+      <tr>
+        <th>Checkpoint</th>
+        <th>Why</th>
+        <th>Implementation</th>
+      </tr>
+      <tr>
+        <td>Underwriting Decision</td>
+        <td>Yes/No loan decision requires human judgment</td>
+        <td><code>interrupt_before=["decision_node"]</code></td>
+      </tr>
+      <tr>
+        <td>Denial Letter Send</td>
+        <td>Regulatory requirement for human approval before denial</td>
+        <td><code>interrupt_before=["send_denial"]</code></td>
+      </tr>
+      <tr>
+        <td>SQ Escalation (any)</td>
+        <td>After 3 SQ failures, human must intervene</td>
+        <td><code>interrupt_before=["sq_escalation"]</code></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>End States (5 Possible Outcomes)</h2>
+    <table>
+      <tr>
+        <th>End State</th>
+        <th>Trigger</th>
+        <th>Phase</th>
+      </tr>
+      <tr>
+        <td style="color:#c0392b">END - Ineligible</td>
+        <td>Assumption not allowed</td>
+        <td>Phase 1</td>
+      </tr>
+      <tr>
+        <td style="color:#c0392b">END - Incomplete</td>
+        <td>Application not complete or over 25 SLA days</td>
+        <td>Phase 2</td>
+      </tr>
+      <tr>
+        <td style="color:#c0392b">END - Withdrawn</td>
+        <td>Customer did not return documents</td>
+        <td>Phase 4</td>
+      </tr>
+      <tr>
+        <td style="color:#c0392b">END - Denied</td>
+        <td>Underwriter decision is No</td>
+        <td>Phase 6a</td>
+      </tr>
+      <tr>
+        <td style="color:#1b5e20">END - Loan Closed</td>
+        <td>All SQ Reviews passed, system maintenance complete</td>
+        <td>Phase 8</td>
+      </tr>
+    </table>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#1a5276',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#154360',
+        lineColor: '#5dade2',
+        fontSize: '11px',
+        fontFamily: 'Segoe UI, system-ui, sans-serif'
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: 'basis',
+        rankSpacing: 40,
+        nodeSpacing: 25,
+        subGraphTitleMargin: { top: 10, bottom: 10 }
+      }
+    });
+  </script>
+
+</body>
+
+</html>

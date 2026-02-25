@@ -1,0 +1,38 @@
+# Dependencies
+frontend/node_modules/
+backend/venv/
+
+# Build outputs
+frontend/dist/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Database files (optional - remove these lines if you want to include DB)
+backend/loan_workflow.db
+backend/loan_workflow.db.backup
+backend/*.db
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code settings
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*

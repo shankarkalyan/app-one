@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0a0e17;
+  color: #c8d6e5;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141c2b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e2d42;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2e4a5f;
+}
+
+/* ReactFlow custom styles */
+.react-flow__node {
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.react-flow__edge-path {
+  stroke: #5dade2;
+  stroke-width: 2;
+}
+
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Phase colors */
+.phase-intake { border-color: #1a5276; }
+.phase-application { border-color: #2874a6; }
+.phase-disclosure { border-color: #27ae60; }
+.phase-loan-review { border-color: #1a5276; }
+.phase-underwriting { border-color: #8e44ad; }
+.phase-denial { border-color: #c0392b; }
+.phase-commitment { border-color: #e67e22; }
+.phase-closing { border-color: #e67e22; }
+.phase-post-closing { border-color: #1b5e20; }
+
+/* Status badges */
+.status-pending { background-color: #6b7280; }
+.status-active { background-color: #3b82f6; animation: pulse 2s infinite; }
+.status-completed { background-color: #22c55e; }
+.status-failed { background-color: #ef4444; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}

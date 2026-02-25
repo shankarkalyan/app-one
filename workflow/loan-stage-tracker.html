@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Assumption — Stage Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --bg-card: #ffffff;
+    --ink: #1a1a1a;
+    --ink-mid: #5c5c5c;
+    --ink-light: #9a9a9a;
+    --border: #e2ded8;
+    --phase1: #2563eb;
+    --phase2: #7c3aed;
+    --phase3: #0891b2;
+    --phase4: #d97706;
+    --phase5: #16a34a;
+    --phase6: #dc2626;
+    --exit: #78716c;
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+    color: var(--ink);
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  .header {
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .header .mono-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    font-size: 0.95rem;
+    color: var(--ink-mid);
+    font-weight: 400;
+    max-width: 520px;
+  }
+
+  /* ── Timeline spine ── */
+  .timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 27px;
+    top: 28px;
+    bottom: 28px;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      var(--phase1) 0%, var(--phase1) 14%,
+      var(--phase2) 14%, var(--phase2) 30%,
+      var(--phase3) 30%, var(--phase3) 50%,
+      var(--phase4) 50%, var(--phase4) 66%,
+      var(--phase5) 66%, var(--phase5) 82%,
+      var(--phase6) 82%, var(--phase6) 100%
+    );
+    border-radius: 2px;
+  }
+
+  /* ── Phase block ── */
+  .phase {
+    position: relative;
+    padding-left: 72px;
+    padding-bottom: 8px;
+    animation: fadeIn 0.5s ease-out both;
+  }
+
+  .phase:nth-child(1) { animation-delay: 0.05s; }
+  .phase:nth-child(2) { animation-delay: 0.1s; }
+  .phase:nth-child(3) { animation-delay: 0.15s; }
+  .phase:nth-child(4) { animation-delay: 0.2s; }
+  .phase:nth-child(5) { animation-delay: 0.25s; }
+  .phase:nth-child(6) { animation-delay: 0.3s; }
+  .phase:nth-child(7) { animation-delay: 0.35s; }
+
+  /* Phase number circle */
+  .phase-dot {
+    position: absolute;
+    left: 14px;
+    top: 20px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #fff;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Phase card */
+  .phase-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 24px 28px 20px;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .phase-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+  }
+
+  .phase-name {
+    font-size: 0.65rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .phase-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  /* Stage rows */
+  .stages {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .stage-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-top: 1px solid #f3f1ee;
+  }
+
+  .stage-row:first-child {
+    border-top: 1px solid var(--border);
+  }
+
+  .stage-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--ink-light);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .stage-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .stage-label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  .stage-note {
+    font-size: 0.72rem;
+    color: var(--ink-light);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  /* ── Exit card ── */
+  .exit-section {
+    margin-top: 4px;
+    position: relative;
+    padding-left: 72px;
+    animation: fadeIn 0.5s ease-out 0.4s both;
+  }
+
+  .exit-dot {
+    position: absolute;
+    left: 14px;
+    top: 20px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--exit);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #fff;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .exit-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 24px 28px 20px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--exit);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .exit-card .phase-name { color: var(--exit); }
+
+  .exit-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .exit-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: #fafaf8;
+    border: 1px solid #eae7e2;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-mid);
+  }
+
+  .exit-chip .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--exit);
+  }
+
+  /* ── Summary bar ── */
+  .summary-bar {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    animation: fadeIn 0.5s ease-out 0.45s both;
+  }
+
+  .summary-stat {
+    text-align: center;
+  }
+
+  .summary-stat .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .summary-stat .label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-top: 2px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .header h1 { font-size: 1.6rem; }
+    .phase { padding-left: 60px; }
+    .exit-section { padding-left: 60px; }
+    .phase-card { padding: 20px 18px 16px; }
+    .stage-note { display: none; }
+    .stage-label { font-size: 0.82rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="mono-tag">Loan Assumption Workflow</div>
+    <h1>Process Stage Tracker</h1>
+    <p>All trackable stages grouped by process phase — use these as statuses in your tracker app.</p>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline">
+
+    <!-- Phase 1 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:var(--phase1)">1</div>
+      <div class="phase-card" style="border-left: 3px solid var(--phase1);">
+        <div class="phase-name" style="color:var(--phase1);">Phase 1</div>
+        <div class="phase-title">Intake & Eligibility</div>
+        <div class="stages">
+          <div class="stage-row">
+            <div class="stage-num">01</div>
+            <div class="stage-indicator" style="background:var(--phase1);"></div>
+            <div class="stage-label">Call Received</div>
+            <div class="stage-note">Initial inquiry logged</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">02</div>
+            <div class="stage-indicator" style="background:var(--phase1);"></div>
+            <div class="stage-label">Eligibility Check</div>
+            <div class="stage-note">Case Optimizer review</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:var(--phase2)">2</div>
+      <div class="phase-card" style="border-left: 3px solid var(--phase2);">
+        <div class="phase-name" style="color:var(--phase2);">Phase 2</div>
+        <div class="phase-title">Application & Disclosure</div>
+        <div class="stages">
+          <div class="stage-row">
+            <div class="stage-num">03</div>
+            <div class="stage-indicator" style="background:var(--phase2);"></div>
+            <div class="stage-label">Application Sent</div>
+            <div class="stage-note">Dispatched via DocuSign</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">04</div>
+            <div class="stage-indicator" style="background:var(--phase2);"></div>
+            <div class="stage-label">Application Received</div>
+            <div class="stage-note">Returned package in hand</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">05</div>
+            <div class="stage-indicator" style="background:var(--phase2);"></div>
+            <div class="stage-label">Completeness Review</div>
+            <div class="stage-note">Docs complete & within 25 days</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">06</div>
+            <div class="stage-indicator" style="background:var(--phase2);"></div>
+            <div class="stage-label">Disclosure Sent</div>
+            <div class="stage-note">Post SQ review</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:var(--phase3)">3</div>
+      <div class="phase-card" style="border-left: 3px solid var(--phase3);">
+        <div class="phase-name" style="color:var(--phase3);">Phase 3</div>
+        <div class="phase-title">Loan Review & Documents</div>
+        <div class="stages">
+          <div class="stage-row">
+            <div class="stage-num">07</div>
+            <div class="stage-indicator" style="background:var(--phase3);"></div>
+            <div class="stage-label">Loan Review Assigned</div>
+            <div class="stage-note">Document gap analysis</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">08</div>
+            <div class="stage-indicator" style="background:var(--phase3);"></div>
+            <div class="stage-label">Awaiting Documents</div>
+            <div class="stage-note">Missing docs requested</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:var(--phase4)">4</div>
+      <div class="phase-card" style="border-left: 3px solid var(--phase4);">
+        <div class="phase-name" style="color:var(--phase4);">Phase 4</div>
+        <div class="phase-title">Underwriting</div>
+        <div class="stages">
+          <div class="stage-row">
+            <div class="stage-num">09</div>
+            <div class="stage-indicator" style="background:var(--phase4);"></div>
+            <div class="stage-label">Underwriting</div>
+            <div class="stage-note">Assigned to underwriter</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">10</div>
+            <div class="stage-indicator" style="background:var(--phase4);"></div>
+            <div class="stage-label">Decision — Approved / Denied</div>
+            <div class="stage-note">Final underwriter ruling</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:var(--phase5)">5</div>
+      <div class="phase-card" style="border-left: 3px solid var(--phase5);">
+        <div class="phase-name" style="color:var(--phase5);">Phase 5</div>
+        <div class="phase-title">Approval & Closing</div>
+        <div class="stages">
+          <div class="stage-row">
+            <div class="stage-num">11</div>
+            <div class="stage-indicator" style="background:var(--phase5);"></div>
+            <div class="stage-label">Commitment Letter Sent</div>
+            <div class="stage-note">Post SQ review</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">12</div>
+            <div class="stage-indicator" style="background:var(--phase5);"></div>
+            <div class="stage-label">Customer Review</div>
+            <div class="stage-note">Call agent reviews terms</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">13</div>
+            <div class="stage-indicator" style="background:var(--phase5);"></div>
+            <div class="stage-label">Closing Packet Sent</div>
+            <div class="stage-note">Sent to title agency · Post SQ</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">14</div>
+            <div class="stage-indicator" style="background:var(--phase5);"></div>
+            <div class="stage-label">Closing Review</div>
+            <div class="stage-note">Final packet review · Post SQ</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">15</div>
+            <div class="stage-indicator" style="background:var(--phase5);"></div>
+            <div class="stage-label">System Maintenance</div>
+            <div class="stage-note">MSP updates · Post SQ</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">16</div>
+            <div class="stage-indicator" style="background:var(--phase5);"></div>
+            <div class="stage-label">Loan Closed</div>
+            <div class="stage-note">✓ Complete</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 6 — Denial -->
+    <div class="phase">
+      <div class="phase-dot" style="background:var(--phase6)">6</div>
+      <div class="phase-card" style="border-left: 3px solid var(--phase6);">
+        <div class="phase-name" style="color:var(--phase6);">Phase 6 — Alternate</div>
+        <div class="phase-title">Denial</div>
+        <div class="stages">
+          <div class="stage-row">
+            <div class="stage-num">D1</div>
+            <div class="stage-indicator" style="background:var(--phase6);"></div>
+            <div class="stage-label">Denial Letter Sent</div>
+            <div class="stage-note">Post SQ review</div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-num">D2</div>
+            <div class="stage-indicator" style="background:var(--phase6);"></div>
+            <div class="stage-label">Denied — Closed</div>
+            <div class="stage-note">✗ Terminal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /timeline -->
+
+  <!-- Exit statuses -->
+  <div class="exit-section">
+    <div class="exit-dot">✕</div>
+    <div class="exit-card">
+      <div class="phase-name">Exit Statuses</div>
+      <div class="phase-title">Early Terminations</div>
+      <div class="exit-items">
+        <div class="exit-chip"><div class="dot"></div>Ineligible</div>
+        <div class="exit-chip"><div class="dot"></div>Incomplete — Closed</div>
+        <div class="exit-chip"><div class="dot"></div>Customer Withdrawn</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-bar">
+    <div class="summary-stat">
+      <div class="num">6</div>
+      <div class="label">Phases</div>
+    </div>
+    <div class="summary-stat">
+      <div class="num">16</div>
+      <div class="label">Forward Stages</div>
+    </div>
+    <div class="summary-stat">
+      <div class="num">3</div>
+      <div class="label">Exit Statuses</div>
+    </div>
+    <div class="summary-stat">
+      <div class="num">7</div>
+      <div class="label">SQ Gates</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

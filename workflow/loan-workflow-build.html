@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Process Flowchart - Complete</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f1724;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
+  .subtitle { font-size: 0.85rem; color: #8899aa; margin-bottom: 24px; }
+  .legend {
+    display: flex; gap: 24px; margin-bottom: 24px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #aabbcc; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+  .mermaid-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px 30px;
+    max-width: 100%;
+    overflow-x: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+</style>
+</head>
+<body>
+
+<h1>Loan Assumption Process Flowchart</h1>
+<p class="subtitle">Complete Flow with all paths</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#2874a6"></div> Process Step</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1a5276"></div> Decision</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#27ae60"></div> SQ Review</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c0392b"></div> Denial</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1b5e20"></div> Loan Closed</div>
+</div>
+
+<div class="mermaid-container">
+<pre class="mermaid">
+flowchart TD
+    A[Call received from Customer or Authorized 3rd Party]
+    B[Agent asks questions in Case Optimizer]
+    A --> B
+
+    C{Decide if assumption is allowed}
+    B --> C
+
+    D[Send Ineligible Letter]
+    C -- No --> D
+    END1((End))
+    D --> END1
+
+    F[Send Application]
+    C -- Yes --> F
+
+    G[DocuSign]
+    F --> G
+
+    H[Application Returned]
+    G --> H
+
+    I[Review Uploaded Package]
+    H --> I
+
+    J{Is Complete or less than 25 days}
+    I --> J
+
+    K[Send Incomplete Closure Letter]
+    J -- No --> K
+    END2((End))
+    K --> END2
+
+    SD[Create and Send Disclosure Package]
+    J -- Yes --> SD
+
+    SQ1[SQ Review]:::sqStyle
+    SD --> SQ1
+    SQ1 -- Fail --> SD
+
+    ALR[Application gets Assigned for Loan Review]
+    SQ1 -- Pass --> ALR
+
+    DOCCHECK{Documents needed?}
+    ALR --> DOCCHECK
+
+    CML[Create Letter for Missing Documents]
+    DOCCHECK -- Yes --> CML
+
+    SQ2[SQ Review]:::sqStyle
+    CML --> SQ2
+    SQ2 -- Fail --> CML
+
+    SLC[Send Letter to Customer]
+    SQ2 -- Pass --> SLC
+
+    DR[Documents Returned]
+    SLC --> DR
+    DR -- Received --> ALR
+
+    CW[Customer Withdrawn]
+    DR -- Not Received --> CW
+    END3((End))
+    CW --> END3
+
+    UWC[Underwriting Checklist]
+    DOCCHECK -- No --> UWC
+
+    AU[Assigned to Underwriter]
+    UWC --> AU
+
+    URC[Underwriter Review for Completeness]
+    AU --> URC
+
+    READY{Ready?}
+    URC --> READY
+    READY -- Not Ready --> ALR
+
+    DEC{Make Yes or No Decision}
+    READY -- Ready --> DEC
+
+    MCL[Make Commitment Letter]
+    DEC -- Yes --> MCL
+
+    SQ3[SQ Review]:::sqStyle
+    MCL --> SQ3
+    SQ3 -- Fail --> MCL
+
+    SL[Send Letter]
+    SQ3 -- Pass --> SL
+
+    ACA[Assigned to Call Agent]in pl
+    SL --> ACA
+
+    RWA[Review With Customer]
+    ACA --> RWA
+
+    CCP[Create and Complete Closing Packet]
+    RWA --> CCP
+
+    SQ4[SQ Review]:::sqStyle
+    CCP --> SQ4
+    SQ4 -- Fail --> CCP
+
+    SCP[Send Closing Packet to Title Agency]
+    SQ4 -- Pass --> SCP
+
+    RCP[Review Closing Packet]
+    SCP --> RCP
+
+    SQ5[SQ Review]:::sqStyle
+    RCP --> SQ5
+    SQ5 -- Fail --> RCP
+
+    CSM[Complete System Maintenance - MSP]
+    SQ5 -- Pass --> CSM
+
+    SQ6[SQ Review]:::sqStyle
+    CSM --> SQ6
+    SQ6 -- Fail --> CSM
+
+    END4((End - Loan Closed)):::successStyle
+    SQ6 -- Pass --> END4
+
+    MDL[Make Denial Letter]:::denyStyle
+    DEC -- No --> MDL
+
+    SQ7[SQ Review]:::sqStyle
+    MDL --> SQ7
+    SQ7 -- Fail --> MDL
+
+    SLD[Send Denial Letter]
+    SQ7 -- Pass --> SLD
+
+    END5((End - Denied))
+    SLD --> END5
+
+    classDef sqStyle fill:#27ae60,color:#fff,stroke:#1e8449,stroke-width:2px
+    classDef successStyle fill:#1b5e20,color:#fff,stroke:#145218,stroke-width:3px
+    classDef denyStyle fill:#c0392b,color:#fff,stroke:#96281b,stroke-width:2px
+
+    style A fill:#1a5276,color:#fff
+    style B fill:#2874a6,color:#fff
+    style C fill:#1a5276,color:#fff
+    style D fill:#2874a6,color:#fff
+    style F fill:#2874a6,color:#fff
+    style G fill:#2874a6,color:#fff
+    style H fill:#2874a6,color:#fff
+    style I fill:#2874a6,color:#fff
+    style J fill:#1a5276,color:#fff
+    style K fill:#2874a6,color:#fff
+    style SD fill:#2874a6,color:#fff
+    style ALR fill:#2874a6,color:#fff
+    style DOCCHECK fill:#1a5276,color:#fff
+    style CML fill:#2874a6,color:#fff
+    style SLC fill:#2874a6,color:#fff
+    style DR fill:#2874a6,color:#fff
+    style CW fill:#7f8c8d,color:#fff
+    style UWC fill:#2874a6,color:#fff
+    style AU fill:#2874a6,color:#fff
+    style URC fill:#2874a6,color:#fff
+    style READY fill:#1a5276,color:#fff
+    style DEC fill:#1a5276,color:#fff
+    style MCL fill:#2874a6,color:#fff
+    style SL fill:#2874a6,color:#fff
+    style ACA fill:#2874a6,color:#fff
+    style RWA fill:#2874a6,color:#fff
+    style CCP fill:#2874a6,color:#fff
+    style SCP fill:#2874a6,color:#fff
+    style RCP fill:#2874a6,color:#fff
+    style CSM fill:#2874a6,color:#fff
+    style SLD fill:#2874a6,color:#fff
+</pre>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#2874a6',
+      primaryTextColor: '#fff',
+      primaryBorderColor: '#1a5276',
+      lineColor: '#5dade2',
+      fontSize: '12px'
+    },
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis',
+      rankSpacing: 50,
+      nodeSpacing: 30
+    }
+  });
+</script>
+
+</body>
+</html>

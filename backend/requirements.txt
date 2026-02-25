@@ -1,0 +1,19 @@
+# FastAPI and server
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-multipart>=0.0.6
+
+# LangGraph and LangChain
+langgraph>=0.0.40
+langgraph-checkpoint-sqlite>=3.0.0
+langchain>=0.1.0
+langchain-core>=0.1.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# Data validation
+pydantic>=2.5.0
+
+# Utilities
+python-dotenv>=1.0.0
