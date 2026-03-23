@@ -63,14 +63,14 @@ const WORKFLOW_PHASES = [
 
 // Icon mapping for activity categories
 const CATEGORY_ICONS = {
-  VERIFICATION: Shield,
-  DOCUMENTATION: FileText,
-  COMMUNICATION: Phone,
-  PROCESSING: Zap,
-  REVIEW: Eye,
-  COMPLIANCE: ClipboardCheck,
-  APPROVAL: Award,
-  OTHER: Activity,
+  VERIFICATION: LuShield,
+  DOCUMENTATION: LuFileText,
+  COMMUNICATION: LuPhone,
+  PROCESSING: LuZap,
+  REVIEW: LuEye,
+  COMPLIANCE: LuClipboardCheck,
+  APPROVAL: LuAward,
+  OTHER: LuActivity,
 };
 
 // Map activity category to type for display
@@ -235,7 +235,7 @@ const SpecialistWorkbench = () => {
 
           // Get icon based on first checklist item category or default
           const firstCategory = subtask.checklist_items?.[0]?.activity_category || 'OTHER';
-          const IconComponent = CATEGORY_ICONS[firstCategory] || Activity;
+          const IconComponent = CATEGORY_ICONS[firstCategory] || LuActivity;
 
           // Transform checklist items to activities
           const activities = (subtask.checklist_items || []).map(item => ({

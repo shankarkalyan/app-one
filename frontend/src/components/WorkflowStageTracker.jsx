@@ -321,15 +321,15 @@ const getApiAction = (apiName, endpoint) => {
 // Stage definitions with icons, conversation content, and detailed descriptions
 // Phase code to icon mapping for dynamic phase loading
 const PHASE_ICONS = {
-  'INTAKE': Phone,
-  'APPLICATION': FileText,
-  'DISCLOSURE': FileText,
+  'INTAKE': LuPhone,
+  'APPLICATION': LuFileText,
+  'DISCLOSURE': LuFileText,
   'LOAN_REVIEW': LuSearch,
-  'UNDERWRITING': Scale,
-  'COMMITMENT': Award,
-  'CLOSING': Home,
-  'POST_CLOSING': Archive,
-  'DENIAL': XCircle,
+  'UNDERWRITING': LuScale,
+  'COMMITMENT': LuAward,
+  'CLOSING': LuHouse,
+  'POST_CLOSING': LuArchive,
+  'DENIAL': LuCircleX,
 };
 
 // Phase code to color mapping
@@ -348,31 +348,31 @@ const PHASE_COLORS = {
 // Subtask icon mapping based on keywords
 const getSubtaskIcon = (subtaskName) => {
   const name = subtaskName.toLowerCase();
-  if (name.includes('call')) return Phone;
-  if (name.includes('eligibility') || name.includes('check')) return Shield;
+  if (name.includes('call')) return LuPhone;
+  if (name.includes('eligibility') || name.includes('check')) return LuShield;
   if (name.includes('optimization') || name.includes('optimizer')) return LuSearch;
-  if (name.includes('document') || name.includes('documentation')) return FileText;
-  if (name.includes('docusign') || name.includes('send') || name.includes('delivery')) return Send;
-  if (name.includes('tracking') || name.includes('track')) return Clock;
-  if (name.includes('return') || name.includes('receive')) return Download;
-  if (name.includes('compliance')) return Shield;
-  if (name.includes('review')) return Eye;
-  if (name.includes('request')) return Upload;
-  if (name.includes('collection')) return Download;
-  if (name.includes('follow-up') || name.includes('missing')) return Bell;
-  if (name.includes('assignment') || name.includes('assign')) return UserCheck;
-  if (name.includes('underwriting') || name.includes('checklist')) return ClipboardCheck;
-  if (name.includes('risk')) return AlertTriangle;
-  if (name.includes('readiness')) return CheckCircle;
-  if (name.includes('commitment') || name.includes('letter')) return Award;
-  if (name.includes('preparation') || name.includes('packet') || name.includes('package')) return Briefcase;
-  if (name.includes('title')) return Building;
-  if (name.includes('pre-closing') || name.includes('closing')) return Home;
-  if (name.includes('execution')) return Key;
-  if (name.includes('msp') || name.includes('maintenance') || name.includes('system')) return Database;
-  if (name.includes('welcome')) return Mail;
-  if (name.includes('file') || name.includes('archive') || name.includes('completion')) return Archive;
-  return Circle;
+  if (name.includes('document') || name.includes('documentation')) return LuFileText;
+  if (name.includes('docusign') || name.includes('send') || name.includes('delivery')) return LuSend;
+  if (name.includes('tracking') || name.includes('track')) return LuClock;
+  if (name.includes('return') || name.includes('receive')) return LuDownload;
+  if (name.includes('compliance')) return LuShield;
+  if (name.includes('review')) return LuEye;
+  if (name.includes('request')) return LuUpload;
+  if (name.includes('collection')) return LuDownload;
+  if (name.includes('follow-up') || name.includes('missing')) return LuBell;
+  if (name.includes('assignment') || name.includes('assign')) return LuUserCheck;
+  if (name.includes('underwriting') || name.includes('checklist')) return LuClipboardCheck;
+  if (name.includes('risk')) return LuTriangleAlert;
+  if (name.includes('readiness')) return LuCircleCheck;
+  if (name.includes('commitment') || name.includes('letter')) return LuAward;
+  if (name.includes('preparation') || name.includes('packet') || name.includes('package')) return LuBriefcase;
+  if (name.includes('title')) return LuBuilding;
+  if (name.includes('pre-closing') || name.includes('closing')) return LuHouse;
+  if (name.includes('execution')) return LuKey;
+  if (name.includes('msp') || name.includes('maintenance') || name.includes('system')) return LuDatabase;
+  if (name.includes('welcome')) return LuMail;
+  if (name.includes('file') || name.includes('archive') || name.includes('completion')) return LuArchive;
+  return LuCircle;
 };
 
 // Get interaction type based on subtask characteristics
@@ -540,14 +540,14 @@ const DEFAULT_PHASES = [
     id: 4,
     name: 'Underwriting',
     shortName: 'Underwriting',
-    icon: Scale,
+    icon: LuScale,
     color: '#f59e0b',
     description: 'Risk assessment and loan decision',
     stages: [
       {
         num: '09',
         label: 'Underwriting',
-        icon: Scale,
+        icon: LuScale,
         interactionType: 'analysis',
         description: 'Perform underwriting analysis',
         details: 'Evaluate creditworthiness, debt-to-income, and property value',
@@ -562,7 +562,7 @@ const DEFAULT_PHASES = [
       {
         num: '10',
         label: 'Decision',
-        icon: Stamp,
+        icon: LuStamp,
         interactionType: 'decision',
         description: 'Final approval or denial',
         details: 'Underwriter renders final decision with conditions if applicable',
@@ -593,7 +593,7 @@ const DEFAULT_PHASES = [
         conversation: [
           { role: 'system', icon: LuFileText, text: 'Generating commitment letter with loan terms...', time: 'Mar 18, 2:00 PM', status: 'processing' },
           { role: 'agent', icon: LuMail, text: 'Commitment letter sent to borrower for review and signature.', time: '2:15 PM', agent: 'Lisa Martinez' },
-          { role: 'system', icon: Receipt, text: 'Loan Terms Summary', time: '2:15 PM', status: 'info', terms: { amount: '$245,000', rate: '6.25%', term: '28 years remaining', payment: '$1,508.42/mo' } },
+          { role: 'system', icon: LuReceipt, text: 'Loan Terms Summary', time: '2:15 PM', status: 'info', terms: { amount: '$245,000', rate: '6.25%', term: '28 years remaining', payment: '$1,508.42/mo' } },
         ],
         apis: ['DocumentService']
       },
@@ -615,7 +615,7 @@ const DEFAULT_PHASES = [
       {
         num: '13',
         label: 'Closing Packet',
-        icon: Briefcase,
+        icon: LuBriefcase,
         interactionType: 'document',
         description: 'Prepare closing documents',
         details: 'Send complete closing package to title agency',
@@ -649,7 +649,7 @@ const DEFAULT_PHASES = [
         description: 'Update servicing systems',
         details: 'Record assumption in MSP and update loan records',
         conversation: [
-          { role: 'system', icon: RefreshCw, text: 'Updating mortgage servicing platform...', time: 'Mar 25, 3:00 PM', status: 'processing' },
+          { role: 'system', icon: LuRefreshCw, text: 'Updating mortgage servicing platform...', time: 'Mar 25, 3:00 PM', status: 'processing' },
           { role: 'system', icon: LuDatabase, text: 'System Records Updated', time: '3:05 PM', status: 'success', updates: ['New borrower information recorded', 'Payment details updated', 'Escrow accounts transferred', 'Insurance records linked'] },
           { role: 'system', icon: LuCircleCheck, text: 'MSP update complete. Loan records synchronized.', time: '3:10 PM', status: 'success', loanNumber: '1234567890' },
         ],
@@ -666,7 +666,7 @@ const DEFAULT_PHASES = [
           { role: 'system', icon: LuAward, text: '🎉 LOAN ASSUMPTION COMPLETE!', time: 'Mar 25, 4:00 PM', status: 'success', celebration: true },
           { role: 'agent', icon: LuPhone, text: 'Congratulations on your new home! Your first payment is due April 1st.', time: '4:15 PM', agent: 'Lisa Martinez', callType: 'congratulations' },
           { role: 'customer', icon: LuThumbsUp, text: 'Thank you so much for all your help!', time: '4:18 PM', sentiment: 'positive' },
-          { role: 'system', icon: Archive, text: 'Case finalized and archived', time: '4:30 PM', status: 'complete', nextSteps: ['Welcome letter mailed', 'Online portal access sent', 'First payment reminder scheduled'] },
+          { role: 'system', icon: LuArchive, text: 'Case finalized and archived', time: '4:30 PM', status: 'complete', nextSteps: ['Welcome letter mailed', 'Online portal access sent', 'First payment reminder scheduled'] },
         ],
         apis: []
       },
@@ -676,7 +676,7 @@ const DEFAULT_PHASES = [
     id: 6,
     name: 'Denial Path',
     shortName: 'Denial',
-    icon: XCircle,
+    icon: LuCircleX,
     color: '#ef4444',
     isAlternate: true,
     description: 'Application denial workflow',
@@ -684,13 +684,13 @@ const DEFAULT_PHASES = [
       {
         num: 'D1',
         label: 'Denial Letter',
-        icon: AlertTriangle,
+        icon: LuTriangleAlert,
         interactionType: 'email',
         description: 'Generate denial notice',
         details: 'Create adverse action letter with specific denial reasons',
         conversation: [
           { role: 'system', icon: LuFileText, text: 'Generating adverse action notice...', time: 'Mar 18, 11:30 AM', status: 'processing' },
-          { role: 'system', icon: AlertTriangle, text: 'Application Denied', time: '11:35 AM', status: 'denied', reasons: ['DTI exceeds maximum (52% vs 45% limit)', 'Insufficient reserves for closing'] },
+          { role: 'system', icon: LuTriangleAlert, text: 'Application Denied', time: '11:35 AM', status: 'denied', reasons: ['DTI exceeds maximum (52% vs 45% limit)', 'Insufficient reserves for closing'] },
           { role: 'agent', icon: LuMail, text: 'Adverse action notice sent to applicant with appeal instructions.', time: '11:45 AM', agent: 'Michael Chen', appealDeadline: '60 days' },
         ],
         apis: ['UnderwritingService']
@@ -698,13 +698,13 @@ const DEFAULT_PHASES = [
       {
         num: 'D2',
         label: 'Case Closed',
-        icon: Lock,
+        icon: LuLock,
         interactionType: 'system',
         description: 'Close denied application',
         details: 'Archive case and retain records per compliance requirements',
         conversation: [
-          { role: 'system', icon: Archive, text: 'Archiving case file for compliance retention...', time: 'Mar 18, 12:00 PM', status: 'processing' },
-          { role: 'system', icon: Lock, text: 'Case Archived', time: '12:05 PM', status: 'closed', caseStatus: 'CLOSED - DENIED', retention: '25 months' },
+          { role: 'system', icon: LuArchive, text: 'Archiving case file for compliance retention...', time: 'Mar 18, 12:00 PM', status: 'processing' },
+          { role: 'system', icon: LuLock, text: 'Case Archived', time: '12:05 PM', status: 'closed', caseStatus: 'CLOSED - DENIED', retention: '25 months' },
           { role: 'system', icon: LuCircleCheck, text: 'All records secured. Case processing complete.', time: '12:10 PM', status: 'complete' },
         ],
         apis: []
@@ -902,7 +902,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
               id: task.id || index + 1,
               name: task.name,
               shortName: task.name.split(' ')[0].replace('&', '').trim() || task.name.substring(0, 10),
-              icon: PHASE_ICONS[phaseCode] || Circle,
+              icon: PHASE_ICONS[phaseCode] || LuCircle,
               color: task.color || PHASE_COLORS[phaseCode] || '#3b82f6',
               description: task.description,
               phaseCode: phaseCode,
@@ -915,7 +915,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
             id: dynamicPhases.length + 1,
             name: 'Denial Path',
             shortName: 'Denial',
-            icon: XCircle,
+            icon: LuCircleX,
             color: '#ef4444',
             isAlternate: true,
             description: 'Application denial workflow',
@@ -924,7 +924,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
               {
                 num: 'D1',
                 label: 'Denial Letter',
-                icon: AlertTriangle,
+                icon: LuTriangleAlert,
                 interactionType: 'email',
                 description: 'Generate denial notice',
                 details: 'Create adverse action letter with specific denial reasons',
@@ -1186,7 +1186,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
   };
 
   const getApiDetail = (apiName) => API_DETAILS[apiName] || {
-    icon: Zap,
+    icon: LuZap,
     category: 'Service',
     color: '#6b7280',
     description: `${apiName} service call`,
@@ -1800,7 +1800,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
               value: isEffectiveCompleted ? 'COMPLETED' : effectiveCurrentPhase,
               subValue: isEffectiveCompleted ? `${totalTasks}/${totalTasks} tasks` : `Task ${displayTaskNum} of ${totalTasks}`,
               color: phaseStatusColor,
-              icon: Zap,
+              icon: LuZap,
               isAnimated: false,
               progress: isEffectiveCompleted ? 100 : Math.round((completedTasksCount / totalTasks) * 100),
             },

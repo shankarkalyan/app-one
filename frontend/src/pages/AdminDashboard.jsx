@@ -98,6 +98,7 @@ const SPECIALTY_TYPES = [
   'UNDERWRITING',
   'COMMITMENT',
   'CLOSING',
+
   'POST_CLOSING',
 ];
 

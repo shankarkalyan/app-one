@@ -38,9 +38,9 @@ import { useAuth } from '../context/AuthContext';
 
 // Status configuration - single source of truth
 const STATUS_CONFIG = {
-  'IN_PROGRESS': { label: 'In Progress', icon: Activity, gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', glow: 'rgba(59, 130, 246, 0.4)', pulse: true },
-  'COMPLETED': { label: 'Completed', icon: CheckCircle, gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', glow: 'rgba(16, 185, 129, 0.4)', pulse: false },
-  'DENIED': { label: 'Denied', icon: XCircle, gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', glow: 'rgba(239, 68, 68, 0.4)', pulse: false },
+  'IN_PROGRESS': { label: 'In Progress', icon: LuActivity, gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', glow: 'rgba(59, 130, 246, 0.4)', pulse: true },
+  'COMPLETED': { label: 'Completed', icon: LuCircleCheck, gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', glow: 'rgba(16, 185, 129, 0.4)', pulse: false },
+  'DENIED': { label: 'Denied', icon: LuCircleX, gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', glow: 'rgba(239, 68, 68, 0.4)', pulse: false },
 };
 
 // All possible status values for filter dropdown
@@ -316,7 +316,7 @@ function ApplicationList() {
   const getStatusBadge = (status) => {
     const config = STATUS_CONFIG[status] || {
       label: status || 'Unknown',
-      icon: Clock,
+      icon: LuClock,
       gradient: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
       glow: 'rgba(100, 116, 139, 0.3)',
       pulse: false,

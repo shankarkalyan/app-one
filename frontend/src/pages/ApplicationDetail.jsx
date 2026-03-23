@@ -376,7 +376,7 @@ function ApplicationDetail() {
         gap: '16px'
       }}>
         <SummaryCard
-          icon={Activity}
+          icon={LuActivity}
           label="Eligibility"
           value={application?.eligibility_status || 'Pending'}
           theme={theme}
@@ -384,7 +384,7 @@ function ApplicationDetail() {
           isManualUpdate={application?.eligibility_status?.includes('Not Applicable')}
         />
         <SummaryCard
-          icon={FileText}
+          icon={LuFileText}
           label="App Status"
           value={application?.app_status || 'Pending'}
           theme={theme}
@@ -392,14 +392,14 @@ function ApplicationDetail() {
           isManualUpdate={application?.app_status?.includes('Not Applicable')}
         />
         <SummaryCard
-          icon={Clock}
+          icon={LuClock}
           label="SLA Days"
           value={application?.sla_days || 0}
           theme={theme}
           color="#F97316"
         />
         <SummaryCard
-          icon={CheckCircle}
+          icon={LuCircleCheck}
           label="UW Decision"
           value={application?.uw_decision || 'Pending'}
           theme={theme}
@@ -821,11 +821,11 @@ function ApplicationDetail() {
         overflowX: 'auto'
       }}>
         {[
-          { id: 'phases', label: 'Phase Status', icon: Zap },
-          { id: 'workflow', label: 'Workflow Graph', icon: Activity },
-          { id: 'executions', label: 'Agent Executions', icon: Play },
-          { id: 'transactions', label: 'Transaction Log', icon: FileText },
-          { id: 'api-calls', label: 'API Calls', icon: Server },
+          { id: 'phases', label: 'Phase Status', icon: LuZap },
+          { id: 'workflow', label: 'Workflow Graph', icon: LuActivity },
+          { id: 'executions', label: 'Agent Executions', icon: LuPlay },
+          { id: 'transactions', label: 'Transaction Log', icon: LuFileText },
+          { id: 'api-calls', label: 'API Calls', icon: LuServer },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
