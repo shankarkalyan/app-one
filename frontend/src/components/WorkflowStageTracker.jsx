@@ -60,7 +60,7 @@ import { getWorkflowTasks, getApplication } from '../services/api';
 // API Details - describes what each API does with endpoint-specific purposes
 const API_DETAILS = {
   'CaseOptimizer': {
-    icon: Search,
+    icon: LuSearch,
     category: 'Analysis',
     color: '#8b5cf6',
     description: 'AI-powered case routing and optimization engine',
@@ -77,7 +77,7 @@ const API_DETAILS = {
     defaultPurpose: 'Determines the best workflow route based on loan characteristics and borrower profile',
   },
   'Eligibility': {
-    icon: Shield,
+    icon: LuShield,
     category: 'Verification',
     color: '#10b981',
     description: 'Loan assumption eligibility verification service',
@@ -90,7 +90,7 @@ const API_DETAILS = {
     defaultPurpose: 'Checks if the existing loan can be legally assumed by the new borrower',
   },
   'EligibilityAPI': {
-    icon: Shield,
+    icon: LuShield,
     category: 'Verification',
     color: '#10b981',
     description: 'Loan assumption eligibility verification service',
@@ -103,7 +103,7 @@ const API_DETAILS = {
     defaultPurpose: 'Checks if the existing loan can be legally assumed by the new borrower',
   },
   'DocuSign': {
-    icon: Send,
+    icon: LuSend,
     category: 'E-Signature',
     color: '#3b82f6',
     description: 'Electronic signature and document delivery platform',
@@ -124,7 +124,7 @@ const API_DETAILS = {
     defaultPurpose: 'Manages electronic document signing workflow with customer',
   },
   'DocumentService': {
-    icon: FileText,
+    icon: LuFileText,
     category: 'Documents',
     color: '#06b6d4',
     description: 'Document generation and management system',
@@ -157,7 +157,7 @@ const API_DETAILS = {
     defaultPurpose: 'Creates, validates, and stores loan documents in the system',
   },
   'Underwriting': {
-    icon: ClipboardCheck,
+    icon: LuClipboardCheck,
     category: 'Decision',
     color: '#f59e0b',
     description: 'Automated underwriting and risk assessment engine',
@@ -182,7 +182,7 @@ const API_DETAILS = {
     defaultPurpose: 'Evaluates risk factors and determines loan approval or denial',
   },
   'UnderwritingService': {
-    icon: ClipboardCheck,
+    icon: LuClipboardCheck,
     category: 'Decision',
     color: '#f59e0b',
     description: 'Automated underwriting and risk assessment engine',
@@ -207,7 +207,7 @@ const API_DETAILS = {
     defaultPurpose: 'Evaluates risk factors and determines loan approval or denial',
   },
   'TitleAgency': {
-    icon: Building,
+    icon: LuBuilding,
     category: 'External',
     color: '#ec4899',
     description: 'Title agency integration for property verification',
@@ -228,7 +228,7 @@ const API_DETAILS = {
     defaultPurpose: 'Coordinates title search, insurance, and closing preparations',
   },
   'TitleAgencyAPI': {
-    icon: Building,
+    icon: LuBuilding,
     category: 'External',
     color: '#ec4899',
     description: 'Title agency integration for property verification',
@@ -249,7 +249,7 @@ const API_DETAILS = {
     defaultPurpose: 'Coordinates title search, insurance, and closing preparations',
   },
   'MSPService': {
-    icon: Database,
+    icon: LuDatabase,
     category: 'System',
     color: '#6366f1',
     description: 'Mortgage Servicing Platform for loan records',
@@ -274,7 +274,7 @@ const API_DETAILS = {
     defaultPurpose: 'Records loan changes and updates servicing records',
   },
   'NotificationService': {
-    icon: Bell,
+    icon: LuBell,
     category: 'Communication',
     color: '#14b8a6',
     description: 'Customer notification and communication service',
@@ -324,7 +324,7 @@ const PHASE_ICONS = {
   'INTAKE': Phone,
   'APPLICATION': FileText,
   'DISCLOSURE': FileText,
-  'LOAN_REVIEW': Search,
+  'LOAN_REVIEW': LuSearch,
   'UNDERWRITING': Scale,
   'COMMITMENT': Award,
   'CLOSING': Home,
@@ -350,7 +350,7 @@ const getSubtaskIcon = (subtaskName) => {
   const name = subtaskName.toLowerCase();
   if (name.includes('call')) return Phone;
   if (name.includes('eligibility') || name.includes('check')) return Shield;
-  if (name.includes('optimization') || name.includes('optimizer')) return Search;
+  if (name.includes('optimization') || name.includes('optimizer')) return LuSearch;
   if (name.includes('document') || name.includes('documentation')) return FileText;
   if (name.includes('docusign') || name.includes('send') || name.includes('delivery')) return Send;
   if (name.includes('tracking') || name.includes('track')) return Clock;
@@ -396,35 +396,35 @@ const DEFAULT_PHASES = [
     id: 1,
     name: 'Intake & Eligibility',
     shortName: 'Intake',
-    icon: Phone,
+    icon: LuPhone,
     color: '#3b82f6',
     description: 'Initial contact and eligibility verification',
     stages: [
       {
         num: '01',
         label: 'Call Received',
-        icon: Phone,
+        icon: LuPhone,
         interactionType: 'call',
         description: 'Customer initiates assumption inquiry',
         details: 'Capture customer information, property details, and loan specifics',
         conversation: [
-          { role: 'customer', icon: User, text: 'Hi, I\'m interested in assuming a mortgage on a property I\'m purchasing.', time: '9:00 AM', status: 'received' },
-          { role: 'agent', icon: MessageSquare, text: 'I\'d be happy to help! Let me collect some information about the property and current loan.', time: '9:01 AM', agent: 'Lisa Martinez' },
-          { role: 'system', icon: Bot, text: 'Creating new case file and initiating eligibility workflow...', time: '9:02 AM', status: 'success', action: 'Case #LA-2024-0892 created' },
+          { role: 'customer', icon: LuUser, text: 'Hi, I\'m interested in assuming a mortgage on a property I\'m purchasing.', time: '9:00 AM', status: 'received' },
+          { role: 'agent', icon: LuMessageSquare, text: 'I\'d be happy to help! Let me collect some information about the property and current loan.', time: '9:01 AM', agent: 'Lisa Martinez' },
+          { role: 'system', icon: LuBot, text: 'Creating new case file and initiating eligibility workflow...', time: '9:02 AM', status: 'success', action: 'Case #LA-2024-0892 created' },
         ],
         apis: ['CaseOptimizer']
       },
       {
         num: '02',
         label: 'Eligibility Check',
-        icon: Shield,
+        icon: LuShield,
         interactionType: 'verification',
         description: 'Verify assumption eligibility',
         details: 'Validate loan type, property occupancy, and preliminary credit review',
         conversation: [
-          { role: 'system', icon: Bot, text: 'Running eligibility checks against loan requirements...', time: '9:05 AM', status: 'processing' },
-          { role: 'agent', icon: UserCheck, text: 'Verified: Loan is FHA assumable. Checking borrower qualifications.', time: '9:06 AM', agent: 'Lisa Martinez' },
-          { role: 'system', icon: Shield, text: 'Credit pre-qualification passed. DTI within acceptable range.', time: '9:07 AM', status: 'success', result: { creditScore: 742, dti: '38%', ltv: '78%' } },
+          { role: 'system', icon: LuBot, text: 'Running eligibility checks against loan requirements...', time: '9:05 AM', status: 'processing' },
+          { role: 'agent', icon: LuUserCheck, text: 'Verified: Loan is FHA assumable. Checking borrower qualifications.', time: '9:06 AM', agent: 'Lisa Martinez' },
+          { role: 'system', icon: LuShield, text: 'Credit pre-qualification passed. DTI within acceptable range.', time: '9:07 AM', status: 'success', result: { creditScore: 742, dti: '38%', ltv: '78%' } },
         ],
         apis: ['EligibilityAPI']
       },
@@ -434,63 +434,63 @@ const DEFAULT_PHASES = [
     id: 2,
     name: 'Application & Disclosure',
     shortName: 'Application',
-    icon: FileText,
+    icon: LuFileText,
     color: '#8b5cf6',
     description: 'Document collection and legal disclosures',
     stages: [
       {
         num: '03',
         label: 'Application Sent',
-        icon: Send,
+        icon: LuSend,
         interactionType: 'email',
         description: 'Send application package to borrower',
         details: 'Dispatch assumption application via DocuSign for electronic signature',
         conversation: [
-          { role: 'system', icon: Mail, text: 'Generating assumption application package...', time: '9:15 AM', status: 'processing', docs: ['Application Form', 'Authorization', 'Disclosures'] },
-          { role: 'agent', icon: Send, text: 'Application package sent to john.smith@email.com via DocuSign.', time: '9:16 AM', agent: 'Lisa Martinez', email: 'john.smith@email.com' },
-          { role: 'system', icon: Bell, text: 'Reminder scheduled: Follow up in 3 days if not completed.', time: '9:16 AM', status: 'scheduled', dueDate: 'Mar 10, 2024' },
+          { role: 'system', icon: LuMail, text: 'Generating assumption application package...', time: '9:15 AM', status: 'processing', docs: ['Application Form', 'Authorization', 'Disclosures'] },
+          { role: 'agent', icon: LuSend, text: 'Application package sent to john.smith@email.com via DocuSign.', time: '9:16 AM', agent: 'Lisa Martinez', email: 'john.smith@email.com' },
+          { role: 'system', icon: LuBell, text: 'Reminder scheduled: Follow up in 3 days if not completed.', time: '9:16 AM', status: 'scheduled', dueDate: 'Mar 10, 2024' },
         ],
         apis: ['DocuSign']
       },
       {
         num: '04',
         label: 'Application Received',
-        icon: Download,
+        icon: LuDownload,
         interactionType: 'document',
         description: 'Receive completed application',
         details: 'Borrower returns signed application with supporting documents',
         conversation: [
-          { role: 'system', icon: Bell, text: 'DocuSign notification: Application completed and signed.', time: 'Mar 9, 2:30 PM', status: 'received' },
-          { role: 'agent', icon: Download, text: 'Downloaded signed application and supporting documents.', time: '2:35 PM', agent: 'Lisa Martinez', files: 4 },
-          { role: 'system', icon: FileCheck, text: 'Documents archived to case file. Ready for review.', time: '2:36 PM', status: 'success', action: 'Files indexed and stored' },
+          { role: 'system', icon: LuBell, text: 'DocuSign notification: Application completed and signed.', time: 'Mar 9, 2:30 PM', status: 'received' },
+          { role: 'agent', icon: LuDownload, text: 'Downloaded signed application and supporting documents.', time: '2:35 PM', agent: 'Lisa Martinez', files: 4 },
+          { role: 'system', icon: LuFileCheck, text: 'Documents archived to case file. Ready for review.', time: '2:36 PM', status: 'success', action: 'Files indexed and stored' },
         ],
         apis: []
       },
       {
         num: '05',
         label: 'Completeness Review',
-        icon: ClipboardCheck,
+        icon: LuClipboardCheck,
         interactionType: 'review',
         description: 'Verify application completeness',
         details: 'Ensure all required documents received within 25-day window',
         conversation: [
-          { role: 'agent', icon: FileSearch, text: 'Reviewing application completeness checklist...', time: '3:00 PM', agent: 'Lisa Martinez' },
-          { role: 'system', icon: CheckCircle, text: 'Document checklist verified:', time: '3:05 PM', status: 'success', checklist: ['Income verification ✓', 'Employment letter ✓', 'Bank statements ✓', 'ID documents ✓'] },
-          { role: 'agent', icon: ThumbsUp, text: 'All required documents received. Application is complete.', time: '3:06 PM', agent: 'Lisa Martinez', decision: 'approved' },
+          { role: 'agent', icon: LuFileSearch, text: 'Reviewing application completeness checklist...', time: '3:00 PM', agent: 'Lisa Martinez' },
+          { role: 'system', icon: LuCircleCheck, text: 'Document checklist verified:', time: '3:05 PM', status: 'success', checklist: ['Income verification ✓', 'Employment letter ✓', 'Bank statements ✓', 'ID documents ✓'] },
+          { role: 'agent', icon: LuThumbsUp, text: 'All required documents received. Application is complete.', time: '3:06 PM', agent: 'Lisa Martinez', decision: 'approved' },
         ],
         apis: []
       },
       {
         num: '06',
         label: 'Disclosure Sent',
-        icon: FileText,
+        icon: LuFileText,
         interactionType: 'email',
         description: 'Send required disclosures',
         details: 'Generate and send TILA, RESPA, and state-specific disclosures',
         conversation: [
-          { role: 'system', icon: FileText, text: 'Generating disclosure documents...', time: '3:15 PM', status: 'processing', docs: ['TILA Disclosure', 'RESPA', 'State Disclosures'] },
-          { role: 'agent', icon: Mail, text: 'Disclosure package sent to borrower for acknowledgment.', time: '3:18 PM', agent: 'Lisa Martinez' },
-          { role: 'system', icon: Calendar, text: 'Disclosure timeline started. 7-day waiting period begins.', time: '3:18 PM', status: 'scheduled', deadline: 'Mar 16, 2024' },
+          { role: 'system', icon: LuFileText, text: 'Generating disclosure documents...', time: '3:15 PM', status: 'processing', docs: ['TILA Disclosure', 'RESPA', 'State Disclosures'] },
+          { role: 'agent', icon: LuMail, text: 'Disclosure package sent to borrower for acknowledgment.', time: '3:18 PM', agent: 'Lisa Martinez' },
+          { role: 'system', icon: LuCalendar, text: 'Disclosure timeline started. 7-day waiting period begins.', time: '3:18 PM', status: 'scheduled', deadline: 'Mar 16, 2024' },
         ],
         apis: ['DocumentService']
       },
@@ -500,37 +500,37 @@ const DEFAULT_PHASES = [
     id: 3,
     name: 'Loan Review & Documents',
     shortName: 'Review',
-    icon: Search,
+    icon: LuSearch,
     color: '#06b6d4',
     description: 'Detailed document analysis and gap identification',
     stages: [
       {
         num: '07',
         label: 'Loan Review Assigned',
-        icon: UserCheck,
+        icon: LuUserCheck,
         interactionType: 'assignment',
         description: 'Assign to loan reviewer',
         details: 'Perform document gap analysis and identify missing items',
         conversation: [
-          { role: 'system', icon: Users, text: 'Case assigned to Loan Reviewer', time: 'Mar 17, 9:00 AM', status: 'assigned', assignee: 'Sarah Johnson', queue: 'Priority Review' },
-          { role: 'agent', icon: Eye, text: 'Beginning detailed document review and verification...', time: '9:15 AM', agent: 'Sarah Johnson' },
-          { role: 'system', icon: FileSearch, text: 'Running automated document validation checks...', time: '9:20 AM', status: 'processing', checks: 12 },
-          { role: 'agent', icon: ClipboardCheck, text: 'Gap analysis complete. Minor items flagged for follow-up.', time: '10:30 AM', agent: 'Sarah Johnson', issues: 1 },
+          { role: 'system', icon: LuUsers, text: 'Case assigned to Loan Reviewer', time: 'Mar 17, 9:00 AM', status: 'assigned', assignee: 'Sarah Johnson', queue: 'Priority Review' },
+          { role: 'agent', icon: LuEye, text: 'Beginning detailed document review and verification...', time: '9:15 AM', agent: 'Sarah Johnson' },
+          { role: 'system', icon: LuFileSearch, text: 'Running automated document validation checks...', time: '9:20 AM', status: 'processing', checks: 12 },
+          { role: 'agent', icon: LuClipboardCheck, text: 'Gap analysis complete. Minor items flagged for follow-up.', time: '10:30 AM', agent: 'Sarah Johnson', issues: 1 },
         ],
         apis: ['DocumentService']
       },
       {
         num: '08',
         label: 'Awaiting Documents',
-        icon: Clock,
+        icon: LuClock,
         interactionType: 'call',
         description: 'Request missing documents',
         details: 'Contact borrower for any missing or incomplete documentation',
         conversation: [
-          { role: 'agent', icon: Phone, text: 'Calling borrower regarding missing paystub from last month...', time: '10:45 AM', agent: 'Sarah Johnson', callType: 'outbound' },
-          { role: 'customer', icon: User, text: 'I\'ll upload that right away. Give me 10 minutes.', time: '10:47 AM' },
-          { role: 'system', icon: Bell, text: 'Document upload notification received.', time: '10:55 AM', status: 'received', file: 'paystub_feb_2024.pdf' },
-          { role: 'agent', icon: ThumbsUp, text: 'All documents now received. Moving to underwriting.', time: '11:00 AM', agent: 'Sarah Johnson', decision: 'complete' },
+          { role: 'agent', icon: LuPhone, text: 'Calling borrower regarding missing paystub from last month...', time: '10:45 AM', agent: 'Sarah Johnson', callType: 'outbound' },
+          { role: 'customer', icon: LuUser, text: 'I\'ll upload that right away. Give me 10 minutes.', time: '10:47 AM' },
+          { role: 'system', icon: LuBell, text: 'Document upload notification received.', time: '10:55 AM', status: 'received', file: 'paystub_feb_2024.pdf' },
+          { role: 'agent', icon: LuThumbsUp, text: 'All documents now received. Moving to underwriting.', time: '11:00 AM', agent: 'Sarah Johnson', decision: 'complete' },
         ],
         apis: []
       },
@@ -552,10 +552,10 @@ const DEFAULT_PHASES = [
         description: 'Perform underwriting analysis',
         details: 'Evaluate creditworthiness, debt-to-income, and property value',
         conversation: [
-          { role: 'system', icon: Users, text: 'Case assigned to Underwriter', time: 'Mar 18, 8:00 AM', status: 'assigned', assignee: 'Michael Chen', level: 'Senior Underwriter' },
-          { role: 'agent', icon: Search, text: 'Analyzing credit report, income stability, and DTI ratio...', time: '8:30 AM', agent: 'Michael Chen' },
-          { role: 'system', icon: Bot, text: 'Automated Underwriting System Results', time: '8:45 AM', status: 'success', result: { decision: 'APPROVE/ELIGIBLE', riskScore: 742, dti: '38%', notes: 'Strong credit profile' } },
-          { role: 'agent', icon: FileSearch, text: 'Verifying employment and reviewing property appraisal...', time: '9:30 AM', agent: 'Michael Chen' },
+          { role: 'system', icon: LuUsers, text: 'Case assigned to Underwriter', time: 'Mar 18, 8:00 AM', status: 'assigned', assignee: 'Michael Chen', level: 'Senior Underwriter' },
+          { role: 'agent', icon: LuSearch, text: 'Analyzing credit report, income stability, and DTI ratio...', time: '8:30 AM', agent: 'Michael Chen' },
+          { role: 'system', icon: LuBot, text: 'Automated Underwriting System Results', time: '8:45 AM', status: 'success', result: { decision: 'APPROVE/ELIGIBLE', riskScore: 742, dti: '38%', notes: 'Strong credit profile' } },
+          { role: 'agent', icon: LuFileSearch, text: 'Verifying employment and reviewing property appraisal...', time: '9:30 AM', agent: 'Michael Chen' },
         ],
         apis: ['UnderwritingService']
       },
@@ -567,9 +567,9 @@ const DEFAULT_PHASES = [
         description: 'Final approval or denial',
         details: 'Underwriter renders final decision with conditions if applicable',
         conversation: [
-          { role: 'agent', icon: ClipboardCheck, text: 'Final underwriting review complete.', time: '11:00 AM', agent: 'Michael Chen' },
-          { role: 'system', icon: Award, text: 'LOAN APPROVED WITH CONDITIONS', time: '11:05 AM', status: 'approved', conditions: ['Verify funds to close', 'Final VOE before closing'] },
-          { role: 'agent', icon: Send, text: 'Approval notification sent to processing team.', time: '11:10 AM', agent: 'Michael Chen', notified: ['Processing', 'Closing', 'Customer'] },
+          { role: 'agent', icon: LuClipboardCheck, text: 'Final underwriting review complete.', time: '11:00 AM', agent: 'Michael Chen' },
+          { role: 'system', icon: LuAward, text: 'LOAN APPROVED WITH CONDITIONS', time: '11:05 AM', status: 'approved', conditions: ['Verify funds to close', 'Final VOE before closing'] },
+          { role: 'agent', icon: LuSend, text: 'Approval notification sent to processing team.', time: '11:10 AM', agent: 'Michael Chen', notified: ['Processing', 'Closing', 'Customer'] },
         ],
         apis: ['UnderwritingService']
       },
@@ -579,20 +579,20 @@ const DEFAULT_PHASES = [
     id: 5,
     name: 'Approval & Closing',
     shortName: 'Closing',
-    icon: Home,
+    icon: LuHouse,
     color: '#10b981',
     description: 'Loan approval and closing process',
     stages: [
       {
         num: '11',
         label: 'Commitment Letter',
-        icon: Award,
+        icon: LuAward,
         interactionType: 'email',
         description: 'Issue commitment letter',
         details: 'Generate and send loan approval commitment with terms',
         conversation: [
-          { role: 'system', icon: FileText, text: 'Generating commitment letter with loan terms...', time: 'Mar 18, 2:00 PM', status: 'processing' },
-          { role: 'agent', icon: Mail, text: 'Commitment letter sent to borrower for review and signature.', time: '2:15 PM', agent: 'Lisa Martinez' },
+          { role: 'system', icon: LuFileText, text: 'Generating commitment letter with loan terms...', time: 'Mar 18, 2:00 PM', status: 'processing' },
+          { role: 'agent', icon: LuMail, text: 'Commitment letter sent to borrower for review and signature.', time: '2:15 PM', agent: 'Lisa Martinez' },
           { role: 'system', icon: Receipt, text: 'Loan Terms Summary', time: '2:15 PM', status: 'info', terms: { amount: '$245,000', rate: '6.25%', term: '28 years remaining', payment: '$1,508.42/mo' } },
         ],
         apis: ['DocumentService']
@@ -600,15 +600,15 @@ const DEFAULT_PHASES = [
       {
         num: '12',
         label: 'Customer Review',
-        icon: Phone,
+        icon: LuPhone,
         interactionType: 'call',
         description: 'Borrower reviews terms',
         details: 'Call agent walks through commitment terms with borrower',
         conversation: [
-          { role: 'agent', icon: Phone, text: 'Hi! I\'m calling to walk you through your commitment letter.', time: 'Mar 19, 10:00 AM', agent: 'Lisa Martinez', callType: 'scheduled' },
-          { role: 'customer', icon: User, text: 'Great! I\'ve reviewed it but have a few questions about closing costs.', time: '10:02 AM' },
-          { role: 'agent', icon: MessageSquare, text: 'Of course! Let me explain each line item on your closing disclosure...', time: '10:05 AM', agent: 'Lisa Martinez', duration: '15 min' },
-          { role: 'customer', icon: ThumbsUp, text: 'That makes sense. I\'m ready to proceed!', time: '10:20 AM', decision: 'accepted' },
+          { role: 'agent', icon: LuPhone, text: 'Hi! I\'m calling to walk you through your commitment letter.', time: 'Mar 19, 10:00 AM', agent: 'Lisa Martinez', callType: 'scheduled' },
+          { role: 'customer', icon: LuUser, text: 'Great! I\'ve reviewed it but have a few questions about closing costs.', time: '10:02 AM' },
+          { role: 'agent', icon: LuMessageSquare, text: 'Of course! Let me explain each line item on your closing disclosure...', time: '10:05 AM', agent: 'Lisa Martinez', duration: '15 min' },
+          { role: 'customer', icon: LuThumbsUp, text: 'That makes sense. I\'m ready to proceed!', time: '10:20 AM', decision: 'accepted' },
         ],
         apis: []
       },
@@ -620,52 +620,52 @@ const DEFAULT_PHASES = [
         description: 'Prepare closing documents',
         details: 'Send complete closing package to title agency',
         conversation: [
-          { role: 'system', icon: FileText, text: 'Compiling closing document package...', time: 'Mar 20, 9:00 AM', status: 'processing', docs: 24 },
-          { role: 'agent', icon: Send, text: 'Closing packet transmitted to ABC Title Company.', time: '9:30 AM', agent: 'Lisa Martinez', recipient: 'ABC Title Company' },
-          { role: 'system', icon: Building, text: 'Title company confirmed receipt. Scheduling closing appointment.', time: '10:00 AM', status: 'confirmed', titleAgent: 'Jennifer Williams' },
-          { role: 'system', icon: Calendar, text: 'Closing appointment scheduled', time: '10:15 AM', status: 'scheduled', appointment: { date: 'Mar 25, 2024', time: '2:00 PM', location: 'ABC Title - Downtown Office' } },
+          { role: 'system', icon: LuFileText, text: 'Compiling closing document package...', time: 'Mar 20, 9:00 AM', status: 'processing', docs: 24 },
+          { role: 'agent', icon: LuSend, text: 'Closing packet transmitted to ABC Title Company.', time: '9:30 AM', agent: 'Lisa Martinez', recipient: 'ABC Title Company' },
+          { role: 'system', icon: LuBuilding, text: 'Title company confirmed receipt. Scheduling closing appointment.', time: '10:00 AM', status: 'confirmed', titleAgent: 'Jennifer Williams' },
+          { role: 'system', icon: LuCalendar, text: 'Closing appointment scheduled', time: '10:15 AM', status: 'scheduled', appointment: { date: 'Mar 25, 2024', time: '2:00 PM', location: 'ABC Title - Downtown Office' } },
         ],
         apis: ['DocumentService', 'TitleAgencyAPI']
       },
       {
         num: '14',
         label: 'Closing Review',
-        icon: Eye,
+        icon: LuEye,
         interactionType: 'review',
         description: 'Final packet verification',
         details: 'Quality check of all closing documents before funding',
         conversation: [
-          { role: 'agent', icon: FileSearch, text: 'Performing final QC review of closing documents...', time: 'Mar 24, 9:00 AM', agent: 'Quality Team' },
-          { role: 'system', icon: CheckCircle, text: 'Quality Check Results', time: '9:30 AM', status: 'success', checklist: ['Loan docs accurate ✓', 'Figures match CD ✓', 'All signatures present ✓', 'Notarization verified ✓'] },
-          { role: 'agent', icon: ThumbsUp, text: 'QC passed. Clear to close!', time: '9:35 AM', agent: 'Quality Team', decision: 'approved' },
+          { role: 'agent', icon: LuFileSearch, text: 'Performing final QC review of closing documents...', time: 'Mar 24, 9:00 AM', agent: 'Quality Team' },
+          { role: 'system', icon: LuCircleCheck, text: 'Quality Check Results', time: '9:30 AM', status: 'success', checklist: ['Loan docs accurate ✓', 'Figures match CD ✓', 'All signatures present ✓', 'Notarization verified ✓'] },
+          { role: 'agent', icon: LuThumbsUp, text: 'QC passed. Clear to close!', time: '9:35 AM', agent: 'Quality Team', decision: 'approved' },
         ],
         apis: []
       },
       {
         num: '15',
         label: 'System Update',
-        icon: Database,
+        icon: LuDatabase,
         interactionType: 'system',
         description: 'Update servicing systems',
         details: 'Record assumption in MSP and update loan records',
         conversation: [
           { role: 'system', icon: RefreshCw, text: 'Updating mortgage servicing platform...', time: 'Mar 25, 3:00 PM', status: 'processing' },
-          { role: 'system', icon: Database, text: 'System Records Updated', time: '3:05 PM', status: 'success', updates: ['New borrower information recorded', 'Payment details updated', 'Escrow accounts transferred', 'Insurance records linked'] },
-          { role: 'system', icon: CheckCircle, text: 'MSP update complete. Loan records synchronized.', time: '3:10 PM', status: 'success', loanNumber: '1234567890' },
+          { role: 'system', icon: LuDatabase, text: 'System Records Updated', time: '3:05 PM', status: 'success', updates: ['New borrower information recorded', 'Payment details updated', 'Escrow accounts transferred', 'Insurance records linked'] },
+          { role: 'system', icon: LuCircleCheck, text: 'MSP update complete. Loan records synchronized.', time: '3:10 PM', status: 'success', loanNumber: '1234567890' },
         ],
         apis: ['MSPService']
       },
       {
         num: '16',
         label: 'Loan Closed',
-        icon: Key,
+        icon: LuKey,
         interactionType: 'completion',
         description: 'Assumption complete',
         details: 'Loan successfully assumed by new borrower',
         conversation: [
-          { role: 'system', icon: Award, text: '🎉 LOAN ASSUMPTION COMPLETE!', time: 'Mar 25, 4:00 PM', status: 'success', celebration: true },
-          { role: 'agent', icon: Phone, text: 'Congratulations on your new home! Your first payment is due April 1st.', time: '4:15 PM', agent: 'Lisa Martinez', callType: 'congratulations' },
-          { role: 'customer', icon: ThumbsUp, text: 'Thank you so much for all your help!', time: '4:18 PM', sentiment: 'positive' },
+          { role: 'system', icon: LuAward, text: '🎉 LOAN ASSUMPTION COMPLETE!', time: 'Mar 25, 4:00 PM', status: 'success', celebration: true },
+          { role: 'agent', icon: LuPhone, text: 'Congratulations on your new home! Your first payment is due April 1st.', time: '4:15 PM', agent: 'Lisa Martinez', callType: 'congratulations' },
+          { role: 'customer', icon: LuThumbsUp, text: 'Thank you so much for all your help!', time: '4:18 PM', sentiment: 'positive' },
           { role: 'system', icon: Archive, text: 'Case finalized and archived', time: '4:30 PM', status: 'complete', nextSteps: ['Welcome letter mailed', 'Online portal access sent', 'First payment reminder scheduled'] },
         ],
         apis: []
@@ -689,9 +689,9 @@ const DEFAULT_PHASES = [
         description: 'Generate denial notice',
         details: 'Create adverse action letter with specific denial reasons',
         conversation: [
-          { role: 'system', icon: FileText, text: 'Generating adverse action notice...', time: 'Mar 18, 11:30 AM', status: 'processing' },
+          { role: 'system', icon: LuFileText, text: 'Generating adverse action notice...', time: 'Mar 18, 11:30 AM', status: 'processing' },
           { role: 'system', icon: AlertTriangle, text: 'Application Denied', time: '11:35 AM', status: 'denied', reasons: ['DTI exceeds maximum (52% vs 45% limit)', 'Insufficient reserves for closing'] },
-          { role: 'agent', icon: Mail, text: 'Adverse action notice sent to applicant with appeal instructions.', time: '11:45 AM', agent: 'Michael Chen', appealDeadline: '60 days' },
+          { role: 'agent', icon: LuMail, text: 'Adverse action notice sent to applicant with appeal instructions.', time: '11:45 AM', agent: 'Michael Chen', appealDeadline: '60 days' },
         ],
         apis: ['UnderwritingService']
       },
@@ -705,7 +705,7 @@ const DEFAULT_PHASES = [
         conversation: [
           { role: 'system', icon: Archive, text: 'Archiving case file for compliance retention...', time: 'Mar 18, 12:00 PM', status: 'processing' },
           { role: 'system', icon: Lock, text: 'Case Archived', time: '12:05 PM', status: 'closed', caseStatus: 'CLOSED - DENIED', retention: '25 months' },
-          { role: 'system', icon: CheckCircle, text: 'All records secured. Case processing complete.', time: '12:10 PM', status: 'complete' },
+          { role: 'system', icon: LuCircleCheck, text: 'All records secured. Case processing complete.', time: '12:10 PM', status: 'complete' },
         ],
         apis: []
       },
@@ -1791,7 +1791,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
               label: 'Status',
               value: effectiveStatus,
               color: phaseStatusColor,
-              icon: Home,
+              icon: LuHouse,
               isAnimated: false,
               customBorder: phaseStatusBorder,
             },
@@ -1809,7 +1809,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
               value: animatedStats.apiCalls,
               targetValue: apiCalls?.length || 0,
               color: '#10b981',
-              icon: Send,
+              icon: LuSend,
               isAnimated: true,
             },
             {
@@ -1817,7 +1817,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
               value: `${animatedStats.duration}ms`,
               targetValue: apiCalls?.reduce((s, c) => s + (c.duration_ms || 0), 0) || 0,
               color: '#f59e0b',
-              icon: Clock,
+              icon: LuClock,
               isAnimated: true,
               isDuration: true,
             },
