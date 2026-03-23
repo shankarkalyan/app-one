@@ -103,22 +103,67 @@ hlt-assumptions-app/
 - Node.js 18+
 - npm
 
+---
+
+## Database Setup (Required for Fresh Checkout)
+
+### Step 1: Navigate to backend folder
+```bash
+cd backend
+```
+
+### Step 2: Create and activate virtual environment
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Mac/Linux
+# or
+venv\Scripts\activate     # Windows
+```
+
+### Step 3: Install Python dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Initialize the database (creates all tables)
+```bash
+python3 -c "from database.connection import init_db; init_db()"
+```
+
+### Step 5: Run database migrations (in order)
+```bash
+python3 migrate_db.py
+python3 migrate_specialty_types.py
+python3 migrate_dual_phase.py
+python3 migrate_workflow_definitions.py
+python3 migrate_sla.py
+```
+
+### Step 6: Seed initial data
+```bash
+python3 seed_specialists.py        # Creates admin and specialist users
+python3 seed_complete_workflow.py  # Creates workflow tasks, subtasks, checklist items
+```
+
+---
+
+## Running the Application
+
 ### Backend Setup
 
 ```bash
 # Navigate to backend directory
 cd backend
 
-# Create virtual environment
-python3 -m venv venv
+# Activate virtual environment
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
 
 # Run the server
 python -m uvicorn main:app --reload --port 8000
 ```
+
+Backend API: http://localhost:8000
+API Docs: http://localhost:8000/docs
 
 Or use the run script:
 ```bash
@@ -139,18 +184,53 @@ npm install
 npm run dev
 ```
 
+Frontend: http://localhost:5173
+
 Or use the run script:
 ```bash
 chmod +x run_frontend.sh
 ./run_frontend.sh
 ```
 
-### Seed Sample Data (Optional)
+---
 
+## Default Login Credentials
+
+| Role       | Username              | Password       |
+|------------|-----------------------|----------------|
+| Admin      | admin                 | admin123       |
+| Specialist | intake_specialist     | specialist123  |
+| Specialist | app_specialist        | specialist123  |
+| Specialist | disclosure_specialist | specialist123  |
+| Specialist | loan_review_specialist| specialist123  |
+| Specialist | underwriter           | specialist123  |
+
+---
+
+## Data Management
+
+### Flush All Data
+The "Flush All" button in the Admin Dashboard will:
+- Delete all loan applications and related data
+- Clear allocation history (Analytics & History tabs)
+- Reset all specialist phase allocations to unallocated
+
+### Reset Database Completely
 ```bash
 cd backend
-python seed_data.py
+rm loan_workflow.db
+python3 -c "from database.connection import init_db; init_db()"
+# Then run migrations and seed scripts again (Steps 5-6)
 ```
+
+---
+
+## Admin Dashboard Features
+
+- **Overview**: System statistics and metrics
+- **Analytics**: D3 charts for network graph, workload, and flow diagrams
+- **Specialist Phase Allocation**: Drag-and-drop specialist assignment to workflow phases
+- **Workflow Config**: Configure workflow tasks, subtasks, and checklist items
 
 ## API Endpoints
 

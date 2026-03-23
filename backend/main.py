@@ -1343,6 +1343,7 @@ async def flush_all_applications(
 ):
     """
     Delete all loan applications and related data.
+    Also clears allocation history and resets specialist allocations.
     WARNING: This permanently deletes all data.
     """
     from sqlalchemy import text
@@ -1364,6 +1365,13 @@ async def flush_all_applications(
         except:
             pass  # Table may not exist yet
 
+        # Get allocation history count
+        count_allocation_history = 0
+        try:
+            count_allocation_history = db.execute(text("SELECT COUNT(*) FROM allocation_history")).scalar() or 0
+        except:
+            pass
+
         # Delete in order due to foreign key constraints (children first)
         db.execute(text("DELETE FROM mock_api_calls"))
         db.execute(text("DELETE FROM human_tasks"))
@@ -1377,13 +1385,31 @@ async def flush_all_applications(
         except:
             pass
 
+        # Delete allocation history
+        try:
+            db.execute(text("DELETE FROM allocation_history"))
+        except:
+            pass
+
+        # Reset specialist allocations (set to empty/unallocated)
+        try:
+            db.execute(text("""
+                UPDATE specialists
+                SET specialty_types = '[]',
+                    dual_phase = 0,
+                    dual_phases = '[]'
+                WHERE role = 'specialist'
+            """))
+        except:
+            pass
+
         db.execute(text("DELETE FROM loan_applications"))
 
         db.commit()
 
         return {
             "success": True,
-            "message": "All application data has been deleted",
+            "message": "All application data has been deleted, allocation history cleared, and specialist allocations reset",
             "deleted": {
                 "applications": count_apps,
                 "workflow_states": count_states,
@@ -1392,6 +1418,8 @@ async def flush_all_applications(
                 "human_tasks": count_tasks,
                 "api_calls": count_api_calls,
                 "specialist_tasks": count_specialist_tasks,
+                "allocation_history": count_allocation_history,
+                "specialist_allocations_reset": True,
             }
         }
     except Exception as e:
