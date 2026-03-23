@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Layers, FileText, RefreshCw, Sun, Moon, GitBranch, Plus, Home } from 'lucide-react';
 import { healthCheck } from '../services/api';
 import D3WorkflowGraph from '../components/D3WorkflowGraph';
@@ -8,9 +8,19 @@ import { useTheme } from '../context/ThemeContext';
 
 function Dashboard() {
   const { isDark, toggleTheme } = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('agentic'); // 'agentic' or 'flowchart'
+
+  // Get initial tab from URL query parameter, default to 'agentic'
+  const viewParam = searchParams.get('view');
+  const [activeTab, setActiveTab] = useState(viewParam === 'flowchart' ? 'flowchart' : 'agentic');
+
+  // Update URL when tab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ view: tab === 'agentic' ? 'agentic' : 'flowchart' });
+  };
 
   useEffect(() => {
     loadHealth();
@@ -188,7 +198,7 @@ function Dashboard() {
             </Link>
             {/* Agentic Workflow */}
             <button
-              onClick={() => setActiveTab('agentic')}
+              onClick={() => handleTabChange('agentic')}
               style={{
                 padding: '6px 16px',
                 borderRadius: '8px',
@@ -209,7 +219,7 @@ function Dashboard() {
             </button>
             {/* Flowchart Workflow */}
             <button
-              onClick={() => setActiveTab('flowchart')}
+              onClick={() => handleTabChange('flowchart')}
               style={{
                 padding: '6px 16px',
                 borderRadius: '8px',

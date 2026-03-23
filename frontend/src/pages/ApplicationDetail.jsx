@@ -296,38 +296,27 @@ function ApplicationDetail() {
           Back to Applications
         </Link>
 
-        {/* STEP CONTROL - RIGHT AFTER BACK LINK */}
+        {/* View-only info banner */}
         {application && application.status !== 'COMPLETED' && (
           <div style={{
-            backgroundColor: '#22C55E',
-            padding: '20px',
+            backgroundColor: isDark ? 'rgba(17, 122, 202, 0.15)' : 'rgba(17, 122, 202, 0.1)',
+            border: '1px solid rgba(17, 122, 202, 0.3)',
+            padding: '16px 20px',
             borderRadius: '12px',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '16px'
+            gap: '12px'
           }}>
-            <div style={{ color: '#fff' }}>
-              <div style={{ fontSize: '18px', fontWeight: 700 }}>Manual Step Control</div>
-              <div style={{ fontSize: '14px', opacity: 0.9 }}>Current Phase: {application?.current_phase}</div>
+            <Activity size={20} color="#117ACA" />
+            <div style={{ color: isDark ? '#e2e8f0' : '#1e293b' }}>
+              <div style={{ fontSize: '14px', fontWeight: 600 }}>
+                Current Phase: {application?.current_phase?.replace('_', ' ')}
+              </div>
+              <div style={{ fontSize: '13px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                Task completion is managed through the Specialist Workbench
+              </div>
             </div>
-            <button
-              onClick={handleCompleteCurrentTask}
-              style={{
-                padding: '14px 28px',
-                borderRadius: '8px',
-                border: '2px solid #fff',
-                backgroundColor: '#fff',
-                color: '#22C55E',
-                fontSize: '16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              ✓ COMPLETE TASK & NEXT PHASE
-            </button>
           </div>
         )}
 
@@ -933,46 +922,7 @@ function ApplicationDetail() {
         )}
       </div>
 
-      {/* Fixed Bottom Action Bar - Always visible */}
-      {application && application.status !== 'COMPLETED' && (
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: '#22C55E',
-          padding: '16px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '16px',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.2)',
-          zIndex: 9999
-        }}>
-          <span style={{ color: '#fff', fontSize: '14px', fontWeight: 500 }}>
-            Current: {application?.current_phase?.replace('_', ' ')}
-          </span>
-          <button
-            onClick={handleCompleteCurrentTask}
-            style={{
-              padding: '12px 32px',
-              borderRadius: '8px',
-              border: '2px solid #fff',
-              backgroundColor: '#fff',
-              color: '#22C55E',
-              fontSize: '16px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <CheckCircle size={20} />
-            COMPLETE TASK & MOVE TO NEXT PHASE
-          </button>
-        </div>
-      )}
+      {/* Removed: Fixed Bottom Action Bar - Task completion now handled in Specialist Workbench */}
 
       {/* JSON Viewer Modal */}
       <JsonViewerModal

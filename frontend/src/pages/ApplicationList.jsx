@@ -1,13 +1,31 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, ChevronLeft, ChevronRight, RefreshCw, ChevronDown, ChevronUp, Activity, Home, Clock, CheckCircle, XCircle, AlertTriangle, Sun, Moon, Filter, X, Search, Layers, GitBranch, Plus, TrendingUp, Users, Zap, Ban, Trash2 } from 'lucide-react';
-import { getApplications, getExecutions, getTransactions, getMockApiCalls, healthCheck, flushAllApplications } from '../services/api';
+import { FileText, ChevronLeft, ChevronRight, RefreshCw, ChevronDown, ChevronUp, Activity, Home, Clock, CheckCircle, XCircle, AlertTriangle, Sun, Moon, Filter, X, Search, Layers, GitBranch, Plus, TrendingUp, Users, Zap, Ban, Trash2, Briefcase, Settings, LogOut } from 'lucide-react';
+import { getApplications, getExecutions, getTransactions, getMockApiCalls, healthCheck, flushAllApplications, getApplicationNotes } from '../services/api';
 import { format } from 'date-fns';
 import WorkflowStageTracker from '../components/WorkflowStageTracker';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+
+// Status configuration - single source of truth
+const STATUS_CONFIG = {
+  'IN_PROGRESS': { label: 'In Progress', icon: Activity, gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', glow: 'rgba(59, 130, 246, 0.4)', pulse: true },
+  'COMPLETED': { label: 'Completed', icon: CheckCircle, gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', glow: 'rgba(16, 185, 129, 0.4)', pulse: false },
+  'DENIED': { label: 'Denied', icon: XCircle, gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', glow: 'rgba(239, 68, 68, 0.4)', pulse: false },
+};
+
+// All possible status values for filter dropdown
+const ALL_STATUSES = Object.keys(STATUS_CONFIG);
+
+// All possible phase values for filter dropdown
+const ALL_PHASES = [
+  'INTAKE', 'APPLICATION', 'DISCLOSURE', 'LOAN_REVIEW',
+  'UNDERWRITING', 'HUMAN_DECISION', 'COMMITMENT', 'CLOSING', 'POST_CLOSING', 'DENIAL'
+];
 
 function ApplicationList() {
   const { isDark, toggleTheme } = useTheme();
+  const { isAdmin, isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [applications, setApplications] = useState([]);
@@ -75,7 +93,7 @@ function ApplicationList() {
         setApplications(data.applications || []);
         setTotal(data.total || 0);
       }).catch(console.error);
-    }, 5000);
+    }, 3000); // Faster refresh for real-time updates
 
     return () => clearInterval(interval);
   }, [applications, autoRefresh, expandedApp]);
@@ -95,26 +113,28 @@ function ApplicationList() {
     }
   };
 
-  // Get unique values for dropdown filters
+  // Get unique values for dropdown filters (use all possible + any from data)
   const uniqueStatuses = useMemo(() => {
-    const statuses = new Set(applications.map(app => app.status));
-    return Array.from(statuses).sort();
+    const dataStatuses = new Set(applications.map(app => app.status));
+    const allStatuses = new Set([...ALL_STATUSES, ...dataStatuses]);
+    return Array.from(allStatuses).sort();
   }, [applications]);
 
   const uniquePhases = useMemo(() => {
-    const phases = new Set(applications.map(app => app.current_phase).filter(Boolean));
-    return Array.from(phases).sort();
+    const dataPhases = new Set(applications.map(app => app.current_phase).filter(Boolean));
+    const allPhases = new Set([...ALL_PHASES, ...dataPhases]);
+    return Array.from(allPhases).sort();
   }, [applications]);
 
   // Apply filters
   const filteredApplications = useMemo(() => {
-    return applications.filter(app => {
-      // Application ID filter (contains search)
+    const result = applications.filter(app => {
+      // Application ID filter
       if (filters.application_id && !app.application_id.toLowerCase().includes(filters.application_id.toLowerCase())) {
         return false;
       }
 
-      // Status filter
+      // Status filter - simple exact match
       if (filters.status && app.status !== filters.status) {
         return false;
       }
@@ -140,6 +160,7 @@ function ApplicationList() {
 
       return true;
     });
+    return result;
   }, [applications, filters]);
 
   // Paginate filtered results
@@ -148,32 +169,45 @@ function ApplicationList() {
     return filteredApplications.slice(start, start + pageSize);
   }, [filteredApplications, page, pageSize]);
 
-  // Calculate stats for summary cards
+  // Calculate stats for summary cards (from ALL applications, not filtered)
   const stats = useMemo(() => {
-    const total = filteredApplications.length;
-    const inProgress = filteredApplications.filter(app => app.status === 'IN_PROGRESS').length;
+    const total = applications.length;
+    const inProgress = applications.filter(app => app.status === 'IN_PROGRESS').length;
     // Denied: check for DENIED status or denial nodes
-    const denied = filteredApplications.filter(app =>
+    const denied = applications.filter(app =>
       app.status === 'DENIED' ||
       app.current_node === 'denial_node' ||
       app.current_node === 'end_denied'
     ).length;
     // Completed: COMPLETED status that isn't denied
-    const completed = filteredApplications.filter(app =>
+    const completed = applications.filter(app =>
       app.status === 'COMPLETED' &&
       app.current_node !== 'denial_node' &&
       app.current_node !== 'end_denied'
     ).length;
-    const other = total - inProgress - completed - denied;
+    const pending = applications.filter(app => app.status === 'PENDING').length;
+    const other = total - inProgress - completed - denied - pending;
 
-    return { total, inProgress, completed, denied, other };
-  }, [filteredApplications]);
+    return { total, inProgress, completed, denied, pending, other };
+  }, [applications]);
 
   // Get phase progress for mini indicator
   const getPhaseProgress = (phase) => {
-    const phases = ['INTAKE', 'APPLICATION', 'REVIEW', 'UNDERWRITING', 'CLOSING'];
-    const index = phases.indexOf(phase);
-    return index >= 0 ? ((index + 1) / phases.length) * 100 : 0;
+    const phaseMapping = {
+      'INTAKE': 1,
+      'APPLICATION': 2,
+      'DISCLOSURE': 2,
+      'LOAN_REVIEW': 3,
+      'REVIEW': 3,
+      'UNDERWRITING': 4,
+      'HUMAN_DECISION': 4,
+      'DENIAL': 4,
+      'COMMITMENT': 5,
+      'CLOSING': 5,
+      'POST_CLOSING': 5,
+    };
+    const progress = phaseMapping[phase] || 0;
+    return (progress / 5) * 100;
   };
 
   // Update pagination when filters change
@@ -186,13 +220,14 @@ function ApplicationList() {
     if (appDetails[appId]) return appDetails[appId];
 
     try {
-      const [executions, transactions, apiCalls] = await Promise.all([
+      const [executions, transactions, apiCalls, specialistNotes] = await Promise.all([
         getExecutions(appId),
         getTransactions(appId),
         getMockApiCalls(appId),
+        getApplicationNotes(appId).catch(() => []), // Don't fail if notes endpoint errors
       ]);
 
-      const details = { executions, transactions, apiCalls };
+      const details = { executions, transactions, apiCalls, specialistNotes };
       setAppDetails(prev => ({ ...prev, [appId]: details }));
       return details;
     } catch (error) {
@@ -214,6 +249,7 @@ function ApplicationList() {
 
   const updateFilter = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+    setPage(1);
   };
 
   const clearFilters = () => {
@@ -224,6 +260,7 @@ function ApplicationList() {
       created_from: '',
       created_to: '',
     });
+    setPage(1); // Reset to first page when clearing filters
   };
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
@@ -246,91 +283,15 @@ function ApplicationList() {
     }
   };
 
-  const getStatusBadge = (status, endState, currentPhase) => {
-    // Check if truly completed: status COMPLETED AND at terminal state
-    const isAtTerminalState = currentPhase === 'POST_CLOSING' ||
-                              endState === 'end_loan_closed' ||
-                              endState === 'end' ||
-                              endState === 'end_denied' ||
-                              endState === 'denial_node';
-    const isTrulyCompleted = status === 'COMPLETED' && isAtTerminalState;
-
-    let config = {
-      gradient: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
-      text: 'Pending',
+  // Simple status badge - uses status field directly from STATUS_CONFIG
+  const getStatusBadge = (status) => {
+    const config = STATUS_CONFIG[status] || {
+      label: status || 'Unknown',
       icon: Clock,
+      gradient: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
       glow: 'rgba(100, 116, 139, 0.3)',
       pulse: false,
     };
-
-    // If status says COMPLETED but not at terminal state, treat as IN_PROGRESS
-    if (status === 'IN_PROGRESS' || (status === 'COMPLETED' && !isTrulyCompleted)) {
-      config = {
-        gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-        text: 'In Progress',
-        icon: Activity,
-        glow: 'rgba(59, 130, 246, 0.4)',
-        pulse: true,
-      };
-    } else if (isTrulyCompleted) {
-      if (endState === 'end' || endState === 'end_loan_closed') {
-        config = {
-          gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-          text: 'Loan Closed',
-          icon: CheckCircle,
-          glow: 'rgba(16, 185, 129, 0.4)',
-          pulse: false,
-        };
-      } else if (endState === 'denial_node' || endState === 'end_denied') {
-        config = {
-          gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-          text: 'Denied',
-          icon: XCircle,
-          glow: 'rgba(239, 68, 68, 0.4)',
-          pulse: false,
-        };
-      } else if (endState === 'end_ineligible') {
-        config = {
-          gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-          text: 'Ineligible',
-          icon: AlertTriangle,
-          glow: 'rgba(249, 115, 22, 0.4)',
-          pulse: false,
-        };
-      } else if (endState === 'end_incomplete') {
-        config = {
-          gradient: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-          text: 'Incomplete',
-          icon: AlertTriangle,
-          glow: 'rgba(234, 179, 8, 0.4)',
-          pulse: false,
-        };
-      } else if (endState === 'end_withdrawn') {
-        config = {
-          gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-          text: 'Withdrawn',
-          icon: AlertTriangle,
-          glow: 'rgba(249, 115, 22, 0.4)',
-          pulse: false,
-        };
-      } else {
-        config = {
-          gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-          text: 'Completed',
-          icon: CheckCircle,
-          glow: 'rgba(16, 185, 129, 0.4)',
-          pulse: false,
-        };
-      }
-    } else if (status === 'FAILED') {
-      config = {
-        gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-        text: 'Failed',
-        icon: XCircle,
-        glow: 'rgba(239, 68, 68, 0.4)',
-        pulse: false,
-      };
-    }
 
     const Icon = config.icon;
     return (
@@ -348,7 +309,7 @@ function ApplicationList() {
         animation: config.pulse ? 'statusPulse 2s ease-in-out infinite' : 'none',
       }}>
         <Icon size={14} style={{ flexShrink: 0 }} />
-        {config.text}
+        {config.label}
       </span>
     );
   };
@@ -374,324 +335,462 @@ function ApplicationList() {
       minHeight: '100vh',
       backgroundColor: isDark ? '#0B1929' : '#F3F6FB'
     }}>
-      {/* Header Bar - Chase Blue Gradient */}
+      {/* Header Bar - Redesigned with Clear Grouping */}
       <header
         style={{
-          height: '64px',
           background: isDark
             ? 'linear-gradient(135deg, #0B1929 0%, #112240 40%, #1A365D 100%)'
             : 'linear-gradient(135deg, #003B73 0%, #00508F 40%, #117ACA 100%)',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px',
+          flexDirection: 'column',
           flexShrink: 0,
         }}
       >
-        {/* Left Side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255,255,255,0.12)',
+        {/* Top Row - Branding & User Actions */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 24px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          {/* Left: Logo & Title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Layers size={20} color="#fff" />
-          </div>
-          <div>
-            <h1 style={{
-              margin: 0,
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: '#fff',
-              fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif'
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
             }}>
-              Loan Assumption Applications
-            </h1>
+              <Layers size={22} color="#fff" />
+            </div>
+            <div>
+              <h1 style={{
+                margin: 0,
+                fontSize: '1.35rem',
+                fontWeight: 700,
+                color: '#fff',
+                letterSpacing: '-0.02em',
+              }}>
+                Loan Assumption Applications
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '2px' }}>
+                <span style={{
+                  fontSize: '12px',
+                  color: 'rgba(255,255,255,0.7)',
+                }}>
+                  Manage and track all loan assumptions
+                </span>
+              </div>
+            </div>
           </div>
-          <span
-            style={{
-              padding: '4px 12px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255,255,255,0.15)',
-              color: '#fff',
-              fontSize: '11px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}
-          >
-            {filteredApplications.length} of {total}
-          </span>
-          {health && (
-            <span
-              style={{
+
+          {/* Right: Status & User Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Stats Badge */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}>
+              <Activity size={14} color="#93c5fd" />
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#fff' }}>
+                {filteredApplications.length}
+              </span>
+              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>of</span>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#fff' }}>
+                {total}
+              </span>
+            </div>
+
+            {/* Online Status */}
+            {health && (
+              <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(20, 113, 58, 0.2)',
-                color: '#4ade80',
-                fontSize: '11px',
-                fontWeight: 600,
+                padding: '6px 12px',
+                borderRadius: '20px',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#4ade80',
+                  animation: 'pulse 2s infinite',
+                  boxShadow: '0 0 8px rgba(74, 222, 128, 0.6)',
+                }} />
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#4ade80' }}>Online</span>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.15)' }} />
+
+            {/* User Section */}
+            {isAuthenticated ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {/* User Badge */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '4px 12px 4px 4px',
+                  borderRadius: '24px',
+                  background: 'rgba(255,255,255,0.1)',
+                }}>
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: isAdmin
+                      ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
+                      : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: '11px',
+                    color: '#fff',
+                  }}>
+                    {user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#fff' }}>
+                    {user?.full_name || user?.username}
+                  </span>
+                </div>
+
+                {/* Workbench/Admin Button */}
+                {!isAdmin ? (
+                  <button
+                    onClick={() => navigate('/workbench')}
+                    title="Specialist Workbench"
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)',
+                      color: '#6ee7b7',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <Briefcase size={14} />
+                    Workbench
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate('/admin')}
+                    title="Admin Dashboard"
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 100%)',
+                      color: '#c4b5fd',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <Settings size={14} />
+                    Admin
+                  </button>
+                )}
+
+                {/* Logout */}
+                <button
+                  onClick={async () => {
+                    await logout();
+                    navigate('/login');
+                  }}
+                  title={`Logout (${user?.full_name || user?.username})`}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    color: '#fca5a5',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <LogOut size={14} />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                title="Login"
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%)',
+                  color: '#93c5fd',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                }}
+              >
+                <Briefcase size={14} />
+                Login
+              </button>
+            )}
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
               }}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              <span style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#4ade80',
-                animation: 'pulse 2s infinite'
-              }} />
-              Online
-            </span>
-          )}
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
         </div>
 
-        {/* Right Side - Tab Switcher & Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Tab Switcher */}
-          <div
-            style={{
-              display: 'flex',
-              backgroundColor: 'rgba(255,255,255,0.08)',
-              borderRadius: '10px',
-              padding: '3px'
-            }}
-          >
-            {/* Applications - Current page */}
+        {/* Bottom Row - Navigation & Actions */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 24px',
+        }}>
+          {/* Navigation Tabs */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '4px',
+            borderRadius: '12px',
+            background: 'rgba(0,0,0,0.2)',
+          }}>
             <button
               onClick={() => {
                 setExpandedApp(null);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               style={{
-                padding: '6px 16px',
+                padding: '8px 18px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: 'rgba(255,255,255,0.18)',
+                background: 'rgba(255,255,255,0.2)',
                 color: '#fff',
                 fontSize: '13px',
-                fontWeight: 500,
+                fontWeight: 600,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               }}
             >
-              <FileText size={14} />
+              <FileText size={15} />
               Applications
             </button>
-            {/* Agentic Workflow */}
             <Link
-              to="/"
+              to="/?view=agentic"
               style={{
-                padding: '6px 16px',
+                padding: '8px 18px',
                 borderRadius: '8px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                color: '#fff',
+                background: 'transparent',
+                color: 'rgba(255,255,255,0.8)',
                 textDecoration: 'none',
                 fontSize: '13px',
                 fontWeight: 500,
-                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                transition: 'background-color 0.2s'
+                gap: '8px',
+                transition: 'all 0.2s',
               }}
             >
-              <Layers size={14} />
+              <Layers size={15} />
               Agentic Workflow
             </Link>
-            {/* Flowchart Workflow */}
             <Link
-              to="/"
+              to="/?view=flowchart"
               style={{
-                padding: '6px 16px',
+                padding: '8px 18px',
                 borderRadius: '8px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                color: '#fff',
+                background: 'transparent',
+                color: 'rgba(255,255,255,0.8)',
                 textDecoration: 'none',
                 fontSize: '13px',
                 fontWeight: 500,
-                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                transition: 'background-color 0.2s'
+                gap: '8px',
+                transition: 'all 0.2s',
               }}
             >
-              <GitBranch size={14} />
+              <GitBranch size={15} />
               Workflow
             </Link>
-            {/* Simulate New Application */}
             <Link
               to="/new"
               style={{
-                padding: '6px 16px',
+                padding: '8px 18px',
                 borderRadius: '8px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                color: '#fff',
+                background: 'transparent',
+                color: 'rgba(255,255,255,0.8)',
                 textDecoration: 'none',
                 fontSize: '13px',
                 fontWeight: 500,
-                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                transition: 'background-color 0.2s'
+                gap: '8px',
+                transition: 'all 0.2s',
               }}
             >
-              <Plus size={14} />
+              <Plus size={15} />
               Simulate
             </Link>
           </div>
 
-          {/* Filter Toggle */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: showFilters ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255,255,255,0.12)',
-              color: '#fff',
-              fontSize: '13px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <Filter size={14} />
-            Filters
-            {hasActiveFilters && (
-              <span style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#fbbf24'
-              }} />
-            )}
-          </button>
-
-          {hasActiveFilters && (
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Filters */}
             <button
-              onClick={clearFilters}
+              onClick={() => setShowFilters(!showFilters)}
               style={{
-                padding: '6px 14px',
+                padding: '8px 16px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: 'rgba(255,255,255,0.12)',
-                color: '#fff',
+                background: showFilters
+                  ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0.25) 100%)'
+                  : 'rgba(255,255,255,0.1)',
+                color: showFilters ? '#93c5fd' : '#fff',
                 fontSize: '13px',
                 fontWeight: 500,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
+                transition: 'all 0.2s',
               }}
             >
-              <X size={14} />
-              Clear
+              <Filter size={15} />
+              Filters
+              {hasActiveFilters && (
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: '#fbbf24',
+                  boxShadow: '0 0 6px rgba(251, 191, 36, 0.6)',
+                }} />
+              )}
             </button>
-          )}
 
-          {/* Home - Current page */}
-          <button
-            onClick={() => {
-              setExpandedApp(null);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: 'rgba(255,255,255,0.18)',
-              color: '#fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            title="Loan Assumption Applications"
-          >
-            <Home size={18} />
-          </button>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <X size={14} />
+                Clear
+              </button>
+            )}
 
-          {/* Refresh */}
-          <button
-            onClick={loadApplications}
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: 'rgba(255,255,255,0.12)',
-              color: '#fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title="Refresh"
-          >
-            <RefreshCw size={18} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
-          </button>
+            {/* Divider */}
+            <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.15)', margin: '0 4px' }} />
 
-          {/* Flush All Data */}
-          <button
-            onClick={() => setShowFlushConfirm(true)}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: 'rgba(239, 68, 68, 0.2)',
-              color: '#fca5a5',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              fontSize: '13px',
-              fontWeight: 500,
-            }}
-            title="Delete all application data"
-          >
-            <Trash2 size={14} />
-            Flush All
-          </button>
+            {/* Refresh */}
+            <button
+              onClick={loadApplications}
+              title="Refresh applications"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
+            >
+              <RefreshCw size={16} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+            </button>
 
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: 'rgba(255,255,255,0.12)',
-              color: '#fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+            {/* Flush All */}
+            <button
+              onClick={() => setShowFlushConfirm(true)}
+              title="Delete all application data"
+              style={{
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'rgba(239, 68, 68, 0.15)',
+                color: '#fca5a5',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '13px',
+                fontWeight: 500,
+                transition: 'all 0.2s',
+              }}
+            >
+              <Trash2 size={14} />
+              Flush All
+            </button>
+          </div>
         </div>
       </header>
 
@@ -1068,7 +1167,9 @@ function ApplicationList() {
                         >
                           <option value="">All Status</option>
                           {uniqueStatuses.map(status => (
-                            <option key={status} value={status}>{status}</option>
+                            <option key={status} value={status}>
+                              {STATUS_CONFIG[status]?.label || status}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -1157,7 +1258,7 @@ function ApplicationList() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            {getStatusBadge(app.status, app.current_node, app.current_phase)}
+                            {getStatusBadge(app.status)}
                           </td>
                           <td className="px-4 py-3">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -1169,13 +1270,15 @@ function ApplicationList() {
                                   'DISCLOSURE': 1,
                                   'LOAN_REVIEW': 2,
                                   'UNDERWRITING': 3,
+                                  'HUMAN_DECISION': 3,
+                                  'DENIAL': 3, // Denial happens during underwriting decision
                                   'COMMITMENT': 4,
                                   'CLOSING': 4,
                                   'POST_CLOSING': 5, // Beyond the 5 visual bars = all complete
                                 };
                                 const visualPhases = ['INTAKE', 'APPLICATION', 'REVIEW', 'UNDERWRITING', 'CLOSING'];
                                 const currentVisualIdx = BACKEND_TO_VISUAL[app.current_phase] ?? -1;
-                                const isDenied = app.current_node === 'denial_node' || app.current_node === 'end_denied';
+                                const isDenied = app.status === 'DENIED' || app.current_node === 'denial_node' || app.current_node === 'end_denied' || app.current_phase === 'DENIAL';
                                 // Check if truly completed: status COMPLETED AND at terminal state
                                 const isAtTerminalState = app.current_phase === 'POST_CLOSING' ||
                                                           app.current_node === 'end_loan_closed' ||
@@ -1255,6 +1358,8 @@ function ApplicationList() {
                                 application={app}
                                 executions={details.executions}
                                 apiCalls={details.apiCalls}
+                                transactions={details.transactions || []}
+                                specialistNotes={details.specialistNotes || []}
                                 isDark={isDark}
                                 onApplicationUpdate={(updatedApp) => {
                                   // Update the applications list to sync table row display

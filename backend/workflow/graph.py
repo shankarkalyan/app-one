@@ -700,6 +700,9 @@ def denial_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
     log_transaction(application_id, "STATE_CHANGE", "Denial", "Denial letter created", source_agent="denial_node")
 
+    # Update status to DENIED when denial is complete
+    update_application_status(application_id, "DENIAL", "denial_node", "DENIED")
+
     output = {
         "denial_letter": {"document_id": letter.get("letter_id")},
         "current_phase": "DENIAL",
@@ -984,8 +987,16 @@ class LoanWorkflow:
                 app.current_node = result.get("current_node", "UNKNOWN")
                 app.end_state = result.get("end_state")
                 if result.get("workflow_status") == "completed":
-                    app.status = "COMPLETED"
-                    app.completed_at = datetime.utcnow()
+                    # Set status based on end_state
+                    end_state = result.get("end_state", "")
+                    if end_state == "denied" or result.get("current_phase") == "DENIAL":
+                        app.status = "DENIED"
+                        app.completed_at = datetime.utcnow()
+                    elif end_state == "loan_closed":
+                        # Only mark as COMPLETED when loan is successfully closed
+                        app.status = "COMPLETED"
+                        app.completed_at = datetime.utcnow()
+                    # For other end states (ineligible, incomplete, withdrawn), keep as IN_PROGRESS
 
                 # Save workflow state to workflow_states table
                 # This is critical for in-progress simulation tracking

@@ -109,8 +109,90 @@ export const flushAllApplications = async () => {
   return response.data;
 };
 
+// Specialist notes
+export const getApplicationNotes = async (applicationId) => {
+  const response = await api.get(`/applications/${applicationId}/notes`);
+  return response.data;
+};
+
 // Aliases for convenience
 export const getExecutions = getAgentExecutions;
 export const getTransactions = getTransactionLogs;
+
+// ============================================
+// Workflow Configuration API
+// ============================================
+
+// Get all workflow tasks with subtasks and checklist items
+export const getWorkflowTasks = async () => {
+  const response = await api.get('/admin/workflow-tasks');
+  return response.data;
+};
+
+// Create a new workflow task
+export const createWorkflowTask = async (data) => {
+  const response = await api.post('/admin/workflow-tasks', data);
+  return response.data;
+};
+
+// Update a workflow task
+export const updateWorkflowTask = async (taskId, data) => {
+  const response = await api.put(`/admin/workflow-tasks/${taskId}`, data);
+  return response.data;
+};
+
+// Delete a workflow task
+export const deleteWorkflowTask = async (taskId) => {
+  const response = await api.delete(`/admin/workflow-tasks/${taskId}`);
+  return response.data;
+};
+
+// Add a subtask to a workflow task
+export const createSubtask = async (taskId, data) => {
+  const response = await api.post(`/admin/workflow-tasks/${taskId}/subtasks`, data);
+  return response.data;
+};
+
+// Update a subtask
+export const updateSubtask = async (subtaskId, data) => {
+  const response = await api.put(`/admin/subtasks/${subtaskId}`, data);
+  return response.data;
+};
+
+// Delete a subtask
+export const deleteSubtask = async (subtaskId) => {
+  const response = await api.delete(`/admin/subtasks/${subtaskId}`);
+  return response.data;
+};
+
+// Add a checklist item to a subtask
+export const createChecklistItem = async (subtaskId, data) => {
+  const response = await api.post(`/admin/subtasks/${subtaskId}/checklist`, data);
+  return response.data;
+};
+
+// Update a checklist item
+export const updateChecklistItem = async (itemId, data) => {
+  const response = await api.put(`/admin/checklist/${itemId}`, data);
+  return response.data;
+};
+
+// Delete a checklist item
+export const deleteChecklistItem = async (itemId) => {
+  const response = await api.delete(`/admin/checklist/${itemId}`);
+  return response.data;
+};
+
+// Reorder workflow tasks
+export const reorderWorkflowTasks = async (taskOrders) => {
+  const response = await api.put('/admin/workflow-tasks/reorder', { task_orders: taskOrders });
+  return response.data;
+};
+
+// Reorder subtasks within a task
+export const reorderSubtasks = async (subtaskOrders) => {
+  const response = await api.put('/admin/subtasks/reorder', { subtask_orders: subtaskOrders });
+  return response.data;
+};
 
 export default api;

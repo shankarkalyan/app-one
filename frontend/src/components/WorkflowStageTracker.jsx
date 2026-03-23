@@ -6,8 +6,9 @@ import {
   Phone, Mail, Home, DollarSign, ClipboardCheck, Stamp, ArrowRight,
   MessageSquare, UserCheck, FileSearch, PenTool, Eye, ThumbsUp, ThumbsDown,
   Bell, RefreshCw, Calendar, Briefcase, Scale, FileCheck, Receipt, Key,
-  Banknote, Award, Archive, Bot, Users, Maximize2, X, Loader2
+  Banknote, Award, Archive, Bot, Users, Maximize2, X, EyeOff, Activity
 } from 'lucide-react';
+import { getWorkflowTasks, getApplication } from '../services/api';
 
 // API Details - describes what each API does with endpoint-specific purposes
 const API_DETAILS = {
@@ -271,7 +272,79 @@ const getApiAction = (apiName, endpoint) => {
 };
 
 // Stage definitions with icons, conversation content, and detailed descriptions
-const PHASES = [
+// Phase code to icon mapping for dynamic phase loading
+const PHASE_ICONS = {
+  'INTAKE': Phone,
+  'APPLICATION': FileText,
+  'DISCLOSURE': FileText,
+  'LOAN_REVIEW': Search,
+  'UNDERWRITING': Scale,
+  'COMMITMENT': Award,
+  'CLOSING': Home,
+  'POST_CLOSING': Archive,
+  'DENIAL': XCircle,
+};
+
+// Phase code to color mapping
+const PHASE_COLORS = {
+  'INTAKE': '#0a4b94',
+  'APPLICATION': '#1a6fc9',
+  'DISCLOSURE': '#2563eb',
+  'LOAN_REVIEW': '#7c3aed',
+  'UNDERWRITING': '#9333ea',
+  'COMMITMENT': '#c026d3',
+  'CLOSING': '#db2777',
+  'POST_CLOSING': '#e11d48',
+  'DENIAL': '#ef4444',
+};
+
+// Subtask icon mapping based on keywords
+const getSubtaskIcon = (subtaskName) => {
+  const name = subtaskName.toLowerCase();
+  if (name.includes('call')) return Phone;
+  if (name.includes('eligibility') || name.includes('check')) return Shield;
+  if (name.includes('optimization') || name.includes('optimizer')) return Search;
+  if (name.includes('document') || name.includes('documentation')) return FileText;
+  if (name.includes('docusign') || name.includes('send') || name.includes('delivery')) return Send;
+  if (name.includes('tracking') || name.includes('track')) return Clock;
+  if (name.includes('return') || name.includes('receive')) return Download;
+  if (name.includes('compliance')) return Shield;
+  if (name.includes('review')) return Eye;
+  if (name.includes('request')) return Upload;
+  if (name.includes('collection')) return Download;
+  if (name.includes('follow-up') || name.includes('missing')) return Bell;
+  if (name.includes('assignment') || name.includes('assign')) return UserCheck;
+  if (name.includes('underwriting') || name.includes('checklist')) return ClipboardCheck;
+  if (name.includes('risk')) return AlertTriangle;
+  if (name.includes('readiness')) return CheckCircle;
+  if (name.includes('commitment') || name.includes('letter')) return Award;
+  if (name.includes('preparation') || name.includes('packet') || name.includes('package')) return Briefcase;
+  if (name.includes('title')) return Building;
+  if (name.includes('pre-closing') || name.includes('closing')) return Home;
+  if (name.includes('execution')) return Key;
+  if (name.includes('msp') || name.includes('maintenance') || name.includes('system')) return Database;
+  if (name.includes('welcome')) return Mail;
+  if (name.includes('file') || name.includes('archive') || name.includes('completion')) return Archive;
+  return Circle;
+};
+
+// Get interaction type based on subtask characteristics
+const getInteractionType = (subtaskName) => {
+  const name = subtaskName.toLowerCase();
+  if (name.includes('call')) return 'call';
+  if (name.includes('send') || name.includes('delivery') || name.includes('docusign')) return 'email';
+  if (name.includes('document') || name.includes('packet') || name.includes('return') || name.includes('receive')) return 'document';
+  if (name.includes('review') || name.includes('compliance') || name.includes('verification')) return 'review';
+  if (name.includes('check') || name.includes('eligibility') || name.includes('verification')) return 'verification';
+  if (name.includes('assign')) return 'assignment';
+  if (name.includes('analysis') || name.includes('underwriting') || name.includes('risk')) return 'analysis';
+  if (name.includes('decision') || name.includes('approval')) return 'decision';
+  if (name.includes('system') || name.includes('msp') || name.includes('update')) return 'system';
+  if (name.includes('complete') || name.includes('closed') || name.includes('completion')) return 'completion';
+  return 'processing';
+};
+
+const DEFAULT_PHASES = [
   {
     id: 1,
     name: 'Intake & Eligibility',
@@ -597,33 +670,35 @@ const PHASES = [
 const NODE_TO_PHASE = {
   'intake_node': 0,
   'application_node': 1,
-  'disclosure_node': 1,
-  'loan_review_node': 2,
-  'underwriting_node': 3,
-  'human_decision_node': 3,
-  'commitment_node': 4,
-  'closing_node': 4,
-  'maintenance_node': 4,
-  'denial_node': 5,
-  'end': 4,
-  'end_loan_closed': 4,
+  'disclosure_node': 2,
+  'loan_review_node': 3,
+  'underwriting_node': 4,
+  'human_decision_node': 4,
+  'commitment_node': 5,
+  'closing_node': 6,
+  'maintenance_node': 7,
+  'post_closing_node': 7,
+  'denial_node': 8,  // Denial path (alternate)
+  'end': 7,
+  'end_loan_closed': 7,
   'end_ineligible': -1,
   'end_incomplete': -1,
   'end_withdrawn': -1,
-  'end_denied': 5,
+  'end_denied': 8,
 };
 
-// Map backend current_phase to the starting stage number (1-16)
+// Map backend current_phase to the starting stage number (1-30)
 // This tells us which stage is "current" based on the backend phase
 const BACKEND_PHASE_TO_STAGE = {
-  'INTAKE': 1,
-  'APPLICATION': 3,
-  'DISCLOSURE': 5,
-  'LOAN_REVIEW': 7,
-  'UNDERWRITING': 9,
-  'COMMITMENT': 11,
-  'CLOSING': 13,
-  'POST_CLOSING': 15,
+  'INTAKE': 1,           // Stages 1-4
+  'APPLICATION': 5,      // Stages 5-8
+  'DISCLOSURE': 9,       // Stages 9-11
+  'LOAN_REVIEW': 12,     // Stages 12-15
+  'UNDERWRITING': 16,    // Stages 16-19
+  'HUMAN_DECISION': 19,  // Underwriter decision step (last stage of underwriting)
+  'COMMITMENT': 20,      // Stages 20-22
+  'CLOSING': 23,         // Stages 23-26
+  'POST_CLOSING': 27,    // Stages 27-30
 };
 
 // HTTP Method colors
@@ -635,7 +710,7 @@ const METHOD_COLORS = {
   'PATCH': { bg: '#f3e8ff', text: '#9333ea' },
 };
 
-function WorkflowStageTracker({ application, executions, apiCalls, isDark = false, onApplicationUpdate }) {
+function WorkflowStageTracker({ application, executions, apiCalls, transactions = [], specialistNotes = [], isDark = false, onApplicationUpdate }) {
   const [expandedPhase, setExpandedPhase] = useState(null);
   const [expandedStage, setExpandedStage] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
@@ -655,12 +730,178 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
   const [localCompletedStatus, setLocalCompletedStatus] = useState(false);
   const [localStatus, setLocalStatus] = useState(null); // 'COMPLETED', 'IN_PROGRESS', etc.
   const [localCurrentPhase, setLocalCurrentPhase] = useState(null);
-  const [isCompletingTask, setIsCompletingTask] = useState(false);
   const phaseCardRefs = useRef({});
   const phaseContentRefs = useRef({});
   const stageContentRefs = useRef({});
   const stageRowRefs = useRef({});
   const apiSectionRefs = useRef({});
+
+  // Dynamic workflow phases from API
+  const [workflowPhases, setWorkflowPhases] = useState(DEFAULT_PHASES);
+  const [loadingWorkflow, setLoadingWorkflow] = useState(true);
+
+  // State for refreshed application data
+  const [currentApplication, setCurrentApplication] = useState(application);
+  const [refreshingApp, setRefreshingApp] = useState(false);
+
+  // Refresh application data from API
+  const refreshApplicationData = async () => {
+    if (!application?.application_id) return;
+
+    setRefreshingApp(true);
+    try {
+      const freshData = await getApplication(application.application_id);
+      setCurrentApplication(freshData);
+      // Notify parent if callback provided
+      if (onApplicationUpdate) {
+        onApplicationUpdate(freshData);
+      }
+    } catch (error) {
+      console.error('Failed to refresh application data:', error);
+    } finally {
+      setRefreshingApp(false);
+    }
+  };
+
+  // Fetch fresh application data on mount and when application prop changes
+  useEffect(() => {
+    if (application?.application_id) {
+      refreshApplicationData();
+    }
+  }, [application?.application_id]);
+
+  // Update currentApplication when prop changes (for external updates)
+  useEffect(() => {
+    setCurrentApplication(application);
+  }, [application]);
+
+  // Helper function to get activities for a specific phase from transactions
+  const getPhaseActivities = (phaseCodeOrId) => {
+    if (!transactions || transactions.length === 0) return [];
+
+    // Convert to string and handle non-string inputs
+    const phaseCode = String(phaseCodeOrId || '');
+    if (!phaseCode) return [];
+
+    // Map phase codes to match transaction data format
+    const phaseMatchers = [phaseCode, phaseCode.toUpperCase()];
+
+    // Filter transactions for this phase
+    return transactions.filter(tx => {
+      // Check if transaction is related to this phase
+      const txPhase = tx.data?.phase || '';
+      const txEventName = tx.event_name || '';
+      const txDescription = tx.description || '';
+
+      // Match by phase in data
+      if (phaseMatchers.includes(txPhase)) return true;
+
+      // Match by phase name in event_name or description
+      const searchTerms = [phaseCode, phaseCode.replace(/_/g, ' ')];
+      for (const term of searchTerms) {
+        if (txEventName.toUpperCase().includes(term.toUpperCase())) return true;
+        if (txDescription.toUpperCase().includes(term.toUpperCase())) return true;
+      }
+
+      return false;
+    }).map(tx => ({
+      id: tx.id,
+      type: tx.event_type,
+      title: tx.event_name,
+      description: tx.description,
+      source: tx.source_agent,
+      timestamp: tx.timestamp,
+      data: tx.data,
+      // Determine activity type for styling
+      activityType: tx.event_type === 'SPECIALIST_TASK_COMPLETED' ? 'specialist' :
+                   tx.event_type === 'TASK_COMPLETED' ? 'system' :
+                   tx.event_type === 'WORKFLOW_START' ? 'start' : 'info'
+    }));
+  };
+
+  // Fetch workflow definitions from API
+  useEffect(() => {
+    const fetchWorkflowDefinitions = async () => {
+      try {
+        setLoadingWorkflow(true);
+        const workflowTasks = await getWorkflowTasks();
+
+        if (workflowTasks && workflowTasks.length > 0) {
+          // Calculate cumulative stage numbers across all phases
+          let stageCounter = 1;
+
+          // Transform API data to match the PHASES structure
+          const dynamicPhases = workflowTasks.map((task, index) => {
+            const phaseCode = task.phase_code || task.name.toUpperCase().replace(/\s+/g, '_');
+            const startingStageNum = stageCounter;
+
+            const stages = (task.subtasks || []).map((subtask, sIndex) => {
+              const stageNum = stageCounter++;
+              return {
+                num: String(stageNum).padStart(2, '0'),
+                label: subtask.name,
+                icon: getSubtaskIcon(subtask.name),
+                interactionType: getInteractionType(subtask.name),
+                description: subtask.description,
+                details: subtask.description,
+                estimatedDuration: subtask.estimated_duration,
+                checklistItems: subtask.checklist_items || [],
+                conversation: [], // Can be populated with actual data later
+                apis: [], // Can be populated based on checklist categories
+              };
+            });
+
+            return {
+              id: task.id || index + 1,
+              name: task.name,
+              shortName: task.name.split(' ')[0].replace('&', '').trim() || task.name.substring(0, 10),
+              icon: PHASE_ICONS[phaseCode] || Circle,
+              color: task.color || PHASE_COLORS[phaseCode] || '#3b82f6',
+              description: task.description,
+              phaseCode: phaseCode,
+              stages: stages,
+            };
+          });
+
+          // Add denial phase at the end
+          const denialPhase = {
+            id: dynamicPhases.length + 1,
+            name: 'Denial Path',
+            shortName: 'Denial',
+            icon: XCircle,
+            color: '#ef4444',
+            isAlternate: true,
+            description: 'Application denial workflow',
+            phaseCode: 'DENIAL',
+            stages: [
+              {
+                num: 'D1',
+                label: 'Denial Letter',
+                icon: AlertTriangle,
+                interactionType: 'email',
+                description: 'Generate denial notice',
+                details: 'Create adverse action letter with specific denial reasons',
+                conversation: [],
+                apis: [],
+              },
+            ],
+          };
+
+          setWorkflowPhases([...dynamicPhases, denialPhase]);
+        }
+      } catch (error) {
+        console.error('Error fetching workflow definitions:', error);
+        // Keep using DEFAULT_PHASES on error
+      } finally {
+        setLoadingWorkflow(false);
+      }
+    };
+
+    fetchWorkflowDefinitions();
+  }, []);
+
+  // Use workflowPhases throughout the component (aliased as PHASES for easier migration)
+  const PHASES = workflowPhases;
 
   // Scroll to newly visible phase card
   useEffect(() => {
@@ -700,11 +941,11 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
   }, [expandedStage]);
 
   // Check if application is denied
-  const isApplicationDenied = application?.status === 'DENIED' ||
-                              application?.current_node === 'denial_node' ||
-                              application?.current_node === 'end_denied' ||
-                              application?.workflow_status === 'denied' ||
-                              application?.current_phase === 'DENIAL';
+  const isApplicationDenied = currentApplication?.status === 'DENIED' ||
+                              currentApplication?.current_node === 'denial_node' ||
+                              currentApplication?.current_node === 'end_denied' ||
+                              currentApplication?.workflow_status === 'denied' ||
+                              currentApplication?.current_phase === 'DENIAL';
 
   // Animate stats based on visible nodes
   useEffect(() => {
@@ -741,9 +982,16 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
     requestAnimationFrame(animate);
   }, [visibleProgressNodes, executions, apiCalls]);
 
-  // Animate progress nodes appearing one by one with 1 second delay
+  // Animate progress nodes appearing one by one with fast animation
+  // Re-run when workflow phases are loaded from API
   useEffect(() => {
     const totalNodes = PHASES.filter(p => !p.isAlternate).length;
+
+    // Don't animate if still loading workflow or no phases
+    if (loadingWorkflow || totalNodes === 0) {
+      return;
+    }
+
     setVisibleProgressNodes(0);
     setAnimationComplete(false);
 
@@ -758,16 +1006,16 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
           // Mark animation complete after a short delay so last spinner shows briefly
           setTimeout(() => {
             setAnimationComplete(true);
-          }, 500);
+          }, 200);
         }
-      }, 1000); // 1 second delay between each node
-    }, 100);
+      }, 150); // Fast 150ms delay between each node (8 phases = ~1.2 seconds total)
+    }, 50);
 
     return () => {
       clearTimeout(timer);
       if (interval) clearInterval(interval);
     };
-  }, [application?.application_id]);
+  }, [currentApplication?.application_id, workflowPhases, loadingWorkflow]);
 
   useEffect(() => {
     setTimeout(() => setAnimateProgress(true), 100);
@@ -799,8 +1047,8 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
     shadow: isDark ? '0 4px 20px rgba(0, 0, 0, 0.3)' : '0 4px 20px rgba(0, 0, 0, 0.05)',
   };
 
-  const currentNode = application?.current_node || '';
-  const currentPhase = application?.current_phase || '';
+  const currentNode = currentApplication?.current_node || '';
+  const currentPhase = currentApplication?.current_phase || '';
 
   // Determine if truly completed: status must be COMPLETED AND must be at terminal phase/node
   // This prevents false "completed" state when status is COMPLETED but phase is still early (e.g., INTAKE)
@@ -809,27 +1057,31 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                             currentNode === 'end' ||
                             currentNode === 'end_denied' ||
                             currentNode === 'denial_node';
-  const isCompleted = application?.status === 'COMPLETED' && isAtTerminalState;
+  const isCompleted = currentApplication?.status === 'COMPLETED' && isAtTerminalState;
 
-  // Map backend phase to frontend phase index (0-4)
+  // Map backend phase to frontend phase index (0-7 for 8 phases)
   const BACKEND_PHASE_TO_FRONTEND_IDX = {
     'INTAKE': 0,
     'APPLICATION': 1,
-    'DISCLOSURE': 1,
-    'LOAN_REVIEW': 2,
-    'UNDERWRITING': 3,
-    'COMMITMENT': 4,
-    'CLOSING': 4,
-    'POST_CLOSING': 4,
+    'DISCLOSURE': 2,
+    'LOAN_REVIEW': 3,
+    'UNDERWRITING': 4,
+    'HUMAN_DECISION': 4,  // Part of Underwriting phase (Decision step)
+    'COMMITMENT': 5,
+    'CLOSING': 6,
+    'POST_CLOSING': 7,
   };
 
-  // Map stage number to frontend phase index
+  // Map stage number to frontend phase index (30 stages across 8 phases)
   const STAGE_TO_FRONTEND_PHASE = {
-    1: 0, 2: 0,           // Intake (stages 1-2)
-    3: 1, 4: 1, 5: 1, 6: 1, // Application (stages 3-6)
-    7: 2, 8: 2,           // Review (stages 7-8)
-    9: 3, 10: 3,          // Underwriting (stages 9-10)
-    11: 4, 12: 4, 13: 4, 14: 4, 15: 4, 16: 4, // Closing (stages 11-16)
+    1: 0, 2: 0, 3: 0, 4: 0,           // Intake & Eligibility (stages 1-4)
+    5: 1, 6: 1, 7: 1, 8: 1,           // Application Processing (stages 5-8)
+    9: 2, 10: 2, 11: 2,               // Disclosure (stages 9-11)
+    12: 3, 13: 3, 14: 3, 15: 3,       // Loan Review (stages 12-15)
+    16: 4, 17: 4, 18: 4, 19: 4,       // Underwriting (stages 16-19)
+    20: 5, 21: 5, 22: 5,              // Commitment (stages 20-22)
+    23: 6, 24: 6, 25: 6, 26: 6,       // Closing (stages 23-26)
+    27: 7, 28: 7, 29: 7, 30: 7,       // Post-Closing (stages 27-30)
   };
 
   // Use current_phase to determine frontend phase index (more reliable than current_node)
@@ -895,9 +1147,9 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
   };
 
   // Check if application ended in denial
-  const isDeniedApplication = application?.workflow_status === 'denied' ||
-                               application?.end_state === 'denied' ||
-                               application?.status === 'DENIED';
+  const isDeniedApplication = currentApplication?.workflow_status === 'denied' ||
+                               currentApplication?.end_state === 'denied' ||
+                               currentApplication?.status === 'DENIED';
 
   // Check if an API call response indicates denial cause
   const checkDenialCause = (call) => {
@@ -1162,8 +1414,40 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                 }}>
                   Loan Assumption Tracker
                 </h2>
-                <div style={{ fontSize: '0.8125rem', color: theme.textSecondary }}>
-                  Application <span style={{ fontFamily: 'monospace', color: '#3b82f6', fontWeight: 600 }}>{application?.application_id}</span>
+                <div style={{ fontSize: '0.8125rem', color: theme.textSecondary, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Application <span style={{ fontFamily: 'monospace', color: '#3b82f6', fontWeight: 600 }}>{currentApplication?.application_id}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      refreshApplicationData();
+                    }}
+                    disabled={refreshingApp}
+                    style={{
+                      background: 'transparent',
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: '4px',
+                      padding: '2px 6px',
+                      cursor: refreshingApp ? 'wait' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.7rem',
+                      color: theme.textMuted,
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.borderColor = '#3b82f6';
+                      e.currentTarget.style.color = '#3b82f6';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.borderColor = theme.border;
+                      e.currentTarget.style.color = theme.textMuted;
+                    }}
+                    title="Refresh application data"
+                  >
+                    <RefreshCw size={12} style={{ animation: refreshingApp ? 'spin 1s linear infinite' : 'none' }} />
+                    {refreshingApp ? 'Refreshing...' : 'Refresh'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -1435,15 +1719,15 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
       }}>
         {(() => {
           // Determine status for Current Phase border
-          const isDenied = application?.status === 'DENIED' ||
-                          application?.current_node === 'denial_node' ||
-                          application?.current_node === 'end_denied' ||
-                          application?.workflow_status === 'denied';
+          const isDenied = currentApplication?.status === 'DENIED' ||
+                          currentApplication?.current_node === 'denial_node' ||
+                          currentApplication?.current_node === 'end_denied' ||
+                          currentApplication?.workflow_status === 'denied';
           // Use local state if available, otherwise use application props
           // If status says COMPLETED but we're not at terminal state, show IN_PROGRESS
-          const actualStatus = isCompleted ? 'COMPLETED' : (application?.status === 'COMPLETED' ? 'IN_PROGRESS' : application?.status);
+          const actualStatus = isCompleted ? 'COMPLETED' : (currentApplication?.status === 'COMPLETED' ? 'IN_PROGRESS' : currentApplication?.status);
           const effectiveStatus = localStatus || actualStatus || 'N/A';
-          const effectiveCurrentPhase = localCurrentPhase || application?.current_phase || 'N/A';
+          const effectiveCurrentPhase = localCurrentPhase || currentApplication?.current_phase || 'N/A';
           const isEffectiveCompleted = localCompletedStatus || isCompleted;
 
           const phaseStatusColor = isDenied ? '#ef4444' : isEffectiveCompleted ? '#10b981' : '#f59e0b';
@@ -1451,7 +1735,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
 
           // Calculate current task number for display
           const effectiveTaskNum = localCurrentStageNum !== null ? localCurrentStageNum : (BACKEND_PHASE_TO_STAGE[effectiveCurrentPhase] || 0);
-          const totalTasks = 16; // Total stages in the workflow
+          const totalTasks = 30; // Total stages in the workflow
           const displayTaskNum = isEffectiveCompleted ? totalTasks : effectiveTaskNum;
           const completedTasksCount = isEffectiveCompleted ? totalTasks : Math.max(0, effectiveTaskNum - 1);
 
@@ -1473,34 +1757,22 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
               isAnimated: false,
               progress: isEffectiveCompleted ? 100 : Math.round((completedTasksCount / totalTasks) * 100),
             },
-            // Show "Manually Completed" if no API calls (manual simulation mode)
-            ...((!apiCalls || apiCalls.length === 0) ? [
-              {
-                label: 'Completion Mode',
-                value: 'Manual',
-                subValue: 'Step-by-step simulation',
-                color: '#8b5cf6',
-                icon: UserCheck,
-                isAnimated: false,
-              },
-            ] : [
-              {
-                label: 'API Calls Made',
-                value: animatedStats.apiCalls,
-                targetValue: apiCalls?.length || 0,
-                color: '#10b981',
-                icon: Send,
-                isAnimated: true,
-              },
-            ]),
             {
-              label: (!apiCalls || apiCalls.length === 0) ? 'Completed By' : 'Total Duration',
-              value: (!apiCalls || apiCalls.length === 0) ? 'UI User' : `${animatedStats.duration}ms`,
+              label: 'API Calls Made',
+              value: animatedStats.apiCalls,
+              targetValue: apiCalls?.length || 0,
+              color: '#10b981',
+              icon: Send,
+              isAnimated: true,
+            },
+            {
+              label: 'Total Duration',
+              value: `${animatedStats.duration}ms`,
               targetValue: apiCalls?.reduce((s, c) => s + (c.duration_ms || 0), 0) || 0,
-              color: (!apiCalls || apiCalls.length === 0) ? '#06b6d4' : '#f59e0b',
-              icon: (!apiCalls || apiCalls.length === 0) ? User : Clock,
-              isAnimated: (!apiCalls || apiCalls.length === 0) ? false : true,
-              isDuration: (!apiCalls || apiCalls.length === 0) ? false : true,
+              color: '#f59e0b',
+              icon: Clock,
+              isAnimated: true,
+              isDuration: true,
             },
           ];
 
@@ -1760,10 +2032,15 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
               )}
               {/* Phase Header */}
               <div
-                onClick={() => setExpandedPhase(isExpanded ? null : phaseIndex)}
+                onClick={() => {
+                  // Allow drill-down on completed or in-progress phases
+                  if (effectiveCompleted || effectiveActive) {
+                    setExpandedPhase(isExpanded ? null : phaseIndex);
+                  }
+                }}
                 style={{
                   padding: '16px 20px',
-                  cursor: 'pointer',
+                  cursor: (effectiveCompleted || effectiveActive) ? 'pointer' : 'not-allowed',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '14px',
@@ -1850,7 +2127,12 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                     {effectiveCompleted ? <CheckCircle size={14} /> : effectiveActive ? <div style={{ width: 10, height: 10, borderRadius: '50%', background: phase.color, animation: 'pulse 1.5s infinite', boxShadow: `0 0 8px ${phase.color}` }} /> : <Circle size={14} />}
                     {effectiveCompleted ? 'Done' : isDenialPhase ? 'DENIED' : effectiveActive ? 'In Progress' : 'Pending'}
                   </div>
-                  <ChevronDown size={20} color={theme.textMuted} style={{ transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
+                  {/* Show expandable chevron for completed or in-progress phases */}
+                  {(effectiveCompleted || effectiveActive) ? (
+                    <ChevronDown size={20} color={theme.textMuted} style={{ transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
+                  ) : (
+                    <Lock size={16} color={theme.textMuted} title="This phase has not started yet" />
+                  )}
                 </div>
               </div>
 
@@ -1869,7 +2151,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                     // Calculate individual stage completion status
                     // Use localCurrentStageNum for optimistic updates if set
                     const globalStageNum = parseInt(stage.num, 10);
-                    const currentBackendPhase = application?.current_phase || '';
+                    const currentBackendPhase = currentApplication?.current_phase || '';
                     const backendStageNum = BACKEND_PHASE_TO_STAGE[currentBackendPhase] || 1;
                     const effectiveCurrentStageNum = localCurrentStageNum !== null ? localCurrentStageNum : backendStageNum;
                     const effectiveCompleted = localCompletedStatus || isCompleted;
@@ -1883,7 +2165,10 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
-                            setExpandedStage(isStageExpanded ? null : stageKey);
+                            // Allow drill-down on completed or in-progress stages
+                            if (isStageCompleted || isStageActive) {
+                              setExpandedStage(isStageExpanded ? null : stageKey);
+                            }
                           }}
                           style={{
                             padding: '14px 20px 14px 24px',
@@ -1898,7 +2183,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                                   ? (isDark ? `${phase.color}25` : `${phase.color}15`)
                                   : 'transparent',
                             borderBottom: `1px solid ${theme.borderLight}`,
-                            cursor: 'pointer',
+                            cursor: (isStageCompleted || isStageActive) ? 'pointer' : 'not-allowed',
                             transition: 'background 0.2s',
                             opacity: isStagePending ? 0.6 : 1,
                             borderLeft: isStageCompleted
@@ -2088,172 +2373,13 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                                 </span>
                               </>
                             )}
-                            {/* Complete Task Button - show on all non-completed tasks for manual updates */}
-                            {/* This allows stakeholders to manually complete any task regardless of order */}
-                            {/* Hide when application is at terminal state (truly completed) */}
-                            {!isStageCompleted && application?.status !== 'DENIED' && !isCompletingTask && !effectiveIsCompleted && (
-                              <button
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  setIsCompletingTask(true);
-                                  try {
-                                    const response = await fetch(`/api/applications/${application?.application_id}/complete-current-task?updated_by=UI User`, {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                    });
-                                    if (response.ok) {
-                                      // For manual completion: completing task N means all tasks 1..N are done
-                                      // Next task to work on is N+1
-                                      const nextStageNum = globalStageNum + 1;
-                                      const totalStages = 16;
-
-                                      // Map stage to backend phase name
-                                      const STAGE_TO_BACKEND_PHASE = {
-                                        1: 'INTAKE', 2: 'INTAKE',
-                                        3: 'APPLICATION', 4: 'APPLICATION',
-                                        5: 'DISCLOSURE', 6: 'DISCLOSURE',
-                                        7: 'LOAN_REVIEW', 8: 'LOAN_REVIEW',
-                                        9: 'UNDERWRITING', 10: 'UNDERWRITING',
-                                        11: 'COMMITMENT', 12: 'COMMITMENT',
-                                        13: 'CLOSING', 14: 'CLOSING',
-                                        15: 'POST_CLOSING', 16: 'POST_CLOSING',
-                                      };
-
-                                      if (nextStageNum > totalStages) {
-                                        // Workflow completed - update all indicators
-                                        setLocalCompletedStatus(true);
-                                        setLocalCurrentStageNum(totalStages + 1);
-                                        setLocalStatus('COMPLETED');
-                                        setLocalCurrentPhase('POST_CLOSING');
-
-                                        // Notify parent to update table row display
-                                        if (onApplicationUpdate) {
-                                          onApplicationUpdate({
-                                            ...application,
-                                            status: 'COMPLETED',
-                                            current_phase: 'POST_CLOSING',
-                                            current_node: 'end_loan_closed',
-                                          });
-                                        }
-
-                                        // Collapse all phases to show the completed view
-                                        setExpandedPhase(null);
-
-                                        // Scroll to top to show completion status
-                                        setTimeout(() => {
-                                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        }, 300);
-                                      } else {
-                                        // Move to next stage
-                                        const nextPhase = STAGE_TO_BACKEND_PHASE[nextStageNum] || application?.current_phase;
-                                        setLocalCurrentStageNum(nextStageNum);
-                                        setLocalCurrentPhase(nextPhase);
-
-                                        // Notify parent to update table row display
-                                        if (onApplicationUpdate) {
-                                          onApplicationUpdate({
-                                            ...application,
-                                            current_phase: nextPhase,
-                                          });
-                                        }
-
-                                        // Find which phase contains the next stage and expand it
-                                        let stageCounter = 0;
-                                        for (let pIdx = 0; pIdx < PHASES.length; pIdx++) {
-                                          const p = PHASES[pIdx];
-                                          if (p.isAlternate) continue;
-                                          for (let sIdx = 0; sIdx < p.stages.length; sIdx++) {
-                                            const stageNum = parseInt(p.stages[sIdx].num, 10);
-                                            if (stageNum === nextStageNum) {
-                                              // Expand this phase
-                                              setExpandedPhase(pIdx);
-                                              // Scroll to the next stage after a short delay
-                                              setTimeout(() => {
-                                                const nextStageRef = stageRowRefs.current[nextStageNum];
-                                                if (nextStageRef) {
-                                                  nextStageRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                }
-                                              }, 300);
-                                              break;
-                                            }
-                                          }
-                                        }
-                                      }
-                                    } else {
-                                      // Parse error response for more descriptive message
-                                      let errorMessage = 'Failed to complete task.';
-                                      try {
-                                        const errorData = await response.json();
-                                        if (errorData.detail) {
-                                          if (errorData.detail.includes('current_phase') || errorData.detail.includes('Invalid phase')) {
-                                            errorMessage = 'This application has already been completed or is in an invalid state.';
-                                          } else {
-                                            errorMessage = errorData.detail;
-                                          }
-                                        }
-                                      } catch {
-                                        // If we can't parse JSON, use generic message
-                                      }
-                                      console.warn('Task completion failed:', response.status, errorMessage);
-                                      // Only show alert for non-400 errors (400 usually means already completed)
-                                      if (response.status !== 400) {
-                                        alert(errorMessage + ' Please try again.');
-                                      }
-                                    }
-                                  } catch (err) {
-                                    console.error('Error completing task:', err);
-                                    alert('Error completing task. Please check your connection and try again.');
-                                  } finally {
-                                    setIsCompletingTask(false);
-                                  }
-                                }}
-                                style={{
-                                  padding: '6px 14px',
-                                  borderRadius: '8px',
-                                  border: 'none',
-                                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                                  color: '#fff',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  boxShadow: '0 2px 8px rgba(34, 197, 94, 0.3)',
-                                  transition: 'transform 0.2s, box-shadow 0.2s',
-                                  whiteSpace: 'nowrap',
-                                }}
-                                onMouseOver={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(-1px)';
-                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.4)';
-                                }}
-                                onMouseOut={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(0)';
-                                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(34, 197, 94, 0.3)';
-                                }}
-                              >
-                                <CheckCircle size={14} />
-                                Complete
-                              </button>
+                            {/* Complete button removed - task completion now handled via Specialist Workbench */}
+                            {/* Show expandable chevron for completed or in-progress stages */}
+                            {(isStageCompleted || isStageActive) ? (
+                              <ChevronRight size={16} color={theme.textMuted} style={{ transform: isStageExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                            ) : (
+                              <Lock size={14} color={theme.textMuted} title="This task has not started yet" />
                             )}
-                            {/* Loading indicator while completing */}
-                            {isStageActive && isCompletingTask && (
-                              <div style={{
-                                padding: '6px 14px',
-                                borderRadius: '8px',
-                                background: 'rgba(34, 197, 94, 0.2)',
-                                color: '#22c55e',
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                              }}>
-                                <Loader2 size={14} style={{ animation: 'spinLoader 1s linear infinite' }} />
-                                Completing...
-                              </div>
-                            )}
-                            <ChevronRight size={16} color={theme.textMuted} style={{ transform: isStageExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
                           </div>
                         </div>
 
@@ -2311,22 +2437,26 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                                   </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                  {stage.conversation && stage.conversation.length > 0 && (
-                                    <span style={{
-                                      fontSize: '0.7rem',
-                                      fontWeight: 600,
-                                      color: '#fff',
-                                      padding: '4px 10px',
-                                      background: 'rgba(255,255,255,0.2)',
-                                      borderRadius: '12px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '5px',
-                                    }}>
-                                      <MessageSquare size={12} />
-                                      {stage.conversation.length} Activities
-                                    </span>
-                                  )}
+                                  {(() => {
+                                    const activityCount = getPhaseActivities(phase.phaseCode).length;
+                                    if (activityCount === 0) return null;
+                                    return (
+                                      <span style={{
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                        color: '#fff',
+                                        padding: '4px 10px',
+                                        background: 'rgba(255,255,255,0.2)',
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                      }}>
+                                        <MessageSquare size={12} />
+                                        {activityCount} Activities
+                                      </span>
+                                    );
+                                  })()}
                                   {stageApiCalls.length > 0 && (
                                     <span style={{
                                       fontSize: '0.7rem',
@@ -2348,241 +2478,197 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
 
                               {/* Panel Content */}
                               <div style={{ padding: '20px' }}>
-                                {/* Conversation Flow */}
-                                {stage.conversation && stage.conversation.length > 0 && (
-                                  <div style={{
-                                    marginBottom: stageApiCalls.length > 0 ? '20px' : 0,
-                                  }}>
+                                {/* Real Activity Log from Transactions */}
+                                {(() => {
+                                  const phaseActivities = getPhaseActivities(phase.phaseCode);
+                                  if (phaseActivities.length === 0) return null;
+
+                                  return (
                                     <div style={{
-                                      fontSize: '0.75rem',
-                                      fontWeight: 700,
-                                      color: theme.textSecondary,
-                                      textTransform: 'uppercase',
-                                      letterSpacing: '0.05em',
-                                      marginBottom: '16px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '8px',
-                                      paddingBottom: '10px',
-                                      borderBottom: `1px solid ${theme.border}`,
+                                      marginBottom: stageApiCalls.length > 0 ? '20px' : 0,
                                     }}>
-                                      <MessageSquare size={14} color={phase.color} />
-                                      Activity Log
-                                    </div>
-                                {/* Timeline */}
-                                <div style={{ position: 'relative', paddingLeft: '24px' }}>
-                                  {/* Vertical line */}
-                                  <div style={{
-                                    position: 'absolute',
-                                    left: '11px',
-                                    top: '20px',
-                                    bottom: '20px',
-                                    width: '2px',
-                                    background: isDark ? 'rgba(100, 116, 139, 0.3)' : '#e2e8f0',
-                                    borderRadius: '1px',
-                                  }} />
-
-                                  {stage.conversation.map((msg, msgIdx) => {
-                                    const MsgIcon = msg.icon;
-                                    const isCustomer = msg.role === 'customer';
-                                    const isSystem = msg.role === 'system';
-                                    const isAgent = msg.role === 'agent';
-
-                                    const bgColor = isCustomer ? '#3b82f6' : isSystem ? (isDark ? 'rgba(139, 92, 246, 0.2)' : '#f5f3ff') : (isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5');
-                                    const borderColor = isCustomer ? '#3b82f6' : isSystem ? (isDark ? 'rgba(139, 92, 246, 0.4)' : '#ddd6fe') : (isDark ? 'rgba(16, 185, 129, 0.4)' : '#a7f3d0');
-                                    const dotColor = isCustomer ? '#3b82f6' : isSystem ? '#8b5cf6' : '#10b981';
-
-                                    return (
-                                      <div
-                                        key={msgIdx}
-                                        style={{
-                                          position: 'relative',
-                                          marginBottom: msgIdx < stage.conversation.length - 1 ? '16px' : 0,
-                                        }}
-                                      >
-                                        {/* Timeline dot */}
+                                      <div style={{
+                                        fontSize: '0.75rem',
+                                        fontWeight: 700,
+                                        color: theme.textSecondary,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em',
+                                        marginBottom: '16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        paddingBottom: '10px',
+                                        borderBottom: `1px solid ${theme.border}`,
+                                      }}>
+                                        <MessageSquare size={14} color={phase.color} />
+                                        Activity Log ({phaseActivities.length})
+                                      </div>
+                                      {/* Timeline */}
+                                      <div style={{ position: 'relative', paddingLeft: '24px' }}>
+                                        {/* Vertical line */}
                                         <div style={{
                                           position: 'absolute',
-                                          left: '-24px',
-                                          top: '6px',
-                                          width: '24px',
-                                          height: '24px',
-                                          borderRadius: '50%',
-                                          background: isDark ? '#1e293b' : '#fff',
-                                          border: `3px solid ${dotColor}`,
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          zIndex: 1,
-                                        }}>
-                                          <MsgIcon size={10} color={dotColor} />
-                                        </div>
+                                          left: '11px',
+                                          top: '20px',
+                                          bottom: '20px',
+                                          width: '2px',
+                                          background: isDark ? 'rgba(100, 116, 139, 0.3)' : '#e2e8f0',
+                                          borderRadius: '1px',
+                                        }} />
 
-                                        {/* Message card */}
-                                        <div style={{
-                                          marginLeft: '16px',
-                                          background: isCustomer ? bgColor : bgColor,
-                                          border: `1px solid ${borderColor}`,
-                                          borderRadius: '12px',
-                                          padding: '12px 16px',
-                                          borderLeft: isSystem ? `3px solid ${dotColor}` : `1px solid ${borderColor}`,
-                                        }}>
-                                          {/* Header row */}
-                                          <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            marginBottom: '8px',
-                                          }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                              <span style={{
-                                                fontSize: '0.75rem',
-                                                fontWeight: 700,
-                                                color: isCustomer ? '#fff' : dotColor,
-                                              }}>
-                                                {isCustomer ? '👤 Customer' : isSystem ? '🤖 System' : `👩‍💼 ${msg.agent || 'Agent'}`}
-                                              </span>
-                                              {msg.status && (
-                                                <span style={{
-                                                  fontSize: '0.625rem',
-                                                  fontWeight: 600,
-                                                  padding: '2px 8px',
-                                                  borderRadius: '10px',
-                                                  background: msg.status === 'success' ? '#dcfce7' : msg.status === 'denied' ? '#fee2e2' : msg.status === 'processing' ? '#dbeafe' : '#f1f5f9',
-                                                  color: msg.status === 'success' ? '#16a34a' : msg.status === 'denied' ? '#dc2626' : msg.status === 'processing' ? '#2563eb' : '#64748b',
-                                                  textTransform: 'uppercase',
-                                                  letterSpacing: '0.03em',
-                                                }}>
-                                                  {msg.status === 'success' ? '✓ Success' : msg.status === 'denied' ? '✗ Denied' : msg.status === 'processing' ? '◉ Processing' : msg.status}
-                                                </span>
-                                              )}
-                                            </div>
-                                            {msg.time && (
-                                              <span style={{
-                                                fontSize: '0.6875rem',
-                                                color: isCustomer ? 'rgba(255,255,255,0.8)' : theme.textMuted,
-                                                fontFamily: 'monospace',
+                                        {phaseActivities.map((activity, actIdx) => {
+                                          const isSpecialist = activity.activityType === 'specialist';
+                                          const isSystem = activity.activityType === 'system';
+                                          const isStart = activity.activityType === 'start';
+
+                                          const dotColor = isSpecialist ? '#10b981' : isSystem ? '#8b5cf6' : isStart ? '#3b82f6' : '#64748b';
+                                          const bgColor = isSpecialist
+                                            ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5')
+                                            : isSystem
+                                              ? (isDark ? 'rgba(139, 92, 246, 0.15)' : '#f5f3ff')
+                                              : (isDark ? 'rgba(59, 130, 246, 0.15)' : '#eff6ff');
+                                          const borderColor = isSpecialist
+                                            ? (isDark ? 'rgba(16, 185, 129, 0.3)' : '#a7f3d0')
+                                            : isSystem
+                                              ? (isDark ? 'rgba(139, 92, 246, 0.3)' : '#ddd6fe')
+                                              : (isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe');
+
+                                          return (
+                                            <div
+                                              key={activity.id || actIdx}
+                                              style={{
+                                                position: 'relative',
+                                                marginBottom: actIdx < phaseActivities.length - 1 ? '16px' : 0,
+                                              }}
+                                            >
+                                              {/* Timeline dot */}
+                                              <div style={{
+                                                position: 'absolute',
+                                                left: '-24px',
+                                                top: '6px',
+                                                width: '24px',
+                                                height: '24px',
+                                                borderRadius: '50%',
+                                                background: isDark ? '#1e293b' : '#fff',
+                                                border: `3px solid ${dotColor}`,
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '4px',
+                                                justifyContent: 'center',
+                                                zIndex: 1,
                                               }}>
-                                                <Clock size={10} />
-                                                {msg.time}
-                                              </span>
-                                            )}
-                                          </div>
+                                                {isSpecialist ? (
+                                                  <User size={10} color={dotColor} />
+                                                ) : isSystem ? (
+                                                  <CheckCircle size={10} color={dotColor} />
+                                                ) : (
+                                                  <Activity size={10} color={dotColor} />
+                                                )}
+                                              </div>
 
-                                          {/* Message text */}
-                                          <div style={{
-                                            fontSize: '0.875rem',
-                                            lineHeight: 1.6,
-                                            color: isCustomer ? '#fff' : theme.textPrimary,
-                                            fontWeight: 500,
-                                          }}>
-                                            {msg.text}
-                                          </div>
+                                              {/* Activity card */}
+                                              <div style={{
+                                                marginLeft: '16px',
+                                                background: bgColor,
+                                                border: `1px solid ${borderColor}`,
+                                                borderRadius: '12px',
+                                                padding: '12px 16px',
+                                                borderLeft: `3px solid ${dotColor}`,
+                                              }}>
+                                                {/* Header row */}
+                                                <div style={{
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  justifyContent: 'space-between',
+                                                  marginBottom: '8px',
+                                                }}>
+                                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <span style={{
+                                                      fontSize: '0.75rem',
+                                                      fontWeight: 700,
+                                                      color: dotColor,
+                                                    }}>
+                                                      {isSpecialist ? `👩‍💼 ${activity.data?.specialist_name || 'Specialist'}` : isSystem ? '🤖 System' : '📋 Workflow'}
+                                                    </span>
+                                                    <span style={{
+                                                      fontSize: '0.625rem',
+                                                      fontWeight: 600,
+                                                      padding: '2px 8px',
+                                                      borderRadius: '10px',
+                                                      background: isSpecialist ? '#dcfce7' : '#e0e7ff',
+                                                      color: isSpecialist ? '#16a34a' : '#4f46e5',
+                                                      textTransform: 'uppercase',
+                                                      letterSpacing: '0.03em',
+                                                    }}>
+                                                      {activity.type === 'SPECIALIST_TASK_COMPLETED' ? '✓ Completed' :
+                                                       activity.type === 'TASK_COMPLETED' ? '✓ Phase Done' :
+                                                       activity.type === 'WORKFLOW_START' ? '▶ Started' : activity.type}
+                                                    </span>
+                                                  </div>
+                                                  <span style={{
+                                                    fontSize: '0.6875rem',
+                                                    color: theme.textMuted,
+                                                    fontFamily: 'monospace',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px',
+                                                  }}>
+                                                    <Clock size={10} />
+                                                    {new Date(activity.timestamp).toLocaleString()}
+                                                  </span>
+                                                </div>
 
-                                          {/* Extra data cards */}
-                                          {(msg.result || msg.checklist || msg.terms || msg.conditions || msg.reasons || msg.updates || msg.appointment || msg.nextSteps) && (
-                                            <div style={{
-                                              marginTop: '10px',
-                                              padding: '10px 12px',
-                                              background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
-                                              borderRadius: '8px',
-                                              border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
-                                            }}>
-                                              {msg.result && typeof msg.result === 'object' && (
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                                                  {Object.entries(msg.result).map(([key, val]) => (
-                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                                      <span style={{ color: theme.textMuted, textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}:</span>
-                                                      <span style={{ fontWeight: 600, color: theme.textPrimary, fontFamily: 'monospace' }}>{val}</span>
+                                                {/* Activity title and description */}
+                                                <div style={{
+                                                  fontSize: '0.875rem',
+                                                  fontWeight: 600,
+                                                  color: theme.textPrimary,
+                                                  marginBottom: '4px',
+                                                }}>
+                                                  {activity.title}
+                                                </div>
+                                                <div style={{
+                                                  fontSize: '0.8125rem',
+                                                  lineHeight: 1.5,
+                                                  color: theme.textSecondary,
+                                                }}>
+                                                  {activity.description}
+                                                </div>
+
+                                                {/* Notes if present */}
+                                                {activity.data?.notes && (
+                                                  <div style={{
+                                                    marginTop: '10px',
+                                                    padding: '10px 12px',
+                                                    background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
+                                                    borderRadius: '8px',
+                                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
+                                                  }}>
+                                                    <div style={{
+                                                      fontSize: '0.6875rem',
+                                                      fontWeight: 600,
+                                                      color: theme.textMuted,
+                                                      marginBottom: '4px',
+                                                      textTransform: 'uppercase',
+                                                    }}>
+                                                      📝 Notes:
                                                     </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              {msg.checklist && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                  {msg.checklist.map((item, i) => (
-                                                    <div key={i} style={{ fontSize: '0.75rem', color: theme.textPrimary, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                      <CheckCircle size={12} color="#10b981" />
-                                                      {item.replace(' ✓', '')}
+                                                    <div style={{
+                                                      fontSize: '0.8125rem',
+                                                      color: theme.textPrimary,
+                                                      fontStyle: 'italic',
+                                                    }}>
+                                                      "{activity.data.notes}"
                                                     </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              {msg.terms && (
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                                                  {Object.entries(msg.terms).map(([key, val]) => (
-                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                                      <span style={{ color: theme.textMuted, textTransform: 'capitalize' }}>{key}:</span>
-                                                      <span style={{ fontWeight: 600, color: theme.textPrimary }}>{val}</span>
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              {msg.conditions && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#f59e0b', marginBottom: '4px' }}>📋 CONDITIONS:</span>
-                                                  {msg.conditions.map((item, i) => (
-                                                    <div key={i} style={{ fontSize: '0.75rem', color: theme.textPrimary, paddingLeft: '12px' }}>• {item}</div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              {msg.reasons && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#ef4444', marginBottom: '4px' }}>⚠️ DENIAL REASONS:</span>
-                                                  {msg.reasons.map((item, i) => (
-                                                    <div key={i} style={{ fontSize: '0.75rem', color: theme.textPrimary, paddingLeft: '12px' }}>• {item}</div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              {msg.updates && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                  {msg.updates.map((item, i) => (
-                                                    <div key={i} style={{ fontSize: '0.75rem', color: theme.textPrimary, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                      <CheckCircle size={12} color="#10b981" />
-                                                      {item}
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              {msg.appointment && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                                  <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px' }}>
-                                                    <span style={{ color: theme.textMuted }}>📅 Date:</span>
-                                                    <span style={{ fontWeight: 600, color: theme.textPrimary }}>{msg.appointment.date}</span>
                                                   </div>
-                                                  <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px' }}>
-                                                    <span style={{ color: theme.textMuted }}>🕐 Time:</span>
-                                                    <span style={{ fontWeight: 600, color: theme.textPrimary }}>{msg.appointment.time}</span>
-                                                  </div>
-                                                  <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px' }}>
-                                                    <span style={{ color: theme.textMuted }}>📍 Location:</span>
-                                                    <span style={{ fontWeight: 600, color: theme.textPrimary }}>{msg.appointment.location}</span>
-                                                  </div>
-                                                </div>
-                                              )}
-                                              {msg.nextSteps && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#10b981', marginBottom: '4px' }}>📬 NEXT STEPS:</span>
-                                                  {msg.nextSteps.map((item, i) => (
-                                                    <div key={i} style={{ fontSize: '0.75rem', color: theme.textPrimary, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                      <span style={{ color: '#10b981' }}>→</span>
-                                                      {item}
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              )}
+                                                )}
+                                              </div>
                                             </div>
-                                          )}
-                                        </div>
+                                          );
+                                        })}
                                       </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
+                                    </div>
+                                  );
+                                })()}
 
                             {/* API Calls - Collapsible */}
                             {stageApiCalls.length > 0 && (
@@ -2952,6 +3038,91 @@ function WorkflowStageTracker({ application, executions, apiCalls, isDark = fals
                                 })}
                               </div>
                             )}
+
+                                {/* Specialist Notes Section */}
+                                {(() => {
+                                  // Filter notes for this phase (match by phaseCode)
+                                  const stageNotes = specialistNotes.filter(
+                                    note => note.phase === phase.phaseCode
+                                  );
+
+                                  if (stageNotes.length === 0) return null;
+
+                                  return (
+                                    <div style={{ marginTop: '20px' }}>
+                                      <div style={{
+                                        fontSize: '0.75rem',
+                                        fontWeight: 700,
+                                        color: theme.textSecondary,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em',
+                                        marginBottom: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        paddingBottom: '10px',
+                                        borderBottom: `1px solid ${theme.border}`,
+                                      }}>
+                                        <MessageSquare size={14} color="#8b5cf6" />
+                                        Specialist Notes ({stageNotes.length})
+                                      </div>
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {stageNotes.map((note, noteIdx) => (
+                                          <div
+                                            key={note.id || noteIdx}
+                                            style={{
+                                              padding: '14px 16px',
+                                              background: isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(139, 92, 246, 0.05)',
+                                              borderRadius: '10px',
+                                              borderLeft: '3px solid #8b5cf6',
+                                            }}
+                                          >
+                                            <div style={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'space-between',
+                                              marginBottom: '8px',
+                                            }}>
+                                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{
+                                                  width: '28px',
+                                                  height: '28px',
+                                                  borderRadius: '50%',
+                                                  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  justifyContent: 'center',
+                                                }}>
+                                                  <User size={14} color="#fff" />
+                                                </div>
+                                                <span style={{
+                                                  fontSize: '0.8125rem',
+                                                  fontWeight: 600,
+                                                  color: '#8b5cf6',
+                                                }}>
+                                                  {note.author_name}
+                                                </span>
+                                              </div>
+                                              <span style={{
+                                                fontSize: '0.6875rem',
+                                                color: theme.textMuted,
+                                              }}>
+                                                {new Date(note.created_at).toLocaleString()}
+                                              </span>
+                                            </div>
+                                            <div style={{
+                                              fontSize: '0.875rem',
+                                              color: isDark ? '#e2e8f0' : '#374151',
+                                              lineHeight: 1.6,
+                                            }}>
+                                              {note.note_text}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </div>
