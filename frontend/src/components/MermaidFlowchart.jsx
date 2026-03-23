@@ -133,72 +133,72 @@ const PHASES = [
 
 const WORKFLOW_NODES = [
   // Phase 1: Initial Contact
-  { id: 'A', label: 'Call Received', type: 'frontend', phase: 1, icon: Phone, x: 500, y: 50, description: 'Call received from Customer or Authorized 3rd Party', status: 'active' },
-  { id: 'B', label: 'Case Optimizer', type: 'frontend', phase: 1, icon: ClipboardCheck, x: 500, y: 130, description: 'Agent asks questions in Case Optimizer', status: 'active' },
+  { id: 'A', label: 'Call Received', type: 'frontend', phase: 1, icon: LuPhone, x: 500, y: 50, description: 'Call received from Customer or Authorized 3rd Party', status: 'active' },
+  { id: 'B', label: 'Case Optimizer', type: 'frontend', phase: 1, icon: LuClipboardCheck, x: 500, y: 130, description: 'Agent asks questions in Case Optimizer', status: 'active' },
 
   // Phase 2: Eligibility
-  { id: 'C', label: 'Assumption Allowed?', type: 'backend', phase: 2, icon: HelpCircle, x: 500, y: 210, description: 'Decide if assumption is allowed', status: 'active' },
-  { id: 'D', label: 'Ineligible Letter', type: 'database', phase: 2, icon: Mail, x: 250, y: 290, description: 'Send Ineligible Letter', status: 'active' },
-  { id: 'END1', label: 'End', type: 'database', phase: 2, icon: XCircle, x: 250, y: 370, description: 'Process ended - Ineligible', status: 'active' },
+  { id: 'C', label: 'Assumption Allowed?', type: 'backend', phase: 2, icon: LuCircleHelp, x: 500, y: 210, description: 'Decide if assumption is allowed', status: 'active' },
+  { id: 'D', label: 'Ineligible Letter', type: 'database', phase: 2, icon: LuMail, x: 250, y: 290, description: 'Send Ineligible Letter', status: 'active' },
+  { id: 'END1', label: 'End', type: 'database', phase: 2, icon: LuCircleX, x: 250, y: 370, description: 'Process ended - Ineligible', status: 'active' },
 
   // Phase 3: Application
-  { id: 'F', label: 'Send Application', type: 'frontend', phase: 3, icon: Send, x: 750, y: 290, description: 'Send Application', status: 'active' },
-  { id: 'G', label: 'DocuSign', type: 'frontend', phase: 3, icon: FileCheck, x: 750, y: 370, description: 'DocuSign', status: 'active' },
-  { id: 'H', label: 'App Returned', type: 'frontend', phase: 3, icon: Upload, x: 750, y: 450, description: 'Application Returned', status: 'active' },
-  { id: 'I', label: 'Review Package', type: 'frontend', phase: 3, icon: Eye, x: 750, y: 530, description: 'Review Uploaded Package', status: 'active' },
+  { id: 'F', label: 'Send Application', type: 'frontend', phase: 3, icon: LuSend, x: 750, y: 290, description: 'Send Application', status: 'active' },
+  { id: 'G', label: 'DocuSign', type: 'frontend', phase: 3, icon: LuFileCheck, x: 750, y: 370, description: 'DocuSign', status: 'active' },
+  { id: 'H', label: 'App Returned', type: 'frontend', phase: 3, icon: LuUpload, x: 750, y: 450, description: 'Application Returned', status: 'active' },
+  { id: 'I', label: 'Review Package', type: 'frontend', phase: 3, icon: LuEye, x: 750, y: 530, description: 'Review Uploaded Package', status: 'active' },
 
   // Phase 4: Completeness Check
-  { id: 'J', label: 'Complete?', type: 'backend', phase: 4, icon: HelpCircle, x: 750, y: 610, description: 'Is Complete or less than 25 days', status: 'active' },
-  { id: 'K', label: 'Incomplete Letter', type: 'database', phase: 4, icon: Mail, x: 500, y: 690, description: 'Send Incomplete Closure Letter', status: 'active' },
-  { id: 'END2', label: 'End', type: 'database', phase: 4, icon: XCircle, x: 500, y: 770, description: 'Process ended - Incomplete', status: 'active' },
+  { id: 'J', label: 'Complete?', type: 'backend', phase: 4, icon: LuCircleHelp, x: 750, y: 610, description: 'Is Complete or less than 25 days', status: 'active' },
+  { id: 'K', label: 'Incomplete Letter', type: 'database', phase: 4, icon: LuMail, x: 500, y: 690, description: 'Send Incomplete Closure Letter', status: 'active' },
+  { id: 'END2', label: 'End', type: 'database', phase: 4, icon: LuCircleX, x: 500, y: 770, description: 'Process ended - Incomplete', status: 'active' },
 
   // Phase 5: Disclosure
-  { id: 'SD', label: 'Disclosure Pkg', type: 'frontend', phase: 5, icon: Package, x: 1000, y: 690, description: 'Create and Send Disclosure Package', status: 'active' },
-  { id: 'SQ1', label: 'SQ Review', type: 'agent', phase: 5, icon: CheckCircle, x: 1000, y: 770, description: 'SQ Review - Disclosure', status: 'active' },
+  { id: 'SD', label: 'Disclosure Pkg', type: 'frontend', phase: 5, icon: LuPackage, x: 1000, y: 690, description: 'Create and Send Disclosure Package', status: 'active' },
+  { id: 'SQ1', label: 'SQ Review', type: 'agent', phase: 5, icon: LuCircleCheck, x: 1000, y: 770, description: 'SQ Review - Disclosure', status: 'active' },
 
   // Phase 6: Document Review
-  { id: 'ALR', label: 'Assign for Review', type: 'frontend', phase: 6, icon: Users, x: 1000, y: 870, description: 'Application gets Assigned for Loan Review', status: 'active' },
-  { id: 'DOCCHECK', label: 'Docs Needed?', type: 'backend', phase: 6, icon: HelpCircle, x: 1000, y: 950, description: 'Documents needed?', status: 'active' },
+  { id: 'ALR', label: 'Assign for Review', type: 'frontend', phase: 6, icon: LuUsers, x: 1000, y: 870, description: 'Application gets Assigned for Loan Review', status: 'active' },
+  { id: 'DOCCHECK', label: 'Docs Needed?', type: 'backend', phase: 6, icon: LuCircleHelp, x: 1000, y: 950, description: 'Documents needed?', status: 'active' },
 
   // Document Request Path (Left branch from DOCCHECK)
-  { id: 'CML', label: 'Missing Docs Letter', type: 'frontend', phase: 6, icon: FileText, x: 700, y: 1050, description: 'Create Letter for Missing Documents', status: 'active' },
-  { id: 'SQ2', label: 'SQ Review', type: 'agent', phase: 6, icon: CheckCircle, x: 700, y: 1130, description: 'SQ Review - Missing Docs', status: 'active' },
-  { id: 'SLC', label: 'Send Letter', type: 'frontend', phase: 6, icon: Send, x: 700, y: 1210, description: 'Send Letter to Customer', status: 'active' },
-  { id: 'DR', label: 'Docs Returned?', type: 'backend', phase: 6, icon: Upload, x: 700, y: 1290, description: 'Documents Returned', status: 'active' },
-  { id: 'CW', label: 'Withdrawn', type: 'database', phase: 6, icon: LogOut, x: 500, y: 1370, description: 'Customer Withdrawn', status: 'active' },
-  { id: 'END3', label: 'End', type: 'database', phase: 6, icon: XCircle, x: 500, y: 1450, description: 'Process ended - Withdrawn', status: 'active' },
+  { id: 'CML', label: 'Missing Docs Letter', type: 'frontend', phase: 6, icon: LuFileText, x: 700, y: 1050, description: 'Create Letter for Missing Documents', status: 'active' },
+  { id: 'SQ2', label: 'SQ Review', type: 'agent', phase: 6, icon: LuCircleCheck, x: 700, y: 1130, description: 'SQ Review - Missing Docs', status: 'active' },
+  { id: 'SLC', label: 'Send Letter', type: 'frontend', phase: 6, icon: LuSend, x: 700, y: 1210, description: 'Send Letter to Customer', status: 'active' },
+  { id: 'DR', label: 'Docs Returned?', type: 'backend', phase: 6, icon: LuUpload, x: 700, y: 1290, description: 'Documents Returned', status: 'active' },
+  { id: 'CW', label: 'Withdrawn', type: 'database', phase: 6, icon: LuLogOut, x: 500, y: 1370, description: 'Customer Withdrawn', status: 'active' },
+  { id: 'END3', label: 'End', type: 'database', phase: 6, icon: LuCircleX, x: 500, y: 1450, description: 'Process ended - Withdrawn', status: 'active' },
 
   // Phase 7: Underwriting (Right branch from DOCCHECK)
-  { id: 'UWC', label: 'UW Checklist', type: 'frontend', phase: 7, icon: Clipboard, x: 1300, y: 1050, description: 'Underwriting Checklist', status: 'active' },
-  { id: 'AU', label: 'Assign UW', type: 'frontend', phase: 7, icon: UserCheck, x: 1300, y: 1130, description: 'Assigned to Underwriter', status: 'active' },
-  { id: 'URC', label: 'UW Review', type: 'frontend', phase: 7, icon: FileSearch, x: 1300, y: 1210, description: 'Underwriter Review for Completeness', status: 'active' },
-  { id: 'READY', label: 'Ready?', type: 'backend', phase: 7, icon: HelpCircle, x: 1300, y: 1290, description: 'Ready for decision?', status: 'active' },
-  { id: 'DEC', label: 'Decision', type: 'backend', phase: 7, icon: AlertCircle, x: 1300, y: 1390, description: 'Make Yes or No Decision', status: 'active' },
+  { id: 'UWC', label: 'UW Checklist', type: 'frontend', phase: 7, icon: LuClipboard, x: 1300, y: 1050, description: 'Underwriting Checklist', status: 'active' },
+  { id: 'AU', label: 'Assign UW', type: 'frontend', phase: 7, icon: LuUserCheck, x: 1300, y: 1130, description: 'Assigned to Underwriter', status: 'active' },
+  { id: 'URC', label: 'UW Review', type: 'frontend', phase: 7, icon: LuFileSearch, x: 1300, y: 1210, description: 'Underwriter Review for Completeness', status: 'active' },
+  { id: 'READY', label: 'Ready?', type: 'backend', phase: 7, icon: LuCircleHelp, x: 1300, y: 1290, description: 'Ready for decision?', status: 'active' },
+  { id: 'DEC', label: 'Decision', type: 'backend', phase: 7, icon: LuCircleAlert, x: 1300, y: 1390, description: 'Make Yes or No Decision', status: 'active' },
 
   // Phase 8: Commitment (Left branch from DEC - Yes)
-  { id: 'MCL', label: 'Commitment Letter', type: 'service', phase: 8, icon: Award, x: 1000, y: 1490, description: 'Make Commitment Letter', status: 'active' },
-  { id: 'SQ3', label: 'SQ Review', type: 'agent', phase: 8, icon: CheckCircle, x: 1000, y: 1570, description: 'SQ Review - Commitment', status: 'active' },
-  { id: 'SL', label: 'Send Letter', type: 'service', phase: 8, icon: Send, x: 1000, y: 1650, description: 'Send Commitment Letter', status: 'active' },
+  { id: 'MCL', label: 'Commitment Letter', type: 'service', phase: 8, icon: LuAward, x: 1000, y: 1490, description: 'Make Commitment Letter', status: 'active' },
+  { id: 'SQ3', label: 'SQ Review', type: 'agent', phase: 8, icon: LuCircleCheck, x: 1000, y: 1570, description: 'SQ Review - Commitment', status: 'active' },
+  { id: 'SL', label: 'Send Letter', type: 'service', phase: 8, icon: LuSend, x: 1000, y: 1650, description: 'Send Commitment Letter', status: 'active' },
 
   // Phase 9: Closing
-  { id: 'ACA', label: 'Assign Agent', type: 'frontend', phase: 9, icon: PhoneCall, x: 1000, y: 1730, description: 'Assigned to Call Agent', status: 'active' },
-  { id: 'RWA', label: 'Review w/ Customer', type: 'frontend', phase: 9, icon: MessageSquare, x: 1000, y: 1810, description: 'Review With Customer', status: 'active' },
-  { id: 'CCP', label: 'Closing Packet', type: 'frontend', phase: 9, icon: FolderOpen, x: 1000, y: 1890, description: 'Create and Complete Closing Packet', status: 'active' },
-  { id: 'SQ4', label: 'SQ Review', type: 'agent', phase: 9, icon: CheckCircle, x: 1000, y: 1970, description: 'SQ Review - Closing Packet', status: 'active' },
-  { id: 'SCP', label: 'Send to Title', type: 'frontend', phase: 9, icon: Building, x: 1000, y: 2050, description: 'Send Closing Packet to Title Agency', status: 'active' },
-  { id: 'RCP', label: 'Review Closing', type: 'frontend', phase: 9, icon: Eye, x: 1000, y: 2130, description: 'Review Closing Packet', status: 'active' },
-  { id: 'SQ5', label: 'SQ Review', type: 'agent', phase: 9, icon: CheckCircle, x: 1000, y: 2210, description: 'SQ Review - Final Review', status: 'active' },
+  { id: 'ACA', label: 'Assign Agent', type: 'frontend', phase: 9, icon: LuPhoneCall, x: 1000, y: 1730, description: 'Assigned to Call Agent', status: 'active' },
+  { id: 'RWA', label: 'Review w/ Customer', type: 'frontend', phase: 9, icon: LuMessageSquare, x: 1000, y: 1810, description: 'Review With Customer', status: 'active' },
+  { id: 'CCP', label: 'Closing Packet', type: 'frontend', phase: 9, icon: LuFolderOpen, x: 1000, y: 1890, description: 'Create and Complete Closing Packet', status: 'active' },
+  { id: 'SQ4', label: 'SQ Review', type: 'agent', phase: 9, icon: LuCircleCheck, x: 1000, y: 1970, description: 'SQ Review - Closing Packet', status: 'active' },
+  { id: 'SCP', label: 'Send to Title', type: 'frontend', phase: 9, icon: LuBuilding, x: 1000, y: 2050, description: 'Send Closing Packet to Title Agency', status: 'active' },
+  { id: 'RCP', label: 'Review Closing', type: 'frontend', phase: 9, icon: LuEye, x: 1000, y: 2130, description: 'Review Closing Packet', status: 'active' },
+  { id: 'SQ5', label: 'SQ Review', type: 'agent', phase: 9, icon: LuCircleCheck, x: 1000, y: 2210, description: 'SQ Review - Final Review', status: 'active' },
 
   // Phase 10: Completion
-  { id: 'CSM', label: 'System Maint', type: 'service', phase: 10, icon: Settings, x: 1000, y: 2290, description: 'Complete System Maintenance - MSP', status: 'active' },
-  { id: 'SQ6', label: 'SQ Review', type: 'agent', phase: 10, icon: CheckCircle, x: 1000, y: 2370, description: 'SQ Review - System Maintenance', status: 'active' },
-  { id: 'END4', label: 'Loan Closed', type: 'service', phase: 10, icon: Award, x: 1000, y: 2470, description: 'End - Loan Closed Successfully!', status: 'active' },
+  { id: 'CSM', label: 'System Maint', type: 'service', phase: 10, icon: LuSettings, x: 1000, y: 2290, description: 'Complete System Maintenance - MSP', status: 'active' },
+  { id: 'SQ6', label: 'SQ Review', type: 'agent', phase: 10, icon: LuCircleCheck, x: 1000, y: 2370, description: 'SQ Review - System Maintenance', status: 'active' },
+  { id: 'END4', label: 'Loan Closed', type: 'service', phase: 10, icon: LuAward, x: 1000, y: 2470, description: 'End - Loan Closed Successfully!', status: 'active' },
 
   // Denial Path (Right branch from DEC - No)
-  { id: 'MDL', label: 'Denial Letter', type: 'database', phase: 7, icon: XCircle, x: 1550, y: 1490, description: 'Make Denial Letter', status: 'active' },
-  { id: 'SQ7', label: 'SQ Review', type: 'agent', phase: 7, icon: CheckCircle, x: 1550, y: 1570, description: 'SQ Review - Denial', status: 'active' },
-  { id: 'SLD', label: 'Send Denial', type: 'database', phase: 7, icon: Mail, x: 1550, y: 1650, description: 'Send Denial Letter', status: 'active' },
-  { id: 'END5', label: 'Denied', type: 'database', phase: 7, icon: XCircle, x: 1550, y: 1730, description: 'End - Application Denied', status: 'active' },
+  { id: 'MDL', label: 'Denial Letter', type: 'database', phase: 7, icon: LuCircleX, x: 1550, y: 1490, description: 'Make Denial Letter', status: 'active' },
+  { id: 'SQ7', label: 'SQ Review', type: 'agent', phase: 7, icon: LuCircleCheck, x: 1550, y: 1570, description: 'SQ Review - Denial', status: 'active' },
+  { id: 'SLD', label: 'Send Denial', type: 'database', phase: 7, icon: LuMail, x: 1550, y: 1650, description: 'Send Denial Letter', status: 'active' },
+  { id: 'END5', label: 'Denied', type: 'database', phase: 7, icon: LuCircleX, x: 1550, y: 1730, description: 'End - Application Denied', status: 'active' },
 ];
 
 const WORKFLOW_EDGES = [
