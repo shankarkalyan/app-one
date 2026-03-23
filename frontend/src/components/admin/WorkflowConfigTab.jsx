@@ -4,18 +4,18 @@
  */
 import React from 'react';
 import {
-  Plus,
-  Edit2,
-  Trash2,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  GripVertical,
-  Clock,
-  CheckCircle2,
-  UserCheck,
-  Workflow,
-} from 'lucide-react';
+  LuPlus,
+  LuPencil,
+  LuTrash2,
+  LuRefreshCw,
+  LuChevronDown,
+  LuChevronUp,
+  LuGripVertical,
+  LuClock,
+  LuCircleCheckBig,
+  LuUserCheck,
+  LuWorkflow,
+} from 'react-icons/lu';
 import { COLORS } from './adminStyles';
 
 const WorkflowConfigTab = ({
@@ -46,7 +46,7 @@ const WorkflowConfigTab = ({
     <div style={styles.card}>
       <div style={styles.cardHeader}>
         <div style={styles.cardTitle}>
-          <Workflow size={18} color={colors.chaseBlue} />
+          <LuWorkflow size={18} color={colors.chaseBlue} />
           Workflow Configuration
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -55,7 +55,7 @@ const WorkflowConfigTab = ({
             style={styles.iconBtn}
             title="Refresh"
           >
-            <RefreshCw size={16} style={loadingWorkflow ? { animation: 'spin 1s linear infinite' } : {}} />
+            <LuRefreshCw size={16} style={loadingWorkflow ? { animation: 'spin 1s linear infinite' } : {}} />
           </button>
           <button
             onClick={() => {
@@ -84,7 +84,7 @@ const WorkflowConfigTab = ({
               boxShadow: '0 2px 8px rgba(10, 75, 148, 0.3)',
             }}
           >
-            <Plus size={16} />
+            <LuPlus size={16} />
             Add Task
           </button>
         </div>
@@ -99,7 +99,7 @@ const WorkflowConfigTab = ({
             padding: '60px',
             color: isDark ? '#64748b' : '#94a3b8',
           }}>
-            <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite', marginRight: '12px' }} />
+            <LuRefreshCw size={24} style={{ animation: 'spin 1s linear infinite', marginRight: '12px' }} />
             Loading workflow configuration...
           </div>
         ) : workflowTasks.length === 0 ? (
@@ -108,7 +108,7 @@ const WorkflowConfigTab = ({
             padding: '60px 20px',
             color: isDark ? '#64748b' : '#94a3b8',
           }}>
-            <Workflow size={48} style={{ opacity: 0.3, marginBottom: '16px' }} />
+            <LuWorkflow size={48} style={{ opacity: 0.3, marginBottom: '16px' }} />
             <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
               No Workflow Tasks Defined
             </div>
@@ -143,7 +143,7 @@ const WorkflowConfigTab = ({
                   onClick={() => setExpandedTasks(prev => ({ ...prev, [task.id]: !prev[task.id] }))}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                    <GripVertical size={16} style={{ opacity: 0.3, cursor: 'grab' }} />
+                    <LuGripVertical size={16} style={{ opacity: 0.3, cursor: 'grab' }} />
                     <div
                       style={{
                         width: '28px',
@@ -217,7 +217,7 @@ const WorkflowConfigTab = ({
                       }}
                       title="Edit Task"
                     >
-                      <Edit2 size={14} />
+                      <LuPencil size={14} />
                     </button>
                     <button
                       onClick={(e) => {
@@ -241,9 +241,9 @@ const WorkflowConfigTab = ({
                       }}
                       title="Delete Task"
                     >
-                      <Trash2 size={14} />
+                      <LuTrash2 size={14} />
                     </button>
-                    {expandedTasks[task.id] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    {expandedTasks[task.id] ? <LuChevronUp size={18} /> : <LuChevronDown size={18} />}
                   </div>
                 </div>
 
@@ -297,7 +297,7 @@ const WorkflowConfigTab = ({
                           cursor: 'pointer',
                         }}
                       >
-                        <Plus size={14} />
+                        <LuPlus size={14} />
                         Add Subtask
                       </button>
                     </div>
@@ -337,7 +337,7 @@ const WorkflowConfigTab = ({
                               onClick={() => setExpandedSubtasks(prev => ({ ...prev, [subtask.id]: !prev[subtask.id] }))}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-                                <GripVertical size={14} style={{ opacity: 0.3, cursor: 'grab' }} />
+                                <LuGripVertical size={14} style={{ opacity: 0.3, cursor: 'grab' }} />
                                 <div
                                   style={{
                                     width: '24px',
@@ -371,7 +371,7 @@ const WorkflowConfigTab = ({
                                   }}>
                                     {subtask.default_specialist && (
                                       <>
-                                        <UserCheck size={12} />
+                                        <LuUserCheck size={12} />
                                         <span>{subtask.default_specialist.full_name}</span>
                                         <span>•</span>
                                       </>
@@ -393,7 +393,7 @@ const WorkflowConfigTab = ({
                                         fontSize: '10px',
                                         marginLeft: '4px',
                                       }}>
-                                        <Clock size={10} />
+                                        <LuClock size={10} />
                                         SLA: {subtask.sla_hours}h
                                       </span>
                                     )}
@@ -431,7 +431,7 @@ const WorkflowConfigTab = ({
                                   }}
                                   title="Edit Subtask"
                                 >
-                                  <Edit2 size={12} />
+                                  <LuPencil size={12} />
                                 </button>
                                 <button
                                   onClick={(e) => {
@@ -455,9 +455,9 @@ const WorkflowConfigTab = ({
                                   }}
                                   title="Delete Subtask"
                                 >
-                                  <Trash2 size={12} />
+                                  <LuTrash2 size={12} />
                                 </button>
-                                {expandedSubtasks[subtask.id] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                {expandedSubtasks[subtask.id] ? <LuChevronUp size={16} /> : <LuChevronDown size={16} />}
                               </div>
                             </div>
 
@@ -509,7 +509,7 @@ const WorkflowConfigTab = ({
                                       cursor: 'pointer',
                                     }}
                                   >
-                                    <Plus size={12} />
+                                    <LuPlus size={12} />
                                     Add Item
                                   </button>
                                 </div>
@@ -548,7 +548,7 @@ const WorkflowConfigTab = ({
                                           justifyContent: 'center',
                                           flexShrink: 0,
                                         }}>
-                                          <CheckCircle2 size={10} color={colors.success} style={{ opacity: 0.3 }} />
+                                          <LuCircleCheckBig size={10} color={colors.success} style={{ opacity: 0.3 }} />
                                         </div>
                                         <div style={{ flex: 1 }}>
                                           <div style={{
@@ -595,7 +595,7 @@ const WorkflowConfigTab = ({
                                           }}
                                           title="Edit Item"
                                         >
-                                          <Edit2 size={11} />
+                                          <LuPencil size={11} />
                                         </button>
                                         <button
                                           onClick={() => {
@@ -618,7 +618,7 @@ const WorkflowConfigTab = ({
                                           }}
                                           title="Delete Item"
                                         >
-                                          <Trash2 size={11} />
+                                          <LuTrash2 size={11} />
                                         </button>
                                       </div>
                                     ))}

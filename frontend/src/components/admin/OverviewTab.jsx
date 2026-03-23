@@ -4,27 +4,27 @@
  */
 import React from 'react';
 import {
-  FileText,
-  Activity,
-  CheckCircle2,
-  Users,
-  TrendingUp,
-  PlayCircle,
-  ArrowUpRight,
-  Shield,
-  Briefcase,
-  AlertCircle,
-  Layers,
-  Clock,
-  CheckCircle,
-  GitBranch,
-  Plus,
-  Search,
-  Edit2,
-  Trash2,
-  UserCheck,
-  UserX,
-} from 'lucide-react';
+  LuFileText,
+  LuActivity,
+  LuCircleCheckBig,
+  LuUsers,
+  LuTrendingUp,
+  LuCirclePlay,
+  LuArrowUpRight,
+  LuShield,
+  LuBriefcase,
+  LuCircleAlert,
+  LuLayers,
+  LuClock,
+  LuCircleCheck,
+  LuGitBranch,
+  LuPlus,
+  LuSearch,
+  LuPencil,
+  LuTrash2,
+  LuUserCheck,
+  LuUserX,
+} from 'react-icons/lu';
 import { COLORS } from './adminStyles';
 
 const OverviewTab = ({
@@ -56,48 +56,48 @@ const OverviewTab = ({
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
           <div style={{ ...styles.statIcon, background: `${colors.lightBlue}20` }}>
-            <FileText size={24} color={colors.lightBlue} />
+            <LuFileText size={24} color={colors.lightBlue} />
           </div>
           <div style={styles.statValue}>{stats.totalApplications}</div>
           <div style={styles.statLabel}>Total Applications</div>
           <div style={{ ...styles.statTrend, color: colors.lightBlue }}>
-            <TrendingUp size={14} />
+            <LuTrendingUp size={14} />
             Active
           </div>
         </div>
 
         <div style={styles.statCard}>
           <div style={{ ...styles.statIcon, background: `${colors.warning}20` }}>
-            <Activity size={24} color={colors.warning} />
+            <LuActivity size={24} color={colors.warning} />
           </div>
           <div style={styles.statValue}>{stats.totalActiveTasks}</div>
           <div style={styles.statLabel}>Active Tasks</div>
           <div style={{ ...styles.statTrend, color: colors.warning }}>
-            <PlayCircle size={14} />
+            <LuCirclePlay size={14} />
             {stats.totalPendingTasks} Pending
           </div>
         </div>
 
         <div style={styles.statCard}>
           <div style={{ ...styles.statIcon, background: `${colors.success}20` }}>
-            <CheckCircle2 size={24} color={colors.success} />
+            <LuCircleCheckBig size={24} color={colors.success} />
           </div>
           <div style={styles.statValue}>{stats.totalCompletedTasks}</div>
           <div style={styles.statLabel}>Completed Tasks</div>
           <div style={{ ...styles.statTrend, color: colors.success }}>
-            <ArrowUpRight size={14} />
+            <LuArrowUpRight size={14} />
             {stats.completed} Apps Done
           </div>
         </div>
 
         <div style={styles.statCard}>
           <div style={{ ...styles.statIcon, background: `${colors.purple}20` }}>
-            <Users size={24} color={colors.purple} />
+            <LuUsers size={24} color={colors.purple} />
           </div>
           <div style={styles.statValue}>{stats.activeSpecialists}</div>
           <div style={styles.statLabel}>Active Specialists</div>
           <div style={{ ...styles.statTrend, color: colors.purple }}>
-            <Shield size={14} />
+            <LuShield size={14} />
             {stats.activeAdmins} Admin{stats.activeAdmins !== 1 ? 's' : ''}
           </div>
         </div>
@@ -109,7 +109,7 @@ const OverviewTab = ({
         <div style={styles.card}>
           <div style={styles.cardHeader}>
             <div style={styles.cardTitle}>
-              <Briefcase size={18} color={colors.primary} />
+              <LuBriefcase size={18} color={colors.primary} />
               Workload Distribution
             </div>
             {stats.unassignedTasks > 0 && (
@@ -118,7 +118,7 @@ const OverviewTab = ({
                 background: `${colors.warning}20`,
                 color: colors.warning,
               }}>
-                <AlertCircle size={12} />
+                <LuCircleAlert size={12} />
                 {stats.unassignedTasks} Unassigned
               </span>
             )}
@@ -129,22 +129,22 @@ const OverviewTab = ({
                 Object.entries(workload.by_specialty).map(([specialty, data]) => (
                   <div key={specialty} style={styles.workloadItem}>
                     <div style={styles.workloadLabel}>
-                      <Layers size={12} />
+                      <LuLayers size={12} />
                       {specialty.replace('_', ' ')}
                     </div>
                     <div style={styles.workloadStats}>
                       <div style={styles.workloadStat}>
-                        <Clock size={14} color={colors.primary} />
+                        <LuClock size={14} color={colors.primary} />
                         <span style={{ ...styles.workloadNumber, color: colors.primary }}>{data.pending}</span>
                         <span style={styles.workloadMini}>pending</span>
                       </div>
                       <div style={styles.workloadStat}>
-                        <Activity size={14} color={colors.warning} />
+                        <LuActivity size={14} color={colors.warning} />
                         <span style={{ ...styles.workloadNumber, color: colors.warning }}>{data.in_progress}</span>
                         <span style={styles.workloadMini}>active</span>
                       </div>
                       <div style={styles.workloadStat}>
-                        <CheckCircle size={14} color={colors.success} />
+                        <LuCircleCheck size={14} color={colors.success} />
                         <span style={{ ...styles.workloadNumber, color: colors.success }}>{data.completed}</span>
                         <span style={styles.workloadMini}>done</span>
                       </div>
@@ -159,7 +159,7 @@ const OverviewTab = ({
         <div style={styles.card}>
           <div style={styles.cardHeader}>
             <div style={styles.cardTitle}>
-              <GitBranch size={18} color={colors.cyan} />
+              <LuGitBranch size={18} color={colors.cyan} />
               Application Pipeline
             </div>
             <span style={{
@@ -180,7 +180,7 @@ const OverviewTab = ({
       <div style={{ ...styles.card, marginBottom: '24px' }}>
         <div style={styles.cardHeader}>
           <div style={styles.cardTitle}>
-            <Plus size={18} color={colors.success} />
+            <LuPlus size={18} color={colors.success} />
             Quick Actions
           </div>
         </div>
@@ -192,7 +192,7 @@ const OverviewTab = ({
               background: `linear-gradient(135deg, ${colors.success} 0%, #059669 100%)`,
             }}
           >
-            <Plus size={18} />
+            <LuPlus size={18} />
             Add Specialist
           </button>
         </div>
@@ -202,12 +202,12 @@ const OverviewTab = ({
       <div style={styles.card}>
         <div style={styles.cardHeader}>
           <div style={styles.cardTitle}>
-            <Users size={18} color={colors.purple} />
+            <LuUsers size={18} color={colors.purple} />
             Specialists ({filteredSpecialists.length})
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div style={styles.searchBox}>
-              <Search size={16} color={isDark ? '#64748b' : '#94a3b8'} />
+              <LuSearch size={16} color={isDark ? '#64748b' : '#94a3b8'} />
               <input
                 type="text"
                 placeholder="Search specialists..."
@@ -299,12 +299,12 @@ const OverviewTab = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {specialist.is_active ? (
                         <>
-                          <UserCheck size={16} color={colors.success} />
+                          <LuUserCheck size={16} color={colors.success} />
                           <span style={{ color: colors.success, fontWeight: '500' }}>Active</span>
                         </>
                       ) : (
                         <>
-                          <UserX size={16} color={colors.danger} />
+                          <LuUserX size={16} color={colors.danger} />
                           <span style={{ color: colors.danger, fontWeight: '500' }}>Inactive</span>
                         </>
                       )}
@@ -341,14 +341,14 @@ const OverviewTab = ({
                         style={styles.iconButton}
                         title="Edit"
                       >
-                        <Edit2 size={16} />
+                        <LuPencil size={16} />
                       </button>
                       <button
                         onClick={() => onDeleteSpecialist(specialist)}
                         style={{ ...styles.iconButton, color: colors.danger }}
                         title="Delete"
                       >
-                        <Trash2 size={16} />
+                        <LuTrash2 size={16} />
                       </button>
                     </div>
                   </td>

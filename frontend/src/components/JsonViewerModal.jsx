@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, FileJson, ChevronRight } from 'lucide-react';
+import {
+  LuX,
+  LuCopy,
+  LuCheck,
+  LuFileJson,
+  LuChevronRight,
+} from 'react-icons/lu';
 
 function JsonViewerModal({ isOpen, onClose, title, requestData, responseData, isDark }) {
   const [activeTab, setActiveTab] = useState('request');
@@ -132,7 +138,7 @@ function JsonViewerModal({ isOpen, onClose, title, requestData, responseData, is
                 justifyContent: 'center',
               }}
             >
-              <FileJson size={20} color={theme.brand} />
+              <LuFileJson size={20} color={theme.brand} />
             </div>
             <div>
               <h2
@@ -178,7 +184,7 @@ function JsonViewerModal({ isOpen, onClose, title, requestData, responseData, is
               e.target.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
             }}
           >
-            <X size={20} />
+            <LuX size={20} />
           </button>
         </div>
 
@@ -208,7 +214,7 @@ function JsonViewerModal({ isOpen, onClose, title, requestData, responseData, is
               transition: 'all 0.2s',
             }}
           >
-            <ChevronRight size={14} style={{ transform: 'rotate(0deg)' }} />
+            <LuChevronRight size={14} style={{ transform: 'rotate(0deg)' }} />
             Request
           </button>
           <button
@@ -228,7 +234,7 @@ function JsonViewerModal({ isOpen, onClose, title, requestData, responseData, is
               transition: 'all 0.2s',
             }}
           >
-            <ChevronRight size={14} style={{ transform: 'rotate(180deg)' }} />
+            <LuChevronRight size={14} style={{ transform: 'rotate(180deg)' }} />
             Response
           </button>
 
@@ -251,7 +257,7 @@ function JsonViewerModal({ isOpen, onClose, title, requestData, responseData, is
               transition: 'all 0.2s',
             }}
           >
-            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? <LuCheck size={14} /> : <LuCopy size={14} />}
             {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>

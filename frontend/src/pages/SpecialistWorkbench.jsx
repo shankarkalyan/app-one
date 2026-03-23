@@ -1,47 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  Briefcase,
-  LogOut,
-  Clock,
-  PlayCircle,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
-  ChevronDown,
-  ChevronRight,
-  FileText,
-  DollarSign,
-  User,
-  Calendar,
-  History,
-  BarChart3,
-  Home,
-  ArrowRight,
-  MapPin,
-  Phone,
-  Mail,
-  Activity,
-  Eye,
-  Zap,
-  Shield,
-  Send,
-  Download,
-  ClipboardCheck,
-  Search,
-  UserCheck,
-  Scale,
-  Stamp,
-  Award,
-  Key,
-  Database,
-  ListChecks,
-  MessageSquare,
-  Plus,
-  Timer,
-  Sun,
-  Moon,
-} from 'lucide-react';
+  LuBriefcase,
+  LuLogOut,
+  LuClock,
+  LuCirclePlay,
+  LuCircleCheckBig,
+  LuCircleAlert,
+  LuRefreshCw,
+  LuChevronDown,
+  LuChevronRight,
+  LuFileText,
+  LuDollarSign,
+  LuUser,
+  LuCalendar,
+  LuHistory,
+  LuChartBar,
+  LuHouse,
+  LuArrowRight,
+  LuMapPin,
+  LuPhone,
+  LuMail,
+  LuActivity,
+  LuEye,
+  LuZap,
+  LuShield,
+  LuSend,
+  LuDownload,
+  LuClipboardCheck,
+  LuSearch,
+  LuUserCheck,
+  LuScale,
+  LuStamp,
+  LuAward,
+  LuKey,
+  LuDatabase,
+  LuListChecks,
+  LuMessageSquare,
+  LuPlus,
+  LuTimer,
+  LuSun,
+  LuMoon,
+} from 'react-icons/lu';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
@@ -705,13 +705,13 @@ const SpecialistWorkbench = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'ASSIGNED':
-        return <Clock size={14} />;
+        return <LuClock size={14} />;
       case 'IN_PROGRESS':
-        return <PlayCircle size={14} />;
+        return <LuCirclePlay size={14} />;
       case 'COMPLETED':
-        return <CheckCircle2 size={14} />;
+        return <LuCircleCheckBig size={14} />;
       default:
-        return <AlertCircle size={14} />;
+        return <LuCircleAlert size={14} />;
     }
   };
 
@@ -762,7 +762,7 @@ const SpecialistWorkbench = () => {
     if (isLoading) {
       return (
         <div style={{ textAlign: 'center', padding: '40px', color: isDark ? '#64748b' : '#94a3b8' }}>
-          <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
+          <LuRefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
           <p>Loading application details...</p>
         </div>
       );
@@ -785,7 +785,7 @@ const SpecialistWorkbench = () => {
 
             return (
               <div style={{ marginBottom: '12px', fontSize: '13px', fontWeight: '600', color: isHistoryTask ? '#10b981' : (isDark ? '#94a3b8' : '#64748b'), display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {isHistoryTask ? <CheckCircle2 size={16} color="#10b981" /> : <ListChecks size={16} />}
+                {isHistoryTask ? <LuCircleCheckBig size={16} color="#10b981" /> : <LuListChecks size={16} />}
                 {isHistoryTask ? 'COMPLETED SUB-TASKS' : 'SUB-TASKS TO COMPLETE'} ({completedCount}/{totalSubtasks})
               </div>
             );
@@ -798,7 +798,7 @@ const SpecialistWorkbench = () => {
               textAlign: 'center',
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
             }}>
-              <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px', color: isDark ? '#64748b' : '#94a3b8' }} />
+              <LuRefreshCw size={24} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px', color: isDark ? '#64748b' : '#94a3b8' }} />
               <div style={{ fontSize: '13px', color: isDark ? '#64748b' : '#94a3b8' }}>Loading workflow steps...</div>
             </div>
           ) : !workflowDefinitions[task.phase] || workflowDefinitions[task.phase].length === 0 ? (
@@ -809,7 +809,7 @@ const SpecialistWorkbench = () => {
               textAlign: 'center',
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
             }}>
-              <ClipboardCheck size={32} style={{ marginBottom: '12px', color: isDark ? '#4a5568' : '#cbd5e1', opacity: 0.5 }} />
+              <LuClipboardCheck size={32} style={{ marginBottom: '12px', color: isDark ? '#4a5568' : '#cbd5e1', opacity: 0.5 }} />
               <div style={{ fontSize: '14px', fontWeight: '500', color: isDark ? '#64748b' : '#94a3b8', marginBottom: '4px' }}>No subtasks defined for this phase</div>
               <div style={{ fontSize: '12px', color: isDark ? '#4a5568' : '#cbd5e1' }}>Configure subtasks in Workflow Config</div>
             </div>
@@ -879,9 +879,9 @@ const SpecialistWorkbench = () => {
                       {/* Expand/Collapse Icon */}
                       <div style={{ flexShrink: 0 }}>
                         {isExpanded ? (
-                          <ChevronDown size={18} color={isDark ? '#64748b' : '#94a3b8'} />
+                          <LuChevronDown size={18} color={isDark ? '#64748b' : '#94a3b8'} />
                         ) : (
-                          <ChevronRight size={18} color={isDark ? '#64748b' : '#94a3b8'} />
+                          <LuChevronRight size={18} color={isDark ? '#64748b' : '#94a3b8'} />
                         )}
                       </div>
 
@@ -902,7 +902,7 @@ const SpecialistWorkbench = () => {
                         boxShadow: isNext && !isCompleted ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none',
                       }}>
                         {isCompleted ? (
-                          <CheckCircle2 size={18} color="#ffffff" />
+                          <LuCircleCheckBig size={18} color="#ffffff" />
                         ) : (
                           <SubtaskIcon size={18} color={isNext ? '#ffffff' : (isDark ? '#64748b' : '#94a3b8')} />
                         )}
@@ -976,7 +976,7 @@ const SpecialistWorkbench = () => {
                         justifyContent: 'center',
                         flexShrink: 0,
                       }}>
-                        {isCompleted && <CheckCircle2 size={16} color="#ffffff" />}
+                        {isCompleted && <LuCircleCheckBig size={16} color="#ffffff" />}
                       </div>
                     </div>
 
@@ -1068,7 +1068,7 @@ const SpecialistWorkbench = () => {
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <Activity size={16} color="#3b82f6" />
+                                <LuActivity size={16} color="#3b82f6" />
                                 <span style={{
                                   fontSize: '13px',
                                   fontWeight: '600',
@@ -1088,9 +1088,9 @@ const SpecialistWorkbench = () => {
                                 </span>
                               </div>
                               {isActivitiesOpen ? (
-                                <ChevronDown size={18} color={isDark ? '#64748b' : '#94a3b8'} />
+                                <LuChevronDown size={18} color={isDark ? '#64748b' : '#94a3b8'} />
                               ) : (
-                                <ChevronRight size={18} color={isDark ? '#64748b' : '#94a3b8'} />
+                                <LuChevronRight size={18} color={isDark ? '#64748b' : '#94a3b8'} />
                               )}
                             </div>
 
@@ -1129,11 +1129,11 @@ const SpecialistWorkbench = () => {
                                         flexShrink: 0,
                                       }}>
                                         {activity.type === 'customer' ? (
-                                          <User size={12} color="#8b5cf6" />
+                                          <LuUser size={12} color="#8b5cf6" />
                                         ) : activity.type === 'agent' ? (
-                                          <UserCheck size={12} color="#3b82f6" />
+                                          <LuUserCheck size={12} color="#3b82f6" />
                                         ) : (
-                                          <Zap size={12} color="#10b981" />
+                                          <LuZap size={12} color="#10b981" />
                                         )}
                                       </div>
                                       <div style={{ flex: 1 }}>
@@ -1185,7 +1185,7 @@ const SpecialistWorkbench = () => {
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <MessageSquare size={16} color="#8b5cf6" />
+                                <LuMessageSquare size={16} color="#8b5cf6" />
                                 <span style={{
                                   fontSize: '13px',
                                   fontWeight: '600',
@@ -1207,9 +1207,9 @@ const SpecialistWorkbench = () => {
                                 )}
                               </div>
                               {isLogOpen ? (
-                                <ChevronDown size={18} color={isDark ? '#64748b' : '#94a3b8'} />
+                                <LuChevronDown size={18} color={isDark ? '#64748b' : '#94a3b8'} />
                               ) : (
-                                <ChevronRight size={18} color={isDark ? '#64748b' : '#94a3b8'} />
+                                <LuChevronRight size={18} color={isDark ? '#64748b' : '#94a3b8'} />
                               )}
                             </div>
 
@@ -1314,9 +1314,9 @@ const SpecialistWorkbench = () => {
                                     }}
                                   >
                                     {savingNote ? (
-                                      <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                                      <LuRefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />
                                     ) : (
-                                      <Plus size={14} />
+                                      <LuPlus size={14} />
                                     )}
                                     Add
                                   </button>
@@ -1352,12 +1352,12 @@ const SpecialistWorkbench = () => {
                             >
                               {isLoadingThis ? (
                                 <>
-                                  <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                                  <LuRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
                                   Processing...
                                 </>
                               ) : (
                                 <>
-                                  <CheckCircle2 size={16} />
+                                  <LuCircleCheckBig size={16} />
                                   Complete Sub-Task
                                 </>
                               )}
@@ -1376,7 +1376,7 @@ const SpecialistWorkbench = () => {
                               fontSize: '14px',
                               fontWeight: '500',
                             }}>
-                              <CheckCircle2 size={16} />
+                              <LuCircleCheckBig size={16} />
                               Sub-task completed
                             </div>
                           )}
@@ -1412,7 +1412,7 @@ const SpecialistWorkbench = () => {
                   to={`/applications/${task.application_id}`}
                   style={styles.viewAppLink}
                 >
-                  <Eye size={16} />
+                  <LuEye size={16} />
                   View Full Application
                 </Link>
                 {!canComplete && (
@@ -1423,7 +1423,7 @@ const SpecialistWorkbench = () => {
                     alignItems: 'center',
                     gap: '6px',
                   }}>
-                    <AlertCircle size={14} />
+                    <LuCircleAlert size={14} />
                     Complete all sub-tasks first ({taskCompletedSubtasks.length}/{phaseSubtasks.length})
                   </span>
                 )}
@@ -1452,9 +1452,9 @@ const SpecialistWorkbench = () => {
                 disabled={!canComplete || actionLoading === task.id}
               >
                 {actionLoading === task.id ? (
-                  <RefreshCw size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                  <LuRefreshCw size={20} style={{ animation: 'spin 1s linear infinite' }} />
                 ) : (
-                  <ArrowRight size={20} />
+                  <LuArrowRight size={20} />
                 )}
                 {allSubtasksCompleted ? 'Complete Phase & Continue' : 'Continue to Next Phase'}
               </button>
@@ -1495,7 +1495,7 @@ const SpecialistWorkbench = () => {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <Briefcase size={20} color="#fff" />
+            <LuBriefcase size={20} color="#fff" />
           </div>
           <div>
             <h1 style={{
@@ -1568,7 +1568,7 @@ const SpecialistWorkbench = () => {
                 gap: '6px',
               }}
             >
-              <Briefcase size={14} />
+              <LuBriefcase size={14} />
               My Tasks
             </button>
             <button
@@ -1587,7 +1587,7 @@ const SpecialistWorkbench = () => {
                 gap: '6px',
               }}
             >
-              <History size={14} />
+              <LuHistory size={14} />
               History
             </button>
           </div>
@@ -1610,7 +1610,7 @@ const SpecialistWorkbench = () => {
               gap: '6px',
             }}
           >
-            <FileText size={14} />
+            <LuFileText size={14} />
             Applications
           </button>
 
@@ -1631,7 +1631,7 @@ const SpecialistWorkbench = () => {
               justifyContent: 'center',
             }}
           >
-            <RefreshCw size={18} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
+            <LuRefreshCw size={18} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
           </button>
 
           {/* User Badge */}
@@ -1685,7 +1685,7 @@ const SpecialistWorkbench = () => {
               fontWeight: 500,
             }}
           >
-            <LogOut size={14} />
+            <LuLogOut size={14} />
             Logout
           </button>
 
@@ -1707,7 +1707,7 @@ const SpecialistWorkbench = () => {
               transition: 'all 0.2s',
             }}
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? <LuSun size={18} /> : <LuMoon size={18} />}
           </button>
         </div>
       </header>
@@ -1718,7 +1718,7 @@ const SpecialistWorkbench = () => {
         <div style={styles.statsGrid}>
           <div style={styles.statCard}>
             <div style={styles.statLabel}>
-              <Briefcase size={16} color="#3b82f6" />
+              <LuBriefcase size={16} color="#3b82f6" />
               Active Tasks
             </div>
             <div style={{ ...styles.statValue, color: '#3b82f6' }}>
@@ -1727,7 +1727,7 @@ const SpecialistWorkbench = () => {
           </div>
           <div style={styles.statCard}>
             <div style={styles.statLabel}>
-              <CheckCircle2 size={16} color="#10b981" />
+              <LuCircleCheckBig size={16} color="#10b981" />
               Completed Today
             </div>
             <div style={{ ...styles.statValue, color: '#10b981' }}>
@@ -1736,7 +1736,7 @@ const SpecialistWorkbench = () => {
           </div>
           <div style={styles.statCard}>
             <div style={styles.statLabel}>
-              <Timer size={16} color="#ec4899" />
+              <LuTimer size={16} color="#ec4899" />
               Avg Completion Time
             </div>
             <div style={{ ...styles.statValue, color: '#ec4899', fontSize: stats?.avg_completion_time_minutes > 60 ? '22px' : '28px' }}>
@@ -1749,7 +1749,7 @@ const SpecialistWorkbench = () => {
           </div>
           <div style={styles.statCard}>
             <div style={styles.statLabel}>
-              <BarChart3 size={16} color="#8b5cf6" />
+              <LuChartBar size={16} color="#8b5cf6" />
               Total Completed
             </div>
             <div style={{ ...styles.statValue, color: '#8b5cf6' }}>
@@ -1761,13 +1761,13 @@ const SpecialistWorkbench = () => {
         {/* Task List */}
         {loading ? (
           <div style={styles.emptyState}>
-            <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite' }} />
+            <LuRefreshCw size={32} style={{ animation: 'spin 1s linear infinite' }} />
             <p>Loading tasks...</p>
           </div>
         ) : displayTasks.length === 0 ? (
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}>
-              <CheckCircle2 size={32} color={isDark ? '#64748b' : '#94a3b8'} />
+              <LuCircleCheckBig size={32} color={isDark ? '#64748b' : '#94a3b8'} />
             </div>
             <h3 style={{ margin: '0 0 8px', color: isDark ? '#e2e8f0' : '#1e293b' }}>
               {activeTab === 'tasks' ? 'All caught up!' : 'No history yet'}
@@ -1788,9 +1788,9 @@ const SpecialistWorkbench = () => {
                 >
                   <div style={styles.taskHeaderLeft}>
                     {expandedTask === task.id ? (
-                      <ChevronDown size={22} color={isDark ? '#64748b' : '#94a3b8'} />
+                      <LuChevronDown size={22} color={isDark ? '#64748b' : '#94a3b8'} />
                     ) : (
-                      <ChevronRight size={22} color={isDark ? '#64748b' : '#94a3b8'} />
+                      <LuChevronRight size={22} color={isDark ? '#64748b' : '#94a3b8'} />
                     )}
                     <span style={styles.taskPhase}>{task.phase.replace('_', ' ')}</span>
                     <div style={styles.taskInfo}>
@@ -1812,7 +1812,7 @@ const SpecialistWorkbench = () => {
                         background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)',
                         border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.2)'}`,
                       }}>
-                        <CheckCircle2 size={16} color="#10b981" />
+                        <LuCircleCheckBig size={16} color="#10b981" />
                         <span style={{
                           fontSize: '13px',
                           fontWeight: '600',
@@ -1851,7 +1851,7 @@ const SpecialistWorkbench = () => {
                                 border: `1px solid ${isDark ? 'rgba(239, 68, 68, 0.4)' : 'rgba(239, 68, 68, 0.3)'}`,
                                 animation: 'pulse 2s ease infinite',
                               }}>
-                                <AlertCircle size={14} color="#ef4444" />
+                                <LuCircleAlert size={14} color="#ef4444" />
                                 <span style={{
                                   fontSize: '12px',
                                   fontWeight: '700',
@@ -1875,7 +1875,7 @@ const SpecialistWorkbench = () => {
                                 background: isDark ? 'rgba(249, 115, 22, 0.2)' : 'rgba(249, 115, 22, 0.1)',
                                 border: `1px solid ${isDark ? 'rgba(249, 115, 22, 0.4)' : 'rgba(249, 115, 22, 0.3)'}`,
                               }}>
-                                <Timer size={14} color="#f97316" />
+                                <LuTimer size={14} color="#f97316" />
                                 <span style={{
                                   fontSize: '12px',
                                   fontWeight: '600',
@@ -1896,7 +1896,7 @@ const SpecialistWorkbench = () => {
                             fontSize: '12px',
                             color: isDark ? '#94a3b8' : '#64748b',
                           }}>
-                            <Clock size={14} />
+                            <LuClock size={14} />
                             <span>Assigned: {format(new Date(task.assigned_at), 'MMM d, yyyy h:mm a')}</span>
                           </div>
                         )}
@@ -1905,7 +1905,7 @@ const SpecialistWorkbench = () => {
                           background: isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)',
                           color: '#3b82f6',
                         }}>
-                          <Briefcase size={14} />
+                          <LuBriefcase size={14} />
                           Active
                         </span>
                       </>

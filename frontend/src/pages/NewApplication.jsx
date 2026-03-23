@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Check, Plus, ChevronLeft, ChevronRight, Sun, Moon, Loader2, FileText, Layers, GitBranch, RefreshCw, Home } from 'lucide-react';
+import {
+  LuCheck,
+  LuPlus,
+  LuChevronLeft,
+  LuChevronRight,
+  LuSun,
+  LuMoon,
+  LuLoader,
+  LuFileText,
+  LuLayers,
+  LuGitBranch,
+  LuRefreshCw,
+  LuHouse,
+} from 'react-icons/lu';
 import { createApplication, healthCheck } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 
@@ -1056,7 +1069,7 @@ function NewApplication() {
       {/* Auto-advance indicator */}
       {isAutoAdvancing && (
         <div style={styles.autoAdvanceIndicator}>
-          <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+          <LuLoader size={18} style={{ animation: 'spin 1s linear infinite' }} />
           <span>Auto-filling form... Step {currentStep + 1} of {STEPS.length}</span>
         </div>
       )}
@@ -1090,7 +1103,7 @@ function NewApplication() {
               justifyContent: 'center'
             }}
           >
-            <Layers size={20} color="#fff" />
+            <LuLayers size={20} color="#fff" />
           </div>
           <div>
             <h1 style={{
@@ -1135,7 +1148,7 @@ function NewApplication() {
                 transition: 'background-color 0.2s'
               }}
             >
-              <FileText size={14} />
+              <LuFileText size={14} />
               Applications
             </Link>
             {/* Agentic Workflow */}
@@ -1157,7 +1170,7 @@ function NewApplication() {
                 transition: 'background-color 0.2s'
               }}
             >
-              <Layers size={14} />
+              <LuLayers size={14} />
               Agentic Workflow
             </Link>
             {/* Flowchart Workflow */}
@@ -1179,7 +1192,7 @@ function NewApplication() {
                 transition: 'background-color 0.2s'
               }}
             >
-              <GitBranch size={14} />
+              <LuGitBranch size={14} />
               Workflow
             </Link>
             {/* Simulate - Active */}
@@ -1197,7 +1210,7 @@ function NewApplication() {
                 gap: '6px',
               }}
             >
-              <Plus size={14} />
+              <LuPlus size={14} />
               Simulate
             </span>
           </div>
@@ -1220,7 +1233,7 @@ function NewApplication() {
             }}
             title="Loan Assumption Applications"
           >
-            <Home size={18} />
+            <LuHouse size={18} />
           </Link>
 
           {/* Refresh */}
@@ -1240,7 +1253,7 @@ function NewApplication() {
             }}
             title="Refresh"
           >
-            <RefreshCw size={18} />
+            <LuRefreshCw size={18} />
           </button>
 
           {/* Theme Toggle */}
@@ -1260,7 +1273,7 @@ function NewApplication() {
             }}
             title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? <LuSun size={18} /> : <LuMoon size={18} />}
           </button>
         </div>
       </header>
@@ -1275,7 +1288,7 @@ function NewApplication() {
               style={styles.stepItem(i === currentStep, i < currentStep)}
             >
               <span style={styles.stepNum(i === currentStep, i < currentStep)}>
-                {i < currentStep ? <Check size={12} /> : i + 1}
+                {i < currentStep ? <LuCheck size={12} /> : i + 1}
               </span>
               {step.label}
             </button>
@@ -1522,7 +1535,7 @@ function NewApplication() {
 
             <div style={styles.btnRow}>
               <button style={{ ...styles.btn, background: 'transparent', color: colors.textLight, textDecoration: 'underline', border: 'none' }}>Save Draft</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1598,8 +1611,8 @@ function NewApplication() {
             </div>
 
             <div style={styles.btnRow}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back</button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1641,8 +1654,8 @@ function NewApplication() {
             </div>
 
             <div style={styles.btnRow}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back</button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1659,8 +1672,8 @@ function NewApplication() {
             </div>
 
             <div style={styles.btnRow}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back</button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1693,7 +1706,7 @@ function NewApplication() {
                   ))}
                 </tbody>
               </table>
-              <button onClick={() => addArrayItem('bankAccounts', { institution: '', type: 'Checking', accountNum: '', balance: '' })} style={styles.addBtn}><Plus size={14} /> Add Account</button>
+              <button onClick={() => addArrayItem('bankAccounts', { institution: '', type: 'Checking', accountNum: '', balance: '' })} style={styles.addBtn}><LuPlus size={14} /> Add Account</button>
             </div>
 
             <div style={styles.card}>
@@ -1716,12 +1729,12 @@ function NewApplication() {
                   ))}
                 </tbody>
               </table>
-              <button onClick={() => addArrayItem('otherAssets', { description: '', type: '', value: '' })} style={styles.addBtn}><Plus size={14} /> Add Asset</button>
+              <button onClick={() => addArrayItem('otherAssets', { description: '', type: '', value: '' })} style={styles.addBtn}><LuPlus size={14} /> Add Asset</button>
             </div>
 
             <div style={styles.btnRow}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back</button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1758,12 +1771,12 @@ function NewApplication() {
                   ))}
                 </tbody>
               </table>
-              <button onClick={() => addArrayItem('debts', { creditor: '', type: '', accountNum: '', payment: '', balance: '', months: '' })} style={styles.addBtn}><Plus size={14} /> Add Liability</button>
+              <button onClick={() => addArrayItem('debts', { creditor: '', type: '', accountNum: '', payment: '', balance: '', months: '' })} style={styles.addBtn}><LuPlus size={14} /> Add Liability</button>
             </div>
 
             <div style={styles.btnRow}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back</button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1805,8 +1818,8 @@ function NewApplication() {
             </div>
 
             <div style={styles.btnRow}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back</button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1845,8 +1858,8 @@ function NewApplication() {
             </div>
 
             <div style={styles.btnRow}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back</button>
-              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <ChevronRight size={16} /></button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back</button>
+              <button onClick={nextStep} style={{ ...styles.btn, ...styles.btnPrimary }}>Continue <LuChevronRight size={16} /></button>
             </div>
           </div>
         )}
@@ -1898,14 +1911,14 @@ function NewApplication() {
             </div>
 
             <div style={{ ...styles.btnRow, justifyContent: 'center', gap: '16px' }}>
-              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><ChevronLeft size={16} /> Back to Review</button>
+              <button onClick={prevStep} style={{ ...styles.btn, ...styles.btnSecondary }}><LuChevronLeft size={16} /> Back to Review</button>
               <button
                 ref={submitButtonRef}
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 style={{ ...styles.btn, ...styles.btnSubmit, opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'} <ChevronRight size={16} />
+                {isSubmitting ? 'Submitting...' : 'Submit Application'} <LuChevronRight size={16} />
               </button>
             </div>
           </div>

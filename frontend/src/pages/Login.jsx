@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogIn, User, Lock, AlertCircle, Briefcase } from 'lucide-react';
+import {
+  LuLogIn,
+  LuUser,
+  LuLock,
+  LuCircleAlert,
+  LuBriefcase,
+} from 'react-icons/lu';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -176,7 +182,7 @@ const Login = () => {
       <div style={styles.card}>
         <div style={styles.logoSection}>
           <div style={styles.logoIcon}>
-            <Briefcase size={32} color="#ffffff" />
+            <LuBriefcase size={32} color="#ffffff" />
           </div>
           <h1 style={styles.title}>Specialist Login</h1>
           <p style={styles.subtitle}>Sign in to access your workbench</p>
@@ -185,13 +191,13 @@ const Login = () => {
         <form style={styles.form} onSubmit={handleSubmit}>
           {error && (
             <div style={styles.error}>
-              <AlertCircle size={18} />
+              <LuCircleAlert size={18} />
               {error}
             </div>
           )}
 
           <div style={styles.inputGroup}>
-            <User size={18} style={styles.inputIcon} />
+            <LuUser size={18} style={styles.inputIcon} />
             <input
               type="text"
               placeholder="Username"
@@ -204,7 +210,7 @@ const Login = () => {
           </div>
 
           <div style={styles.inputGroup}>
-            <Lock size={18} style={styles.inputIcon} />
+            <LuLock size={18} style={styles.inputIcon} />
             <input
               type="password"
               placeholder="Password"
@@ -240,7 +246,7 @@ const Login = () => {
               </>
             ) : (
               <>
-                <LogIn size={18} />
+                <LuLogIn size={18} />
                 Sign In
               </>
             )}

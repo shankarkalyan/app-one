@@ -1,6 +1,18 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
-import { X, Activity, GitBranch, CheckCircle, Server, Workflow, AlertCircle, Database, FileText, Users, Settings } from 'lucide-react';
+import {
+  LuX,
+  LuActivity,
+  LuGitBranch,
+  LuCircleCheck,
+  LuServer,
+  LuWorkflow,
+  LuCircleAlert,
+  LuDatabase,
+  LuFileText,
+  LuUsers,
+  LuSettings,
+} from 'react-icons/lu';
 
 /* ══════════════════════════════════════════════════════════════════════════════
    DESIGN SYSTEM - Chase Blue Theme
@@ -305,7 +317,7 @@ function DetailPanel({ node, isDark, onClose }) {
               color: theme.textMuted,
             }}
           >
-            <X size={20} />
+            <LuX size={20} />
           </button>
         </div>
       </div>
@@ -352,7 +364,7 @@ function DetailPanel({ node, isDark, onClose }) {
                     fontSize: '13px',
                   }}
                 >
-                  <Activity size={14} style={{ color: colors.start, flexShrink: 0 }} />
+                  <LuActivity size={14} style={{ color: colors.start, flexShrink: 0 }} />
                   {resp}
                 </li>
               ))}
@@ -362,7 +374,7 @@ function DetailPanel({ node, isDark, onClose }) {
 
         <div style={{ marginTop: '16px', padding: '12px', borderRadius: '8px', backgroundColor: theme.bgCardHover }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <GitBranch size={14} style={{ color: theme.textMuted }} />
+            <LuGitBranch size={14} style={{ color: theme.textMuted }} />
             <span style={{ fontSize: '12px', fontWeight: 600, color: theme.textMuted }}>Node ID</span>
           </div>
           <code style={{ fontSize: '12px', color: theme.brand }}>{node.id}</code>

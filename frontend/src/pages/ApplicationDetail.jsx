@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  ArrowLeft,
-  RefreshCw,
-  Activity,
-  FileText,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Play,
-  User,
-  Server,
-  ChevronDown,
-  ChevronRight,
-  Eye,
-  Cpu,
-  Zap,
-} from 'lucide-react';
+  LuArrowLeft,
+  LuRefreshCw,
+  LuActivity,
+  LuFileText,
+  LuClock,
+  LuCircleCheck,
+  LuCircleX,
+  LuTriangleAlert,
+  LuPlay,
+  LuUser,
+  LuServer,
+  LuChevronDown,
+  LuChevronRight,
+  LuEye,
+  LuCpu,
+  LuZap,
+} from 'react-icons/lu';
 import { format } from 'date-fns';
 import {
   getApplication,
@@ -258,7 +258,7 @@ function ApplicationDetail() {
           textAlign: 'center',
           maxWidth: '400px'
         }}>
-          <AlertTriangle size={48} color={theme.error} style={{ marginBottom: '16px' }} />
+          <LuTriangleAlert size={48} color={theme.error} style={{ marginBottom: '16px' }} />
           <p style={{ color: theme.error, marginBottom: '16px' }}>{error}</p>
           <Link to="/applications" style={{ color: theme.brand, textDecoration: 'none' }}>
             Back to Applications
@@ -292,7 +292,7 @@ function ApplicationDetail() {
             marginBottom: '16px',
           }}
         >
-          <ArrowLeft size={18} />
+          <LuArrowLeft size={18} />
           Back to Applications
         </Link>
 
@@ -308,7 +308,7 @@ function ApplicationDetail() {
             alignItems: 'center',
             gap: '12px'
           }}>
-            <Activity size={20} color="#117ACA" />
+            <LuActivity size={20} color="#117ACA" />
             <div style={{ color: isDark ? '#e2e8f0' : '#1e293b' }}>
               <div style={{ fontSize: '14px', fontWeight: 600 }}>
                 Current Phase: {application?.current_phase?.replace('_', ' ')}
@@ -360,7 +360,7 @@ function ApplicationDetail() {
                 cursor: 'pointer'
               }}
             >
-              <RefreshCw size={16} />
+              <LuRefreshCw size={16} />
               Refresh
             </button>
           </div>
@@ -430,7 +430,7 @@ function ApplicationDetail() {
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Play size={24} color={theme.success} />
+                <LuPlay size={24} color={theme.success} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
@@ -486,7 +486,7 @@ function ApplicationDetail() {
                 e.target.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.3)';
               }}
             >
-              <CheckCircle size={18} />
+              <LuCircleCheck size={18} />
               Complete Task
             </button>
           </div>
@@ -523,8 +523,8 @@ function ApplicationDetail() {
                       fontSize: '11px',
                       fontWeight: 600,
                     }}>
-                      {isCompleted && <CheckCircle size={12} />}
-                      {isCurrent && <Play size={12} />}
+                      {isCompleted && <LuCircleCheck size={12} />}
+                      {isCurrent && <LuPlay size={12} />}
                       {phase.replace('_', ' ')}
                     </div>
                     {idx < 7 && (
@@ -555,7 +555,7 @@ function ApplicationDetail() {
           alignItems: 'center',
           gap: '12px'
         }}>
-          <AlertTriangle size={18} color={theme.warning} />
+          <LuTriangleAlert size={18} color={theme.warning} />
           <div>
             <p style={{ margin: 0, fontWeight: 600, color: theme.textPrimary, fontSize: '13px' }}>
               Manual Update Applied
@@ -580,7 +580,7 @@ function ApplicationDetail() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Zap size={20} color={theme.brand} />
+              <LuZap size={20} color={theme.brand} />
               <span style={{ fontWeight: 600, color: theme.textPrimary }}>Manual Phase Control</span>
               <span style={{
                 fontSize: '11px',
@@ -610,7 +610,7 @@ function ApplicationDetail() {
               }}
             >
               {showPhaseControl ? 'Hide Controls' : 'Show Phase Controls'}
-              {showPhaseControl ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              {showPhaseControl ? <LuChevronDown size={14} /> : <LuChevronRight size={14} />}
             </button>
           </div>
 
@@ -719,7 +719,7 @@ function ApplicationDetail() {
           padding: '20px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <User size={20} color="#8B5CF6" />
+            <LuUser size={20} color="#8B5CF6" />
             <span style={{ fontWeight: 600, color: theme.textPrimary }}>Human Action Required</span>
           </div>
           {humanTasks.filter((t) => t.status === 'PENDING').map((task) => (
@@ -770,7 +770,7 @@ function ApplicationDetail() {
           padding: '20px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <Activity size={20} color="#F59E0B" />
+            <LuActivity size={20} color="#F59E0B" />
             <span style={{ fontWeight: 600, color: theme.textPrimary }}>Tasks In Progress</span>
           </div>
           {humanTasks.filter((t) => t.status === 'IN_PROGRESS').map((task) => (
@@ -1191,7 +1191,7 @@ function PhaseStatusView({ phases, getPhaseStatus, getPhaseAgents, getAgentApiCa
                       boxShadow: '0 2px 8px rgba(34, 197, 94, 0.3)'
                     }}
                   >
-                    <CheckCircle size={14} />
+                    <LuCircleCheck size={14} />
                     Complete Task
                   </button>
                 )}
@@ -1206,15 +1206,15 @@ function PhaseStatusView({ phases, getPhaseStatus, getPhaseAgents, getAgentApiCa
                   fontSize: '12px',
                   fontWeight: 600
                 }}>
-                  {effectiveStatus === 'completed' && <CheckCircle size={14} />}
-                  {effectiveStatus === 'active' && <Play size={14} />}
-                  {effectiveStatus === 'active_no_data' && <AlertTriangle size={14} />}
-                  {effectiveStatus === 'pending' && <Clock size={14} />}
-                  {effectiveStatus === 'failed' && <XCircle size={14} />}
-                  {effectiveStatus === 'disabled' && <Clock size={14} />}
+                  {effectiveStatus === 'completed' && <LuCircleCheck size={14} />}
+                  {effectiveStatus === 'active' && <LuPlay size={14} />}
+                  {effectiveStatus === 'active_no_data' && <LuTriangleAlert size={14} />}
+                  {effectiveStatus === 'pending' && <LuClock size={14} />}
+                  {effectiveStatus === 'failed' && <LuCircleX size={14} />}
+                  {effectiveStatus === 'disabled' && <LuClock size={14} />}
                   {statusLabels[effectiveStatus]}
                 </span>
-                {!disabled && (isExpanded ? <ChevronDown size={20} color={theme.textMuted} /> : <ChevronRight size={20} color={theme.textMuted} />)}
+                {!disabled && (isExpanded ? <LuChevronDown size={20} color={theme.textMuted} /> : <LuChevronRight size={20} color={theme.textMuted} />)}
               </div>
             </div>
 
@@ -1249,7 +1249,7 @@ function PhaseStatusView({ phases, getPhaseStatus, getPhaseAgents, getAgentApiCa
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}>
-                            <Cpu size={18} color={theme.brand} />
+                            <LuCpu size={18} color={theme.brand} />
                           </div>
                           <div>
                             <p style={{ margin: 0, fontWeight: 600, color: theme.textPrimary, fontSize: '14px' }}>
@@ -1354,7 +1354,7 @@ function PhaseStatusView({ phases, getPhaseStatus, getPhaseAgents, getAgentApiCa
                                     cursor: 'pointer'
                                   }}
                                 >
-                                  <Eye size={12} />
+                                  <LuEye size={12} />
                                   View JSON
                                 </button>
                               </div>
@@ -1561,7 +1561,7 @@ function ApiCallsList({ calls, openJsonModal, theme, isDark }) {
                   cursor: 'pointer'
                 }}
               >
-                <Eye size={12} />
+                <LuEye size={12} />
                 View JSON
               </button>
             </div>

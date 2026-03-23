@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Layers, FileText, RefreshCw, Sun, Moon, GitBranch, Plus, Home } from 'lucide-react';
+import {
+  LuLayers,
+  LuFileText,
+  LuRefreshCw,
+  LuSun,
+  LuMoon,
+  LuGitBranch,
+  LuPlus,
+  LuHouse,
+} from 'react-icons/lu';
 import { healthCheck } from '../services/api';
 import D3WorkflowGraph from '../components/D3WorkflowGraph';
 import MermaidFlowchart from '../components/MermaidFlowchart';
@@ -110,7 +119,7 @@ function Dashboard() {
               justifyContent: 'center'
             }}
           >
-            <Layers size={20} color="#fff" />
+            <LuLayers size={20} color="#fff" />
           </div>
           <div>
             <h1 style={{
@@ -193,7 +202,7 @@ function Dashboard() {
                 transition: 'background-color 0.2s'
               }}
             >
-              <FileText size={14} />
+              <LuFileText size={14} />
               Applications
             </Link>
             {/* Agentic Workflow */}
@@ -214,7 +223,7 @@ function Dashboard() {
                 transition: 'background-color 0.2s'
               }}
             >
-              <Layers size={14} />
+              <LuLayers size={14} />
               Agentic Workflow
             </button>
             {/* Flowchart Workflow */}
@@ -235,7 +244,7 @@ function Dashboard() {
                 transition: 'background-color 0.2s'
               }}
             >
-              <GitBranch size={14} />
+              <LuGitBranch size={14} />
               Workflow
             </button>
             {/* Simulate New Application */}
@@ -257,7 +266,7 @@ function Dashboard() {
                 transition: 'background-color 0.2s'
               }}
             >
-              <Plus size={14} />
+              <LuPlus size={14} />
               Simulate
             </Link>
           </div>
@@ -280,7 +289,7 @@ function Dashboard() {
             }}
             title="Loan Assumption Applications"
           >
-            <Home size={18} />
+            <LuHouse size={18} />
           </Link>
 
           {/* Refresh */}
@@ -300,7 +309,7 @@ function Dashboard() {
             }}
             title="Refresh"
           >
-            <RefreshCw size={18} />
+            <LuRefreshCw size={18} />
           </button>
 
           {/* Theme Toggle */}
@@ -320,7 +329,7 @@ function Dashboard() {
             }}
             title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? <LuSun size={18} /> : <LuMoon size={18} />}
           </button>
         </div>
       </header>

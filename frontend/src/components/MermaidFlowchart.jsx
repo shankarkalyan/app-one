@@ -1,35 +1,35 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import {
-  X,
-  Phone,
-  FileText,
-  HelpCircle,
-  Mail,
-  Send,
-  FileCheck,
-  Upload,
-  ClipboardCheck,
-  Package,
-  CheckCircle,
-  Users,
-  Clipboard,
-  UserCheck,
-  FileSearch,
-  AlertCircle,
-  Award,
-  PhoneCall,
-  MessageSquare,
-  FolderOpen,
-  Building,
-  Eye,
-  Settings,
-  XCircle,
-  LogOut,
-  Box,
-  Activity,
-  GitBranch,
-} from 'lucide-react';
+  LuX,
+  LuPhone,
+  LuFileText,
+  LuCircleHelp,
+  LuMail,
+  LuSend,
+  LuFileCheck,
+  LuUpload,
+  LuClipboardCheck,
+  LuPackage,
+  LuCircleCheck,
+  LuUsers,
+  LuClipboard,
+  LuUserCheck,
+  LuFileSearch,
+  LuCircleAlert,
+  LuAward,
+  LuPhoneCall,
+  LuMessageSquare,
+  LuFolderOpen,
+  LuBuilding,
+  LuEye,
+  LuSettings,
+  LuCircleX,
+  LuLogOut,
+  LuBox,
+  LuActivity,
+  LuGitBranch,
+} from 'react-icons/lu';
 
 /* ══════════════════════════════════════════════════════════════════════════════
    DESIGN SYSTEM - Chase Blue Theme
@@ -541,7 +541,7 @@ function DetailPanel({ node, onClose, isDark }) {
             justifyContent: 'center',
           }}
         >
-          <X size={16} />
+          <LuX size={16} />
         </button>
       </div>
 

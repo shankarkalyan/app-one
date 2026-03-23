@@ -4,12 +4,12 @@
  */
 import React from 'react';
 import {
-  GitBranch,
-  BarChart3,
-  PieChart,
-  Activity,
-  Maximize2,
-} from 'lucide-react';
+  LuGitBranch,
+  LuChartBar,
+  LuChartPie,
+  LuActivity,
+  LuMaximize2,
+} from 'react-icons/lu';
 import { COLORS } from './adminStyles';
 
 const AnalyticsTab = ({
@@ -29,7 +29,7 @@ const AnalyticsTab = ({
       <div style={{ ...styles.analyticsCard, ...styles.analyticsCardFull, marginBottom: '24px' }}>
         <div style={styles.cardHeader}>
           <div style={styles.cardTitle}>
-            <GitBranch size={18} color={colors.primary} />
+            <LuGitBranch size={18} color={colors.primary} />
             Specialist Network Graph
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -45,7 +45,7 @@ const AnalyticsTab = ({
               onMouseEnter={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}
               onMouseLeave={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}
             >
-              <Maximize2 size={14} />
+              <LuMaximize2 size={14} />
               Expand
             </button>
           </div>
@@ -61,7 +61,7 @@ const AnalyticsTab = ({
         <div style={styles.analyticsCard}>
           <div style={styles.cardHeader}>
             <div style={styles.cardTitle}>
-              <BarChart3 size={18} color={colors.warning} />
+              <LuChartBar size={18} color={colors.warning} />
               Workload by Phase
             </div>
           </div>
@@ -74,7 +74,7 @@ const AnalyticsTab = ({
         <div style={styles.analyticsCard}>
           <div style={styles.cardHeader}>
             <div style={styles.cardTitle}>
-              <PieChart size={18} color={colors.success} />
+              <LuChartPie size={18} color={colors.success} />
               Task Status Distribution
             </div>
           </div>
@@ -88,7 +88,7 @@ const AnalyticsTab = ({
       <div style={{ ...styles.analyticsCard, ...styles.analyticsCardFull }}>
         <div style={styles.cardHeader}>
           <div style={styles.cardTitle}>
-            <Activity size={18} color={colors.cyan} />
+            <LuActivity size={18} color={colors.cyan} />
             Workflow Flow Diagram
           </div>
         </div>

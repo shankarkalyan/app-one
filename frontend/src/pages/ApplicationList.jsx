@@ -1,6 +1,35 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, ChevronLeft, ChevronRight, RefreshCw, ChevronDown, ChevronUp, Activity, Home, Clock, CheckCircle, XCircle, AlertTriangle, Sun, Moon, Filter, X, Search, Layers, GitBranch, Plus, TrendingUp, Users, Zap, Ban, Trash2, Briefcase, Settings, LogOut } from 'lucide-react';
+import {
+  LuFileText,
+  LuChevronLeft,
+  LuChevronRight,
+  LuRefreshCw,
+  LuChevronDown,
+  LuChevronUp,
+  LuActivity,
+  LuHouse,
+  LuClock,
+  LuCircleCheck,
+  LuCircleX,
+  LuTriangleAlert,
+  LuSun,
+  LuMoon,
+  LuFilter,
+  LuX,
+  LuSearch,
+  LuLayers,
+  LuGitBranch,
+  LuPlus,
+  LuTrendingUp,
+  LuUsers,
+  LuZap,
+  LuBan,
+  LuTrash2,
+  LuBriefcase,
+  LuSettings,
+  LuLogOut,
+} from 'react-icons/lu';
 import { getApplications, getExecutions, getTransactions, getMockApiCalls, healthCheck, flushAllApplications, getApplicationNotes } from '../services/api';
 import { format } from 'date-fns';
 import WorkflowStageTracker from '../components/WorkflowStageTracker';
@@ -366,7 +395,7 @@ function ApplicationList() {
               justifyContent: 'center',
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
             }}>
-              <Layers size={22} color="#fff" />
+              <LuLayers size={22} color="#fff" />
             </div>
             <div>
               <h1 style={{
@@ -401,7 +430,7 @@ function ApplicationList() {
               background: 'rgba(255,255,255,0.1)',
               border: '1px solid rgba(255,255,255,0.15)',
             }}>
-              <Activity size={14} color="#93c5fd" />
+              <LuActivity size={14} color="#93c5fd" />
               <span style={{ fontSize: '13px', fontWeight: 600, color: '#fff' }}>
                 {filteredApplications.length}
               </span>
@@ -490,7 +519,7 @@ function ApplicationList() {
                       transition: 'all 0.2s',
                     }}
                   >
-                    <Briefcase size={14} />
+                    <LuBriefcase size={14} />
                     Workbench
                   </button>
                 ) : (
@@ -512,7 +541,7 @@ function ApplicationList() {
                       transition: 'all 0.2s',
                     }}
                   >
-                    <Settings size={14} />
+                    <LuSettings size={14} />
                     Admin
                   </button>
                 )}
@@ -539,7 +568,7 @@ function ApplicationList() {
                     transition: 'all 0.2s',
                   }}
                 >
-                  <LogOut size={14} />
+                  <LuLogOut size={14} />
                   Logout
                 </button>
               </div>
@@ -561,7 +590,7 @@ function ApplicationList() {
                   fontWeight: 500,
                 }}
               >
-                <Briefcase size={14} />
+                <LuBriefcase size={14} />
                 Login
               </button>
             )}
@@ -584,7 +613,7 @@ function ApplicationList() {
               }}
               title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              {isDark ? <LuSun size={18} /> : <LuMoon size={18} />}
             </button>
           </div>
         </div>
@@ -625,7 +654,7 @@ function ApplicationList() {
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               }}
             >
-              <FileText size={15} />
+              <LuFileText size={15} />
               Applications
             </button>
             <Link
@@ -644,7 +673,7 @@ function ApplicationList() {
                 transition: 'all 0.2s',
               }}
             >
-              <Layers size={15} />
+              <LuLayers size={15} />
               Agentic Workflow
             </Link>
             <Link
@@ -663,7 +692,7 @@ function ApplicationList() {
                 transition: 'all 0.2s',
               }}
             >
-              <GitBranch size={15} />
+              <LuGitBranch size={15} />
               Workflow
             </Link>
             <Link
@@ -682,7 +711,7 @@ function ApplicationList() {
                 transition: 'all 0.2s',
               }}
             >
-              <Plus size={15} />
+              <LuPlus size={15} />
               Simulate
             </Link>
           </div>
@@ -709,7 +738,7 @@ function ApplicationList() {
                 transition: 'all 0.2s',
               }}
             >
-              <Filter size={15} />
+              <LuFilter size={15} />
               Filters
               {hasActiveFilters && (
                 <span style={{
@@ -739,7 +768,7 @@ function ApplicationList() {
                   gap: '6px',
                 }}
               >
-                <X size={14} />
+                <LuX size={14} />
                 Clear
               </button>
             )}
@@ -765,7 +794,7 @@ function ApplicationList() {
                 transition: 'all 0.2s',
               }}
             >
-              <RefreshCw size={16} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+              <LuRefreshCw size={16} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
             </button>
 
             {/* Flush All */}
@@ -787,7 +816,7 @@ function ApplicationList() {
                 transition: 'all 0.2s',
               }}
             >
-              <Trash2 size={14} />
+              <LuTrash2 size={14} />
               Flush All
             </button>
           </div>
@@ -844,7 +873,7 @@ function ApplicationList() {
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
               }}>
-                <Users size={24} color="#fff" />
+                <LuUsers size={24} color="#fff" />
               </div>
               <div>
                 <div style={{
@@ -885,7 +914,7 @@ function ApplicationList() {
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
               }}>
-                <Zap size={24} color="#fff" />
+                <LuZap size={24} color="#fff" />
               </div>
               <div>
                 <div style={{
@@ -937,7 +966,7 @@ function ApplicationList() {
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
               }}>
-                <CheckCircle size={24} color="#fff" />
+                <LuCircleCheck size={24} color="#fff" />
               </div>
               <div>
                 <div style={{
@@ -978,7 +1007,7 @@ function ApplicationList() {
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
               }}>
-                <Ban size={24} color="#fff" />
+                <LuBan size={24} color="#fff" />
               </div>
               <div>
                 <div style={{
@@ -1019,7 +1048,7 @@ function ApplicationList() {
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(0, 59, 115, 0.3)',
               }}>
-                <TrendingUp size={24} color="#fff" />
+                <LuTrendingUp size={24} color="#fff" />
               </div>
               <div>
                 <div style={{
@@ -1059,7 +1088,7 @@ function ApplicationList() {
               justifyContent: 'space-between',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FileText size={20} color={isDark ? '#60a5fa' : '#3b82f6'} />
+                <LuFileText size={20} color={isDark ? '#60a5fa' : '#3b82f6'} />
                 <span style={{
                   fontSize: '1rem',
                   fontWeight: 600,
@@ -1149,7 +1178,7 @@ function ApplicationList() {
                     <tr className={isDark ? 'bg-gray-700/30' : 'bg-gray-50'}>
                       <td className="px-4 py-2">
                         <div className="relative">
-                          <Search className={`absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+                          <LuSearch className={`absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
                           <input
                             type="text"
                             placeholder="Search ID..."
@@ -1220,7 +1249,7 @@ function ApplicationList() {
                   ) : paginatedApplications.length === 0 ? (
                     <tr>
                       <td colSpan="5" className={`px-4 py-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <LuFileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
                         {hasActiveFilters ? 'No applications match your filters' : 'No applications found'}
                         {hasActiveFilters && (
                           <button
@@ -1342,10 +1371,10 @@ function ApplicationList() {
                             {expandedApp === app.application_id ? (
                               <div className="flex items-center gap-1 text-blue-500">
                                 <span className="text-xs font-medium">Collapse</span>
-                                <ChevronUp className="w-4 h-4" />
+                                <LuChevronUp className="w-4 h-4" />
                               </div>
                             ) : (
-                              <ChevronDown className="w-4 h-4" />
+                              <LuChevronDown className="w-4 h-4" />
                             )}
                           </td>
                         </tr>
@@ -1391,7 +1420,7 @@ function ApplicationList() {
                         isDark ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-white' : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'
                       }`}
                     >
-                      <ChevronLeft className="w-4 h-4" />
+                      <LuChevronLeft className="w-4 h-4" />
                     </button>
                     <span className={`px-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {page} / {totalPages}
@@ -1403,7 +1432,7 @@ function ApplicationList() {
                         isDark ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-white' : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'
                       }`}
                     >
-                      <ChevronRight className="w-4 h-4" />
+                      <LuChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1449,7 +1478,7 @@ function ApplicationList() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <Trash2 size={24} color="#EF4444" />
+                <LuTrash2 size={24} color="#EF4444" />
               </div>
               <div>
                 <h3 style={{
@@ -1532,12 +1561,12 @@ function ApplicationList() {
               >
                 {flushing ? (
                   <>
-                    <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                    <LuRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
                     Deleting...
                   </>
                 ) : (
                   <>
-                    <Trash2 size={16} />
+                    <LuTrash2 size={16} />
                     Delete All Data
                   </>
                 )}

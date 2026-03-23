@@ -4,22 +4,22 @@
  */
 import React from 'react';
 import {
-  Users,
-  UserX,
-  RefreshCw,
-  BarChart3,
-  Clock,
-  Search,
-  X,
-  PieChart,
-  TrendingUp,
-  Activity,
-  CheckCircle,
-  Database,
-  UserCheck,
-  ArrowUpRight,
-  GitBranch,
-} from 'lucide-react';
+  LuUsers,
+  LuUserX,
+  LuRefreshCw,
+  LuChartBar,
+  LuClock,
+  LuSearch,
+  LuX,
+  LuChartPie,
+  LuTrendingUp,
+  LuActivity,
+  LuCircleCheck,
+  LuDatabase,
+  LuUserCheck,
+  LuArrowUpRight,
+  LuGitBranch,
+} from 'react-icons/lu';
 import { COLORS, SPECIALTY_TYPES } from './adminStyles';
 
 const AllocationTab = ({
@@ -55,7 +55,7 @@ const AllocationTab = ({
     <div style={styles.card}>
       <div style={styles.cardHeader}>
         <div style={styles.cardTitle}>
-          <Users size={18} color={colors.chaseBlue} />
+          <LuUsers size={18} color={colors.chaseBlue} />
           Specialist Phase Allocation
         </div>
         <span style={{
@@ -81,7 +81,7 @@ const AllocationTab = ({
             borderRadius: '12px',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: colors.primary }}>
-              <RefreshCw size={20} className="animate-spin" />
+              <LuRefreshCw size={20} className="animate-spin" />
               Updating allocation...
             </div>
           </div>
@@ -119,7 +119,7 @@ const AllocationTab = ({
             }}
             onClick={() => setAllocationSubTab('buckets')}
           >
-            <Users size={16} />
+            <LuUsers size={16} />
             Allocation Buckets
           </button>
           <button
@@ -143,7 +143,7 @@ const AllocationTab = ({
             }}
             onClick={() => setAllocationSubTab('analytics')}
           >
-            <BarChart3 size={16} />
+            <LuChartBar size={16} />
             Analytics
           </button>
           <button
@@ -167,7 +167,7 @@ const AllocationTab = ({
             }}
             onClick={() => setAllocationSubTab('history')}
           >
-            <Clock size={16} />
+            <LuClock size={16} />
             History
           </button>
         </div>
@@ -218,7 +218,7 @@ const AllocationTab = ({
                     background: isDark ? 'rgba(249, 115, 22, 0.12)' : 'rgba(249, 115, 22, 0.08)',
                   }}>
                     <span style={{ ...styles.bucketTitle, color: colors.orange }}>
-                      <UserX size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                      <LuUserX size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
                       Not Allocated (Out for the Day)
                     </span>
                     <span style={{ ...styles.bucketCount, background: `${colors.orange}20`, color: colors.orange }}>
@@ -460,7 +460,7 @@ const AllocationTab = ({
                                 }}
                                 title={`Remove ${specialist.full_name || specialist.username} from ${phase.replace(/_/g, ' ')}`}
                               >
-                                <X size={12} />
+                                <LuX size={12} />
                               </button>
                             )}
                           </div>
@@ -496,7 +496,7 @@ const AllocationTab = ({
                 background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)',
                 borderRadius: '16px',
               }}>
-                <BarChart3 size={48} style={{ marginBottom: '16px', opacity: 0.4 }} />
+                <LuChartBar size={48} style={{ marginBottom: '16px', opacity: 0.4 }} />
                 <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
                   No Analytics Data Yet
                 </div>
@@ -535,7 +535,7 @@ const AllocationTab = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                      <PieChart size={16} color={colors.chaseBlue} />
+                      <LuChartPie size={16} color={colors.chaseBlue} />
                     </div>
                     Reallocation Reasons
                   </div>
@@ -574,7 +574,7 @@ const AllocationTab = ({
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}>
-                        <Users size={14} color={colors.success} />
+                        <LuUsers size={14} color={colors.success} />
                       </div>
                       Reallocations by Specialist
                     </div>
@@ -612,7 +612,7 @@ const AllocationTab = ({
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                          <CheckCircle size={14} color="#22c55e" />
+                          <LuCircleCheck size={14} color="#22c55e" />
                         </div>
                         Tasks Completed
                       </div>
@@ -628,7 +628,7 @@ const AllocationTab = ({
                         justifyContent: 'center',
                         color: isDark ? '#64748b' : '#94a3b8',
                       }}>
-                        <CheckCircle size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
+                        <LuCircleCheck size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
                         <div style={{ fontSize: '12px' }}>No data yet</div>
                       </div>
                     )}
@@ -661,7 +661,7 @@ const AllocationTab = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                      <TrendingUp size={16} color={colors.orange} />
+                      <LuTrendingUp size={16} color={colors.orange} />
                     </div>
                     Reallocation Timeline
                   </div>
@@ -694,7 +694,7 @@ const AllocationTab = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                      <Activity size={16} color={colors.primary} />
+                      <LuActivity size={16} color={colors.primary} />
                     </div>
                     Event Type Distribution
                   </div>
@@ -825,7 +825,7 @@ const AllocationTab = ({
                 fontWeight: '700',
                 color: isDark ? '#f1f5f9' : '#1e293b',
               }}>
-                <Clock size={18} color={colors.chaseBlue} />
+                <LuClock size={18} color={colors.chaseBlue} />
                 Allocation History
               </div>
               <div style={{
@@ -841,7 +841,7 @@ const AllocationTab = ({
                   maxWidth: '300px',
                   flex: '1',
                 }}>
-                  <Search
+                  <LuSearch
                     size={16}
                     style={{
                       position: 'absolute',
@@ -888,7 +888,7 @@ const AllocationTab = ({
                         color: '#ffffff',
                       }}
                     >
-                      <X size={12} />
+                      <LuX size={12} />
                     </button>
                   )}
                 </div>
@@ -911,7 +911,7 @@ const AllocationTab = ({
                   onClick={fetchAllocationHistory}
                   disabled={loadingHistory}
                 >
-                  <RefreshCw size={15} style={loadingHistory ? { animation: 'spin 1s linear infinite' } : {}} />
+                  <LuRefreshCw size={15} style={loadingHistory ? { animation: 'spin 1s linear infinite' } : {}} />
                   <span>Refresh</span>
                 </button>
               </div>
@@ -923,7 +923,7 @@ const AllocationTab = ({
                 padding: '40px',
                 color: isDark ? '#64748b' : '#94a3b8',
               }}>
-                <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
+                <LuRefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
                 <div style={{ marginTop: '12px' }}>Loading history...</div>
               </div>
             ) : allocationHistory.length === 0 ? (
@@ -934,7 +934,7 @@ const AllocationTab = ({
                 background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)',
                 borderRadius: '12px',
               }}>
-                <Database size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
+                <LuDatabase size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
                 <div style={{ fontSize: '14px' }}>No allocation history yet</div>
                 <div style={{ fontSize: '12px', marginTop: '4px' }}>
                   Reallocation events will appear here
@@ -962,7 +962,7 @@ const AllocationTab = ({
                     background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)',
                     borderRadius: '12px',
                   }}>
-                    <Search size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
+                    <LuSearch size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
                     <div style={{ fontSize: '14px' }}>No results found for "{historySearchQuery}"</div>
                   </div>
                 );
@@ -1017,15 +1017,15 @@ const AllocationTab = ({
                                 : `${colors.success}20`,
                       }}>
                         {event.event_type === 'MOVED_TO_UNALLOCATED' ? (
-                          <UserX size={18} color={colors.orange} />
+                          <LuUserX size={18} color={colors.orange} />
                         ) : event.event_type === 'TASK_REASSIGNMENT' ? (
-                          <ArrowUpRight size={18} color={colors.chaseBlue} />
+                          <LuArrowUpRight size={18} color={colors.chaseBlue} />
                         ) : event.event_type === 'PHASE_TRANSFER' ? (
-                          <GitBranch size={18} color="#185FA5" />
+                          <LuGitBranch size={18} color="#185FA5" />
                         ) : event.event_type === 'DUAL_PHASE_REMOVED' ? (
-                          <UserX size={18} color="#ef4444" />
+                          <LuUserX size={18} color="#ef4444" />
                         ) : (
-                          <UserCheck size={18} color={colors.success} />
+                          <LuUserCheck size={18} color={colors.success} />
                         )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>

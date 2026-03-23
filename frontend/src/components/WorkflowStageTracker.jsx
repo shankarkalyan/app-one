@@ -1,13 +1,60 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  ChevronDown, ChevronRight, Clock, CheckCircle, XCircle, Circle, Zap,
-  Copy, Check, FileJson, Send, Shield, FileText, Database, CreditCard,
-  Building, User, Search, Upload, Download, Lock, Unlock, AlertTriangle,
-  Phone, Mail, Home, DollarSign, ClipboardCheck, Stamp, ArrowRight,
-  MessageSquare, UserCheck, FileSearch, PenTool, Eye, ThumbsUp, ThumbsDown,
-  Bell, RefreshCw, Calendar, Briefcase, Scale, FileCheck, Receipt, Key,
-  Banknote, Award, Archive, Bot, Users, Maximize2, X, EyeOff, Activity
-} from 'lucide-react';
+  LuChevronDown,
+  LuChevronRight,
+  LuClock,
+  LuCircleCheck,
+  LuCircleX,
+  LuCircle,
+  LuZap,
+  LuCopy,
+  LuCheck,
+  LuFileJson,
+  LuSend,
+  LuShield,
+  LuFileText,
+  LuDatabase,
+  LuCreditCard,
+  LuBuilding,
+  LuUser,
+  LuSearch,
+  LuUpload,
+  LuDownload,
+  LuLock,
+  LuLockOpen,
+  LuTriangleAlert,
+  LuPhone,
+  LuMail,
+  LuHouse,
+  LuDollarSign,
+  LuClipboardCheck,
+  LuStamp,
+  LuArrowRight,
+  LuMessageSquare,
+  LuUserCheck,
+  LuFileSearch,
+  LuPenTool,
+  LuEye,
+  LuThumbsUp,
+  LuThumbsDown,
+  LuBell,
+  LuRefreshCw,
+  LuCalendar,
+  LuBriefcase,
+  LuScale,
+  LuFileCheck,
+  LuReceipt,
+  LuKey,
+  LuBanknote,
+  LuAward,
+  LuArchive,
+  LuBot,
+  LuUsers,
+  LuMaximize2,
+  LuX,
+  LuEyeOff,
+  LuActivity,
+} from 'react-icons/lu';
 import { getWorkflowTasks, getApplication } from '../services/api';
 
 // API Details - describes what each API does with endpoint-specific purposes
@@ -1259,7 +1306,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  {jsonModal.type === 'request' ? <Upload size={20} color="#fff" /> : <Download size={20} color="#fff" />}
+                  {jsonModal.type === 'request' ? <LuUpload size={20} color="#fff" /> : <LuDownload size={20} color="#fff" />}
                 </div>
                 <div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>
@@ -1292,7 +1339,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                     transition: 'background 0.2s',
                   }}
                 >
-                  {copiedId === 'modal-json' ? <Check size={14} /> : <Copy size={14} />}
+                  {copiedId === 'modal-json' ? <LuCheck size={14} /> : <LuCopy size={14} />}
                   {copiedId === 'modal-json' ? 'Copied!' : 'Copy'}
                 </button>
                 <button
@@ -1311,7 +1358,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                     transition: 'background 0.2s',
                   }}
                 >
-                  <X size={18} />
+                  <LuX size={18} />
                 </button>
               </div>
             </div>
@@ -1403,7 +1450,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <Home size={20} color="#fff" />
+                <LuHouse size={20} color="#fff" />
               </div>
               <div>
                 <h2 style={{
@@ -1445,7 +1492,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                     }}
                     title="Refresh application data"
                   >
-                    <RefreshCw size={12} style={{ animation: refreshingApp ? 'spin 1s linear infinite' : 'none' }} />
+                    <LuRefreshCw size={12} style={{ animation: refreshingApp ? 'spin 1s linear infinite' : 'none' }} />
                     {refreshingApp ? 'Refreshing...' : 'Refresh'}
                   </button>
                 </div>
@@ -1559,7 +1606,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                       zIndex: 1,
                     }}>
                       {isNodeLoading ? null : completed ? (
-                        <CheckCircle size={20} color="#fff" />
+                        <LuCircleCheck size={20} color="#fff" />
                       ) : (
                         <PhaseIcon size={18} color={active ? phase.color : theme.textMuted} />
                       )}
@@ -2074,7 +2121,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                     position: 'relative',
                     zIndex: 1,
                   }}>
-                    {effectiveCompleted ? <CheckCircle size={22} color="#fff" /> : isDenialPhase ? <XCircle size={22} color="#fff" /> : <PhaseIcon size={22} color={effectiveActive ? '#fff' : theme.textMuted} />}
+                    {effectiveCompleted ? <LuCircleCheck size={22} color="#fff" /> : isDenialPhase ? <LuCircleX size={22} color="#fff" /> : <PhaseIcon size={22} color={effectiveActive ? '#fff' : theme.textMuted} />}
                   </div>
                 </div>
 
@@ -2124,14 +2171,14 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                     textTransform: effectiveActive ? 'uppercase' : 'none',
                     letterSpacing: effectiveActive ? '0.05em' : 'normal',
                   }}>
-                    {effectiveCompleted ? <CheckCircle size={14} /> : effectiveActive ? <div style={{ width: 10, height: 10, borderRadius: '50%', background: phase.color, animation: 'pulse 1.5s infinite', boxShadow: `0 0 8px ${phase.color}` }} /> : <Circle size={14} />}
+                    {effectiveCompleted ? <LuCircleCheck size={14} /> : effectiveActive ? <div style={{ width: 10, height: 10, borderRadius: '50%', background: phase.color, animation: 'pulse 1.5s infinite', boxShadow: `0 0 8px ${phase.color}` }} /> : <LuCircle size={14} />}
                     {effectiveCompleted ? 'Done' : isDenialPhase ? 'DENIED' : effectiveActive ? 'In Progress' : 'Pending'}
                   </div>
                   {/* Show expandable chevron for completed or in-progress phases */}
                   {(effectiveCompleted || effectiveActive) ? (
-                    <ChevronDown size={20} color={theme.textMuted} style={{ transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
+                    <LuChevronDown size={20} color={theme.textMuted} style={{ transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
                   ) : (
-                    <Lock size={16} color={theme.textMuted} title="This phase has not started yet" />
+                    <LuLock size={16} color={theme.textMuted} title="This phase has not started yet" />
                   )}
                 </div>
               </div>
@@ -2209,7 +2256,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                             fontFamily: 'monospace',
                             boxShadow: isStageCompleted ? '0 2px 8px rgba(16, 185, 129, 0.3)' : 'none',
                           }}>
-                            {isStageCompleted ? <CheckCircle size={16} /> : stage.num}
+                            {isStageCompleted ? <LuCircleCheck size={16} /> : stage.num}
                           </div>
 
                           {/* Stage Icon */}
@@ -2252,7 +2299,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                   alignItems: 'center',
                                   gap: '3px',
                                 }}>
-                                  <CheckCircle size={10} />
+                                  <LuCircleCheck size={10} />
                                   Done
                                 </span>
                               )}
@@ -2331,7 +2378,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                 alignItems: 'center',
                                 gap: '4px',
                               }}>
-                                <MessageSquare size={12} />
+                                <LuMessageSquare size={12} />
                                 {stage.conversation.length} msgs
                               </span>
                             )}
@@ -2376,9 +2423,9 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                             {/* Complete button removed - task completion now handled via Specialist Workbench */}
                             {/* Show expandable chevron for completed or in-progress stages */}
                             {(isStageCompleted || isStageActive) ? (
-                              <ChevronRight size={16} color={theme.textMuted} style={{ transform: isStageExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                              <LuChevronRight size={16} color={theme.textMuted} style={{ transform: isStageExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
                             ) : (
-                              <Lock size={14} color={theme.textMuted} title="This task has not started yet" />
+                              <LuLock size={14} color={theme.textMuted} title="This task has not started yet" />
                             )}
                           </div>
                         </div>
@@ -2452,7 +2499,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                         alignItems: 'center',
                                         gap: '5px',
                                       }}>
-                                        <MessageSquare size={12} />
+                                        <LuMessageSquare size={12} />
                                         {activityCount} Activities
                                       </span>
                                     );
@@ -2469,7 +2516,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                       alignItems: 'center',
                                       gap: '5px',
                                     }}>
-                                      <Zap size={12} />
+                                      <LuZap size={12} />
                                       {stageApiCalls.length} API Calls
                                     </span>
                                   )}
@@ -2500,7 +2547,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                         paddingBottom: '10px',
                                         borderBottom: `1px solid ${theme.border}`,
                                       }}>
-                                        <MessageSquare size={14} color={phase.color} />
+                                        <LuMessageSquare size={14} color={phase.color} />
                                         Activity Log ({phaseActivities.length})
                                       </div>
                                       {/* Timeline */}
@@ -2557,11 +2604,11 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                                 zIndex: 1,
                                               }}>
                                                 {isSpecialist ? (
-                                                  <User size={10} color={dotColor} />
+                                                  <LuUser size={10} color={dotColor} />
                                                 ) : isSystem ? (
-                                                  <CheckCircle size={10} color={dotColor} />
+                                                  <LuCircleCheck size={10} color={dotColor} />
                                                 ) : (
-                                                  <Activity size={10} color={dotColor} />
+                                                  <LuActivity size={10} color={dotColor} />
                                                 )}
                                               </div>
 
@@ -2612,7 +2659,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                                     alignItems: 'center',
                                                     gap: '4px',
                                                   }}>
-                                                    <Clock size={10} />
+                                                    <LuClock size={10} />
                                                     {new Date(activity.timestamp).toLocaleString()}
                                                   </span>
                                                 </div>
@@ -2709,7 +2756,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                     alignItems: 'center',
                                     gap: '8px',
                                   }}>
-                                    <Zap size={14} color={theme.textSecondary} />
+                                    <LuZap size={14} color={theme.textSecondary} />
                                     <span style={{
                                       fontSize: '0.75rem',
                                       fontWeight: 700,
@@ -2741,12 +2788,12 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                         alignItems: 'center',
                                         gap: '4px',
                                       }}>
-                                        <AlertTriangle size={10} />
+                                        <LuTriangleAlert size={10} />
                                         DENIAL
                                       </span>
                                     )}
                                   </div>
-                                  <ChevronDown
+                                  <LuChevronDown
                                     size={16}
                                     color={theme.textSecondary}
                                     style={{
@@ -2795,7 +2842,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                       gap: '5px',
                                       letterSpacing: '0.03em',
                                     }}>
-                                      <AlertTriangle size={12} />
+                                      <LuTriangleAlert size={12} />
                                       CAUSE OF DENIAL
                                     </div>
                                   )}
@@ -2902,7 +2949,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                           alignItems: 'center',
                                           gap: '4px',
                                         }}>
-                                          <Upload size={12} /> REQUEST
+                                          <LuUpload size={12} /> REQUEST
                                         </span>
                                         <div style={{ display: 'flex', gap: '4px' }}>
                                           <button
@@ -2922,7 +2969,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                             }}
                                             title="Expand JSON"
                                           >
-                                            <Maximize2 size={10} />
+                                            <LuMaximize2 size={10} />
                                             Expand
                                           </button>
                                           <button
@@ -2941,7 +2988,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                               color: copiedId === `req-${call.id}` ? '#10b981' : theme.textSecondary,
                                             }}
                                           >
-                                            {copiedId === `req-${call.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                            {copiedId === `req-${call.id}` ? <LuCheck size={10} /> : <LuCopy size={10} />}
                                             {copiedId === `req-${call.id}` ? 'Copied!' : 'Copy'}
                                           </button>
                                         </div>
@@ -2973,7 +3020,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                           alignItems: 'center',
                                           gap: '4px',
                                         }}>
-                                          <Download size={12} /> RESPONSE
+                                          <LuDownload size={12} /> RESPONSE
                                         </span>
                                         <div style={{ display: 'flex', gap: '4px' }}>
                                           <button
@@ -2993,7 +3040,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                             }}
                                             title="Expand JSON"
                                           >
-                                            <Maximize2 size={10} />
+                                            <LuMaximize2 size={10} />
                                             Expand
                                           </button>
                                           <button
@@ -3012,7 +3059,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                               color: copiedId === `res-${call.id}` ? '#3b82f6' : theme.textSecondary,
                                             }}
                                           >
-                                            {copiedId === `res-${call.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                            {copiedId === `res-${call.id}` ? <LuCheck size={10} /> : <LuCopy size={10} />}
                                             {copiedId === `res-${call.id}` ? 'Copied!' : 'Copy'}
                                           </button>
                                         </div>
@@ -3063,7 +3110,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                         paddingBottom: '10px',
                                         borderBottom: `1px solid ${theme.border}`,
                                       }}>
-                                        <MessageSquare size={14} color="#8b5cf6" />
+                                        <LuMessageSquare size={14} color="#8b5cf6" />
                                         Specialist Notes ({stageNotes.length})
                                       </div>
                                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -3093,7 +3140,7 @@ function WorkflowStageTracker({ application, executions, apiCalls, transactions 
                                                   alignItems: 'center',
                                                   justifyContent: 'center',
                                                 }}>
-                                                  <User size={14} color="#fff" />
+                                                  <LuUser size={14} color="#fff" />
                                                 </div>
                                                 <span style={{
                                                   fontSize: '0.8125rem',

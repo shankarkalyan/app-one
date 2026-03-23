@@ -3,65 +3,65 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as d3 from 'd3';
 import {
-  Users,
-  Plus,
-  Edit2,
-  Trash2,
-  RefreshCw,
-  Home,
-  Briefcase,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  X,
-  Save,
-  Eye,
-  EyeOff,
-  LogOut,
-  Activity,
-  TrendingUp,
-  FileText,
-  Shield,
-  Zap,
-  BarChart3,
-  PieChart,
-  Bell,
-  Settings,
-  Search,
-  Filter,
-  ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
-  Circle,
-  CheckCircle,
-  XCircle,
-  PlayCircle,
-  PauseCircle,
-  Target,
-  Layers,
-  GitBranch,
-  Database,
-  Server,
-  Cpu,
-  HardDrive,
-  Wifi,
-  Calendar,
-  UserCheck,
-  UserX,
-  ClipboardList,
-  AlertTriangle,
-  Maximize2,
-  Minimize2,
-  Info,
-  Sun,
-  Moon,
-  ChevronDown,
-  ChevronUp,
-  GripVertical,
-  List,
-  Copy,
-  Workflow,
-} from 'lucide-react';
+  LuUsers,
+  LuPlus,
+  LuPencil,
+  LuTrash2,
+  LuRefreshCw,
+  LuHouse,
+  LuBriefcase,
+  LuCircleCheckBig,
+  LuClock,
+  LuCircleAlert,
+  LuX,
+  LuSave,
+  LuEye,
+  LuEyeOff,
+  LuLogOut,
+  LuActivity,
+  LuTrendingUp,
+  LuFileText,
+  LuShield,
+  LuZap,
+  LuChartBar,
+  LuChartPie,
+  LuBell,
+  LuSettings,
+  LuSearch,
+  LuFilter,
+  LuChevronRight,
+  LuArrowUpRight,
+  LuArrowDownRight,
+  LuCircle,
+  LuCircleCheck,
+  LuCircleX,
+  LuCirclePlay,
+  LuCirclePause,
+  LuTarget,
+  LuLayers,
+  LuGitBranch,
+  LuDatabase,
+  LuServer,
+  LuCpu,
+  LuHardDrive,
+  LuWifi,
+  LuCalendar,
+  LuUserCheck,
+  LuUserX,
+  LuClipboardList,
+  LuTriangleAlert,
+  LuMaximize2,
+  LuMinimize2,
+  LuInfo,
+  LuSun,
+  LuMoon,
+  LuChevronDown,
+  LuChevronUp,
+  LuGripVertical,
+  LuList,
+  LuCopy,
+  LuWorkflow,
+} from 'react-icons/lu';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -3717,7 +3717,7 @@ const AdminDashboard = () => {
         <div style={styles.headerLeft}>
           <div style={styles.logo}>
             <div style={styles.logoIcon}>
-              <Shield size={22} color="#fff" />
+              <LuShield size={22} color="#fff" />
             </div>
             <div style={styles.logoText}>
               <span style={styles.logoTitle}>Command Center</span>
@@ -3833,21 +3833,21 @@ const AdminDashboard = () => {
             onClick={handleRefresh}
             title="Refresh Data"
           >
-            <RefreshCw size={18} />
+            <LuRefreshCw size={18} />
           </button>
           <button
             style={styles.iconBtn}
             onClick={() => navigate('/applications')}
             title="Applications"
           >
-            <Home size={18} />
+            <LuHouse size={18} />
           </button>
           <button
             style={styles.themeToggleBtn}
             onClick={toggleTheme}
             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? <LuSun size={18} /> : <LuMoon size={18} />}
           </button>
           <button
             style={styles.logoutBtn}
@@ -3857,7 +3857,7 @@ const AdminDashboard = () => {
             }}
             title="Logout"
           >
-            <LogOut size={18} />
+            <LuLogOut size={18} />
           </button>
         </div>
       </header>
@@ -3871,7 +3871,7 @@ const AdminDashboard = () => {
           }}
           onClick={() => setActiveTab('overview')}
         >
-          <Layers size={18} />
+          <LuLayers size={18} />
           Overview
         </button>
         <button
@@ -3881,7 +3881,7 @@ const AdminDashboard = () => {
           }}
           onClick={() => setActiveTab('analytics')}
         >
-          <BarChart3 size={18} />
+          <LuChartBar size={18} />
           Analytics
         </button>
         <button
@@ -3891,7 +3891,7 @@ const AdminDashboard = () => {
           }}
           onClick={() => setActiveTab('allocation')}
         >
-          <Users size={18} />
+          <LuUsers size={18} />
           Specialists Allocation
         </button>
         <button
@@ -3901,7 +3901,7 @@ const AdminDashboard = () => {
           }}
           onClick={() => setActiveTab('workflow')}
         >
-          <Workflow size={18} />
+          <LuWorkflow size={18} />
           Workflow Config
         </button>
       </div>
@@ -3914,48 +3914,48 @@ const AdminDashboard = () => {
         <div style={styles.statsGrid}>
           <div style={styles.statCard}>
             <div style={{ ...styles.statIcon, background: `${colors.lightBlue}20` }}>
-              <FileText size={24} color={colors.lightBlue} />
+              <LuFileText size={24} color={colors.lightBlue} />
             </div>
             <div style={styles.statValue}>{stats.totalApplications}</div>
             <div style={styles.statLabel}>Total Applications</div>
             <div style={{ ...styles.statTrend, color: colors.lightBlue }}>
-              <TrendingUp size={14} />
+              <LuTrendingUp size={14} />
               Active
             </div>
           </div>
 
           <div style={styles.statCard}>
             <div style={{ ...styles.statIcon, background: `${colors.warning}20` }}>
-              <Activity size={24} color={colors.warning} />
+              <LuActivity size={24} color={colors.warning} />
             </div>
             <div style={styles.statValue}>{stats.totalActiveTasks}</div>
             <div style={styles.statLabel}>Active Tasks</div>
             <div style={{ ...styles.statTrend, color: colors.warning }}>
-              <PlayCircle size={14} />
+              <LuCirclePlay size={14} />
               {stats.totalPendingTasks} Pending
             </div>
           </div>
 
           <div style={styles.statCard}>
             <div style={{ ...styles.statIcon, background: `${colors.success}20` }}>
-              <CheckCircle2 size={24} color={colors.success} />
+              <LuCircleCheckBig size={24} color={colors.success} />
             </div>
             <div style={styles.statValue}>{stats.totalCompletedTasks}</div>
             <div style={styles.statLabel}>Completed Tasks</div>
             <div style={{ ...styles.statTrend, color: colors.success }}>
-              <ArrowUpRight size={14} />
+              <LuArrowUpRight size={14} />
               {stats.completed} Apps Done
             </div>
           </div>
 
           <div style={styles.statCard}>
             <div style={{ ...styles.statIcon, background: `${colors.purple}20` }}>
-              <Users size={24} color={colors.purple} />
+              <LuUsers size={24} color={colors.purple} />
             </div>
             <div style={styles.statValue}>{stats.activeSpecialists}</div>
             <div style={styles.statLabel}>Active Specialists</div>
             <div style={{ ...styles.statTrend, color: colors.purple }}>
-              <Shield size={14} />
+              <LuShield size={14} />
               {stats.activeAdmins} Admin{stats.activeAdmins !== 1 ? 's' : ''}
             </div>
           </div>
@@ -3967,7 +3967,7 @@ const AdminDashboard = () => {
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <div style={styles.cardTitle}>
-                <Briefcase size={18} color={colors.primary} />
+                <LuBriefcase size={18} color={colors.primary} />
                 Workload Distribution
               </div>
               {stats.unassignedTasks > 0 && (
@@ -3976,7 +3976,7 @@ const AdminDashboard = () => {
                   background: `${colors.warning}20`,
                   color: colors.warning,
                 }}>
-                  <AlertCircle size={12} />
+                  <LuCircleAlert size={12} />
                   {stats.unassignedTasks} Unassigned
                 </span>
               )}
@@ -3987,22 +3987,22 @@ const AdminDashboard = () => {
                   Object.entries(workload.by_specialty).map(([specialty, data]) => (
                     <div key={specialty} style={styles.workloadItem}>
                       <div style={styles.workloadLabel}>
-                        <Layers size={12} />
+                        <LuLayers size={12} />
                         {specialty.replace('_', ' ')}
                       </div>
                       <div style={styles.workloadStats}>
                         <div style={styles.workloadStat}>
-                          <Clock size={14} color={colors.primary} />
+                          <LuClock size={14} color={colors.primary} />
                           <span style={{ ...styles.workloadNumber, color: colors.primary }}>{data.pending}</span>
                           <span style={styles.workloadMini}>pending</span>
                         </div>
                         <div style={styles.workloadStat}>
-                          <Activity size={14} color={colors.warning} />
+                          <LuActivity size={14} color={colors.warning} />
                           <span style={{ ...styles.workloadNumber, color: colors.warning }}>{data.in_progress}</span>
                           <span style={styles.workloadMini}>active</span>
                         </div>
                         <div style={styles.workloadStat}>
-                          <CheckCircle size={14} color={colors.success} />
+                          <LuCircleCheck size={14} color={colors.success} />
                           <span style={{ ...styles.workloadNumber, color: colors.success }}>{data.completed}</span>
                           <span style={styles.workloadMini}>done</span>
                         </div>
@@ -4017,7 +4017,7 @@ const AdminDashboard = () => {
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <div style={styles.cardTitle}>
-                <GitBranch size={18} color={colors.cyan} />
+                <LuGitBranch size={18} color={colors.cyan} />
                 Application Pipeline
               </div>
               <span style={{
@@ -4290,7 +4290,7 @@ const AdminDashboard = () => {
         <div style={{ ...styles.card, marginBottom: '24px' }}>
           <div style={styles.cardHeader}>
             <div style={styles.cardTitle}>
-              <Zap size={18} color={colors.warning} />
+              <LuZap size={18} color={colors.warning} />
               Quick Actions
             </div>
           </div>
@@ -4303,7 +4303,7 @@ const AdminDashboard = () => {
                 onMouseLeave={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
               >
                 <div style={{ ...styles.quickActionIcon, background: `${colors.success}20` }}>
-                  <Plus size={20} color={colors.success} />
+                  <LuPlus size={20} color={colors.success} />
                 </div>
                 <span style={styles.quickActionLabel}>Add Specialist</span>
               </div>
@@ -4314,7 +4314,7 @@ const AdminDashboard = () => {
                 onMouseLeave={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
               >
                 <div style={{ ...styles.quickActionIcon, background: `${colors.primary}20` }}>
-                  <FileText size={20} color={colors.primary} />
+                  <LuFileText size={20} color={colors.primary} />
                 </div>
                 <span style={styles.quickActionLabel}>View Applications</span>
               </div>
@@ -4325,7 +4325,7 @@ const AdminDashboard = () => {
                 onMouseLeave={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
               >
                 <div style={{ ...styles.quickActionIcon, background: `${colors.purple}20` }}>
-                  <ClipboardList size={20} color={colors.purple} />
+                  <LuClipboardList size={20} color={colors.purple} />
                 </div>
                 <span style={styles.quickActionLabel}>Specialist Workbench</span>
               </div>
@@ -4336,7 +4336,7 @@ const AdminDashboard = () => {
                 onMouseLeave={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
               >
                 <div style={{ ...styles.quickActionIcon, background: `${colors.cyan}20` }}>
-                  <RefreshCw size={20} color={colors.cyan} />
+                  <LuRefreshCw size={20} color={colors.cyan} />
                 </div>
                 <span style={styles.quickActionLabel}>Refresh Data</span>
               </div>
@@ -4348,12 +4348,12 @@ const AdminDashboard = () => {
         <div style={styles.card}>
           <div style={styles.cardHeader}>
             <div style={styles.cardTitle}>
-              <Users size={18} color={colors.purple} />
+              <LuUsers size={18} color={colors.purple} />
               Specialists ({filteredSpecialists.length})
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={styles.searchBar}>
-                <Search size={16} color={isDark ? '#64748b' : '#94a3b8'} />
+                <LuSearch size={16} color={isDark ? '#64748b' : '#94a3b8'} />
                 <input
                   type="text"
                   placeholder="Search specialists..."
@@ -4370,7 +4370,7 @@ const AdminDashboard = () => {
                 }}
                 onClick={openCreateModal}
               >
-                <Plus size={14} />
+                <LuPlus size={14} />
                 Add New
               </button>
             </div>
@@ -4378,7 +4378,7 @@ const AdminDashboard = () => {
           <div style={styles.tableContainer}>
             {loading ? (
               <div style={{ textAlign: 'center', padding: '60px', color: isDark ? '#64748b' : '#94a3b8' }}>
-                <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
+                <LuRefreshCw size={32} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
                 <p>Loading specialists...</p>
               </div>
             ) : (
@@ -4483,9 +4483,9 @@ const AdminDashboard = () => {
                           color: specialist.is_active ? colors.success : colors.danger,
                         }}>
                           {specialist.is_active ? (
-                            <><Circle size={8} fill="currentColor" /> Active</>
+                            <><LuCircle size={8} fill="currentColor" /> Active</>
                           ) : (
-                            <><XCircle size={12} /> Inactive</>
+                            <><LuCircleX size={12} /> Inactive</>
                           )}
                         </span>
                       </td>
@@ -4500,14 +4500,14 @@ const AdminDashboard = () => {
                           onClick={() => openEditModal(specialist)}
                           title="Edit"
                         >
-                          <Edit2 size={14} />
+                          <LuPencil size={14} />
                         </button>
                         <button
                           style={{ ...styles.actionBtn, color: colors.danger }}
                           onClick={() => handleDelete(specialist)}
                           title="Deactivate"
                         >
-                          <Trash2 size={14} />
+                          <LuTrash2 size={14} />
                         </button>
                       </td>
                     </tr>
@@ -4596,7 +4596,7 @@ const AdminDashboard = () => {
           <div style={styles.expandedModal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.expandedHeader}>
               <div style={styles.expandedTitle}>
-                <GitBranch size={20} color={colors.primary} />
+                <LuGitBranch size={20} color={colors.primary} />
                 Specialist Network Graph
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -4618,7 +4618,7 @@ const AdminDashboard = () => {
                     e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.4)';
                   }}
                 >
-                  <X size={18} />
+                  <LuX size={18} />
                 </button>
               </div>
             </div>
@@ -4649,13 +4649,13 @@ const AdminDashboard = () => {
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.4)';
                 }}
               >
-                <X size={18} />
+                <LuX size={18} />
               </button>
             </div>
             <div style={styles.modalBody}>
               {formError && (
                 <div style={styles.error}>
-                  <AlertTriangle size={16} />
+                  <LuTriangleAlert size={16} />
                   {formError}
                 </div>
               )}
@@ -4689,7 +4689,7 @@ const AdminDashboard = () => {
                     style={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <LuEyeOff size={18} /> : <LuEye size={18} />}
                   </button>
                 </div>
               </div>
@@ -4819,9 +4819,9 @@ const AdminDashboard = () => {
                 disabled={saving}
               >
                 {saving ? (
-                  <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                  <LuRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
                 ) : (
-                  <Save size={16} />
+                  <LuSave size={16} />
                 )}
                 {editingSpecialist ? 'Update' : 'Create'}
               </button>
@@ -4846,7 +4846,7 @@ const AdminDashboard = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <AlertTriangle size={20} color="#fff" />
+                  <LuTriangleAlert size={20} color="#fff" />
                 </div>
                 Specialist Reallocation
               </div>
@@ -4862,7 +4862,7 @@ const AdminDashboard = () => {
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.4)';
                 }}
               >
-                <X size={18} />
+                <LuX size={18} />
               </button>
             </div>
 
@@ -4873,7 +4873,7 @@ const AdminDashboard = () => {
                 <>
                   <div style={styles.warningBox}>
                     <div style={styles.warningIcon}>
-                      <AlertCircle size={24} color="#fff" />
+                      <LuCircleAlert size={24} color="#fff" />
                     </div>
                     <div style={styles.warningContent}>
                       <div style={styles.warningTitle}>Active Tasks Detected</div>
@@ -4919,7 +4919,7 @@ const AdminDashboard = () => {
                           background: `${colors.warning}20`,
                           color: colors.warning,
                         }}>
-                          <Clock size={14} />
+                          <LuClock size={14} />
                           {reallocationData.specialist.pending_tasks_count || 0} Pending
                         </span>
                         <span style={{
@@ -4933,7 +4933,7 @@ const AdminDashboard = () => {
                           background: `${colors.chaseBlue}20`,
                           color: colors.chaseBlue,
                         }}>
-                          <PlayCircle size={14} />
+                          <LuCirclePlay size={14} />
                           {reallocationData.specialist.in_progress_tasks_count || 0} In Progress
                         </span>
                       </div>
@@ -5018,12 +5018,12 @@ const AdminDashboard = () => {
                     {/* Tasks to reassign */}
                     <div style={styles.taskList}>
                       <div style={styles.taskListTitle}>
-                        <ClipboardList size={14} />
+                        <LuClipboardList size={14} />
                         Tasks to Reassign ({specialistTasks.filter(t => !taskReassignments[t.id]).length} remaining)
                       </div>
                       {loadingTasks ? (
                         <div style={{ textAlign: 'center', padding: '20px', color: isDark ? '#64748b' : '#94a3b8' }}>
-                          <RefreshCw size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                          <LuRefreshCw size={20} style={{ animation: 'spin 1s linear infinite' }} />
                           <div style={{ marginTop: '8px' }}>Loading tasks...</div>
                         </div>
                       ) : (
@@ -5070,7 +5070,7 @@ const AdminDashboard = () => {
                               fontSize: '14px',
                               fontWeight: '600',
                             }}>
-                              <CheckCircle size={24} style={{ marginBottom: '8px' }} />
+                              <LuCircleCheck size={24} style={{ marginBottom: '8px' }} />
                               <div>All tasks reassigned!</div>
                             </div>
                           )}
@@ -5091,7 +5091,7 @@ const AdminDashboard = () => {
                     {/* Target specialists */}
                     <div style={styles.taskList}>
                       <div style={styles.taskListTitle}>
-                        <Users size={14} />
+                        <LuUsers size={14} />
                         Available Specialists
                       </div>
                       {specialists
@@ -5168,7 +5168,7 @@ const AdminDashboard = () => {
                               </div>
                               {assignedTasks.length > 0 && (
                                 <div style={styles.assignedTaskBadge}>
-                                  <CheckCircle size={12} />
+                                  <LuCircleCheck size={12} />
                                   {assignedTasks.length} task{assignedTasks.length !== 1 ? 's' : ''} assigned
                                 </div>
                               )}
@@ -5221,7 +5221,7 @@ const AdminDashboard = () => {
                         <span style={styles.reasonIcon}>{reason.icon}</span>
                         <span style={styles.reasonLabel}>{reason.label}</span>
                         {reallocationReason === reason.id && (
-                          <CheckCircle size={18} color={colors.chaseBlue} style={{ marginLeft: 'auto' }} />
+                          <LuCircleCheck size={18} color={colors.chaseBlue} style={{ marginLeft: 'auto' }} />
                         )}
                       </div>
                     ))}
@@ -5277,7 +5277,7 @@ const AdminDashboard = () => {
                     style={{ ...styles.modalActionBtn, ...styles.actionBtnSecondary }}
                     onClick={() => setReallocationStep(prev => prev - 1)}
                   >
-                    <ChevronRight size={16} style={{ transform: 'rotate(180deg)' }} />
+                    <LuChevronRight size={16} style={{ transform: 'rotate(180deg)' }} />
                     Back
                   </button>
                 )}
@@ -5308,7 +5308,7 @@ const AdminDashboard = () => {
                       disabled={loadingTasks}
                     >
                       {loadingTasks ? 'Loading...' : 'Continue'}
-                      <ChevronRight size={16} />
+                      <LuChevronRight size={16} />
                     </button>
                   </>
                 )}
@@ -5319,7 +5319,7 @@ const AdminDashboard = () => {
                     onClick={() => setReallocationStep(3)}
                   >
                     Next: Select Reason
-                    <ChevronRight size={16} />
+                    <LuChevronRight size={16} />
                   </button>
                 )}
 
@@ -5336,12 +5336,12 @@ const AdminDashboard = () => {
                   >
                     {updatingAllocation ? (
                       <>
-                        <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        <LuRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
                         Processing...
                       </>
                     ) : (
                       <>
-                        <CheckCircle size={16} />
+                        <LuCircleCheck size={16} />
                         Confirm Reallocation
                       </>
                     )}
@@ -5490,7 +5490,7 @@ const AdminDashboard = () => {
                       fontWeight: '600',
                     }}
                   >
-                    <Circle size={8} fill={idx === 0 ? '#185FA5' : '#0d9488'} />
+                    <LuCircle size={8} fill={idx === 0 ? '#185FA5' : '#0d9488'} />
                     {phase.replace(/_/g, ' ')}
                   </span>
                 ))}
@@ -5527,7 +5527,7 @@ const AdminDashboard = () => {
                     fontWeight: '600',
                   }}
                 >
-                  <CheckCircle size={12} />
+                  <LuCircleCheck size={12} />
                   {type.replace(/_/g, ' ')}
                 </span>
               ))}
@@ -5585,7 +5585,7 @@ const AdminDashboard = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <XCircle size={20} color="#fff" />
+                  <LuCircleX size={20} color="#fff" />
                 </div>
                 Certification Required
               </div>
@@ -5601,7 +5601,7 @@ const AdminDashboard = () => {
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.4)';
                 }}
               >
-                <X size={18} />
+                <LuX size={18} />
               </button>
             </div>
 
@@ -5629,7 +5629,7 @@ const AdminDashboard = () => {
                     justifyContent: 'center',
                     flexShrink: 0,
                   }}>
-                    <AlertTriangle size={24} color="#fff" />
+                    <LuTriangleAlert size={24} color="#fff" />
                   </div>
                   <div>
                     <div style={{
@@ -5688,7 +5688,7 @@ const AdminDashboard = () => {
                         fontWeight: '600',
                       }}
                     >
-                      <CheckCircle size={14} />
+                      <LuCircleCheck size={14} />
                       {type.replace(/_/g, ' ')}
                     </span>
                   ))}
@@ -5819,7 +5819,7 @@ const AdminDashboard = () => {
                       alignItems: 'center',
                       gap: '8px',
                     }}>
-                      <CheckCircle size={16} />
+                      <LuCircleCheck size={16} />
                       <span>
                         <strong>{phaseTransferData.specialist.full_name || phaseTransferData.specialist.username}</strong> is certified in{' '}
                         <strong>{phaseTransferData.currentPhase.replace(/_/g, ' ')}</strong> and{' '}
@@ -5924,7 +5924,7 @@ const AdminDashboard = () => {
                         justifyContent: 'center',
                         color: isDark ? '#475569' : '#94a3b8',
                       }}>
-                        <Clock size={32} style={{ marginBottom: '8px', opacity: 0.5 }} strokeDasharray="4 2" />
+                        <LuClock size={32} style={{ marginBottom: '8px', opacity: 0.5 }} strokeDasharray="4 2" />
                         <span style={{ fontSize: '12px', textAlign: 'center' }}>
                           No tasks yet<br />
                           <span style={{ fontSize: '11px', opacity: 0.7 }}>New tasks will queue here</span>
@@ -6070,7 +6070,7 @@ const AdminDashboard = () => {
                             alignItems: 'center',
                             gap: '6px',
                           }}>
-                            <AlertTriangle size={14} />
+                            <LuTriangleAlert size={14} />
                             Current load: {phaseTransferData.tasks.length} tasks · Combined load may slow throughput
                           </div>
                         </div>
@@ -6096,7 +6096,7 @@ const AdminDashboard = () => {
                           fontWeight: '700',
                           fontSize: '13px',
                         }}>
-                          <Info size={16} />
+                          <LuInfo size={16} />
                           Preview: Dual-Phase Chip Appearance
                         </div>
                         <div style={{
@@ -6302,7 +6302,7 @@ const AdminDashboard = () => {
                       alignItems: 'center',
                       gap: '8px',
                     }}>
-                      <AlertCircle size={16} />
+                      <LuCircleAlert size={16} />
                       Please assign all tasks before continuing ({Object.keys(phaseTransferAssignments).length}/{phaseTransferData.tasks.length} assigned)
                     </div>
                   )}
@@ -6466,7 +6466,7 @@ const AdminDashboard = () => {
                       alignItems: 'flex-start',
                       gap: '12px',
                     }}>
-                      <AlertTriangle size={20} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <LuTriangleAlert size={20} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
                       <div>
                         <div style={{
                           fontSize: '14px',
@@ -6527,7 +6527,7 @@ const AdminDashboard = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                          <CheckCircle size={16} color="#fff" />
+                          <LuCircleCheck size={16} color="#fff" />
                         </div>
                         <div style={{
                           fontSize: '14px',
@@ -6593,7 +6593,7 @@ const AdminDashboard = () => {
                       gap: '8px',
                       marginBottom: '16px',
                     }}>
-                      <Eye size={18} color={phaseTransferOption === 'dual' ? '#92400e' : '#185FA5'} />
+                      <LuEye size={18} color={phaseTransferOption === 'dual' ? '#92400e' : '#185FA5'} />
                       <span style={{
                         fontSize: '14px',
                         fontWeight: '700',
@@ -6769,19 +6769,19 @@ const AdminDashboard = () => {
                     {phaseTransferStep === 1 && (
                       <>
                         Continue · {phaseTransferOption === 'reassign' ? 'Reassign tasks' : 'Dual-phase assignment'}
-                        <ChevronRight size={16} />
+                        <LuChevronRight size={16} />
                       </>
                     )}
                     {phaseTransferStep === 2 && phaseTransferOption === 'reassign' && (
                       <>
                         Review & Confirm
-                        <ChevronRight size={16} />
+                        <LuChevronRight size={16} />
                       </>
                     )}
                     {phaseTransferStep === 2 && phaseTransferOption === 'dual' && (
                       <>
                         Confirm Dual Assignment
-                        <ChevronRight size={16} />
+                        <LuChevronRight size={16} />
                       </>
                     )}
                   </button>
@@ -6813,12 +6813,12 @@ const AdminDashboard = () => {
                   >
                     {phaseTransferLoading ? (
                       <>
-                        <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        <LuRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
                         Processing...
                       </>
                     ) : (
                       <>
-                        <CheckCircle size={16} />
+                        <LuCircleCheck size={16} />
                         Confirm Move
                       </>
                     )}
@@ -6869,7 +6869,7 @@ const AdminDashboard = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <UserX size={24} color="#fff" />
+                  <LuUserX size={24} color="#fff" />
                 </div>
                 <div>
                   <div style={{
@@ -6942,7 +6942,7 @@ const AdminDashboard = () => {
                       alignItems: 'flex-start',
                       gap: '12px',
                     }}>
-                      <AlertTriangle size={20} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <LuTriangleAlert size={20} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
                       <div>
                         <div style={{
                           fontSize: '14px',
@@ -7018,7 +7018,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    <ChevronRight size={24} color={isDark ? '#64748b' : '#94a3b8'} />
+                    <LuChevronRight size={24} color={isDark ? '#64748b' : '#94a3b8'} />
 
                     {/* After */}
                     <div style={{
@@ -7066,7 +7066,7 @@ const AdminDashboard = () => {
                         alignItems: 'center',
                         gap: '8px',
                       }}>
-                        <ClipboardList size={16} />
+                        <LuClipboardList size={16} />
                         Tasks to Offboard from {dualRemovalData.phaseToRemove?.replace(/_/g, ' ')}
                       </div>
                       <div style={{
@@ -7143,7 +7143,7 @@ const AdminDashboard = () => {
                       padding: '24px',
                       textAlign: 'center',
                     }}>
-                      <CheckCircle size={32} color="#22c55e" style={{ marginBottom: '12px' }} />
+                      <LuCircleCheck size={32} color="#22c55e" style={{ marginBottom: '12px' }} />
                       <div style={{
                         fontSize: '14px',
                         fontWeight: '600',
@@ -7278,7 +7278,7 @@ const AdminDashboard = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                          <UserX size={16} color="#fff" />
+                          <LuUserX size={16} color="#fff" />
                         </div>
                         <div style={{
                           fontSize: '14px',
@@ -7303,7 +7303,7 @@ const AdminDashboard = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                          <CheckCircle size={16} color="#fff" />
+                          <LuCircleCheck size={16} color="#fff" />
                         </div>
                         <div style={{
                           fontSize: '14px',
@@ -7331,7 +7331,7 @@ const AdminDashboard = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                           }}>
-                            <ClipboardList size={16} color="#fff" />
+                            <LuClipboardList size={16} color="#fff" />
                           </div>
                           <div style={{
                             fontSize: '14px',
@@ -7357,7 +7357,7 @@ const AdminDashboard = () => {
                       gap: '8px',
                       marginBottom: '16px',
                     }}>
-                      <Eye size={18} color="#22c55e" />
+                      <LuEye size={18} color="#22c55e" />
                       <span style={{
                         fontSize: '14px',
                         fontWeight: '700',
@@ -7489,13 +7489,13 @@ const AdminDashboard = () => {
                     {dualRemovalStep === 1 && (
                       <>
                         {dualRemovalData.tasksInRemovedPhase?.length > 0 ? 'Offboard Tasks' : 'Skip to Confirm'}
-                        <ChevronRight size={16} />
+                        <LuChevronRight size={16} />
                       </>
                     )}
                     {dualRemovalStep === 2 && (
                       <>
                         Review & Confirm
-                        <ChevronRight size={16} />
+                        <LuChevronRight size={16} />
                       </>
                     )}
                   </button>
@@ -7523,12 +7523,12 @@ const AdminDashboard = () => {
                   >
                     {dualRemovalLoading ? (
                       <>
-                        <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        <LuRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
                         Processing...
                       </>
                     ) : (
                       <>
-                        <UserX size={16} />
+                        <LuUserX size={16} />
                         Remove Dual-Phase
                       </>
                     )}
@@ -7594,19 +7594,19 @@ const AdminDashboard = () => {
               }}>
                 {workflowModal === 'task' && (
                   <>
-                    <Workflow size={20} color={colors.chaseBlue} />
+                    <LuWorkflow size={20} color={colors.chaseBlue} />
                     {editingTask ? 'Edit Task' : 'Add New Task'}
                   </>
                 )}
                 {workflowModal === 'subtask' && (
                   <>
-                    <List size={20} color={colors.purple} />
+                    <LuList size={20} color={colors.purple} />
                     {editingSubtask ? 'Edit Subtask' : 'Add New Subtask'}
                   </>
                 )}
                 {workflowModal === 'checklist' && (
                   <>
-                    <CheckCircle2 size={20} color={colors.success} />
+                    <LuCircleCheckBig size={20} color={colors.success} />
                     {editingChecklist ? 'Edit Checklist Item' : 'Add Checklist Item'}
                   </>
                 )}
@@ -7628,7 +7628,7 @@ const AdminDashboard = () => {
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.4)';
                 }}
               >
-                <X size={18} />
+                <LuX size={18} />
               </button>
             </div>
 
@@ -8207,12 +8207,12 @@ const AdminDashboard = () => {
               >
                 {savingWorkflow ? (
                   <>
-                    <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                    <LuRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <Save size={16} />
+                    <LuSave size={16} />
                     {editingTask || editingSubtask || editingChecklist ? 'Update' : 'Create'}
                   </>
                 )}
@@ -8246,7 +8246,7 @@ const AdminDashboard = () => {
           }}
           onClick={() => setToastMessage(null)}
         >
-          {toastMessage.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+          {toastMessage.type === 'success' ? <LuCircleCheck size={18} /> : <LuCircleX size={18} />}
           {toastMessage.text}
         </div>
       )}
@@ -8267,12 +8267,12 @@ const AdminDashboard = () => {
                   padding: '4px',
                 }}
               >
-                <X size={20} />
+                <LuX size={20} />
               </button>
             </div>
             <div style={styles.modalBody}>
               <div style={styles.deleteModalIcon}>
-                <Trash2 size={28} color="#ef4444" />
+                <LuTrash2 size={28} color="#ef4444" />
               </div>
               <div style={styles.deleteModalText}>
                 <p style={{ margin: '0 0 12px 0' }}>
@@ -8306,7 +8306,7 @@ const AdminDashboard = () => {
                 Cancel
               </button>
               <button style={styles.deleteBtn} onClick={handleDeleteConfirm}>
-                <Trash2 size={16} />
+                <LuTrash2 size={16} />
                 Delete
               </button>
             </div>
