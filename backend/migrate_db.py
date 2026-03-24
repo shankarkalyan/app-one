@@ -1,4 +1,4 @@
-"""Quick migration script to allow NULL specialty_type and create allocation_history table."""
+"""Quick migration script to allow NULL specialty_type, create allocation_history table, and add ssn_last_four column."""
 import sqlite3
 import os
 
@@ -11,6 +11,16 @@ def migrate():
 
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+
+    # Check if ssn_last_four column exists in loan_applications
+    cursor.execute("PRAGMA table_info(loan_applications)")
+    columns = [c[1] for c in cursor.fetchall()]
+    if 'ssn_last_four' not in columns:
+        print("Adding ssn_last_four column to loan_applications...")
+        cursor.execute("ALTER TABLE loan_applications ADD COLUMN ssn_last_four VARCHAR(4)")
+        print("ssn_last_four column added.")
+    else:
+        print("ssn_last_four column already exists.")
 
     # Check if allocation_history table exists
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='allocation_history'")

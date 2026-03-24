@@ -18,6 +18,7 @@ class LoanApplication(Base):
     customer_name = Column(String(200))
     customer_email = Column(String(200))
     customer_phone = Column(String(50))
+    ssn_last_four = Column(String(4))  # Last 4 digits of SSN
     property_address = Column(String(500))
     loan_amount = Column(Float)
     original_borrower = Column(String(200))
