@@ -1153,7 +1153,7 @@ function NewApplication() {
             </Link>
             {/* Agentic Workflow */}
             <Link
-              to="/"
+              to="/workflow?view=agentic"
               style={{
                 padding: '6px 16px',
                 borderRadius: '8px',
@@ -1175,7 +1175,7 @@ function NewApplication() {
             </Link>
             {/* Flowchart Workflow */}
             <Link
-              to="/"
+              to="/workflow?view=flowchart"
               style={{
                 padding: '6px 16px',
                 borderRadius: '8px',

@@ -658,7 +658,7 @@ function ApplicationList() {
               Applications
             </button>
             <Link
-              to="/?view=agentic"
+              to="/workflow?view=agentic"
               style={{
                 padding: '8px 18px',
                 borderRadius: '8px',
@@ -677,7 +677,7 @@ function ApplicationList() {
               Agentic Workflow
             </Link>
             <Link
-              to="/?view=flowchart"
+              to="/workflow?view=flowchart"
               style={{
                 padding: '8px 18px',
                 borderRadius: '8px',
