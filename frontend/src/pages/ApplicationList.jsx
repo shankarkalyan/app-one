@@ -695,25 +695,27 @@ function ApplicationList() {
               <LuGitBranch size={15} />
               Workflow
             </Link>
-            <Link
-              to="/new"
-              style={{
-                padding: '8px 18px',
-                borderRadius: '8px',
-                background: 'transparent',
-                color: 'rgba(255,255,255,0.8)',
-                textDecoration: 'none',
-                fontSize: '13px',
-                fontWeight: 500,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s',
-              }}
-            >
-              <LuPlus size={15} />
-              Simulate
-            </Link>
+            {isAuthenticated && (
+              <Link
+                to="/new"
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '8px',
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.8)',
+                  textDecoration: 'none',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <LuPlus size={15} />
+                Simulate
+              </Link>
+            )}
           </div>
 
           {/* Action Buttons */}
@@ -797,28 +799,30 @@ function ApplicationList() {
               <LuRefreshCw size={16} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
             </button>
 
-            {/* Flush All */}
-            <button
-              onClick={() => setShowFlushConfirm(true)}
-              title="Delete all application data"
-              style={{
-                padding: '8px 14px',
-                borderRadius: '8px',
-                border: 'none',
-                background: 'rgba(239, 68, 68, 0.15)',
-                color: '#fca5a5',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '13px',
-                fontWeight: 500,
-                transition: 'all 0.2s',
-              }}
-            >
-              <LuTrash2 size={14} />
-              Flush All
-            </button>
+            {/* Flush All - Only visible to authenticated admins */}
+            {isAuthenticated && isAdmin && (
+              <button
+                onClick={() => setShowFlushConfirm(true)}
+                title="Delete all application data"
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  color: '#fca5a5',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                }}
+              >
+                <LuTrash2 size={14} />
+                Flush All
+              </button>
+            )}
           </div>
         </div>
       </header>
