@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as d3 from 'd3';
 import {
@@ -208,6 +208,23 @@ const AdminDashboard = () => {
   // Tasks completed by specialist data
   const [specialistTaskStats, setSpecialistTaskStats] = useState([]);
 
+  // Dynamic phases derived from workflow tasks - falls back to hardcoded if no tasks
+  const dynamicPhases = useMemo(() => {
+    if (workflowTasks.length > 0) {
+      return workflowTasks.map(task => task.phase_code);
+    }
+    return SPECIALTY_TYPES;
+  }, [workflowTasks]);
+
+  // Workflow task lookup by phase code for color/name
+  const workflowTaskMap = useMemo(() => {
+    const map = {};
+    workflowTasks.forEach(task => {
+      map[task.phase_code] = task;
+    });
+    return map;
+  }, [workflowTasks]);
+
   const REALLOCATION_REASONS = [
     { id: 'sick_leave', label: 'Sick Leave', icon: '🏥' },
     { id: 'vacation', label: 'Vacation / PTO', icon: '🏖️' },
@@ -354,7 +371,7 @@ const AdminDashboard = () => {
 
     // Filter specialists with valid specialty_type
     const validSpecialists = specialists.filter(s =>
-      s.specialty_type && SPECIALTY_TYPES.includes(s.specialty_type)
+      s.specialty_type && dynamicPhases.includes(s.specialty_type)
     );
 
     // Show message if no valid specialists
@@ -936,16 +953,18 @@ const AdminDashboard = () => {
       .attr('width', width)
       .attr('height', height);
 
-    // Create flow stages
-    const phases = SPECIALTY_TYPES;
+    // Create flow stages - using dynamic phases from workflow tasks
+    const phases = dynamicPhases;
     const stageWidth = (width - margin.left - margin.right) / phases.length;
 
     const data = phases.map((phase, i) => {
       const phaseData = workload.by_specialty[phase] || { pending: 0, in_progress: 0, completed: 0 };
       const total = (phaseData.pending || 0) + (phaseData.in_progress || 0);
+      const taskInfo = workflowTaskMap[phase];
       return {
         phase,
-        label: phase.replace('_', ' '),
+        label: taskInfo?.name || phase.replace('_', ' '),
+        color: taskInfo?.color || '#0a4b94',
         total,
         pending: phaseData.pending || 0,
         inProgress: phaseData.in_progress || 0,
@@ -3691,14 +3710,17 @@ const AdminDashboard = () => {
   };
 
   // Application pipeline by phase - using workload data for accurate counts
-  const pipelineData = SPECIALTY_TYPES.map(phase => {
+  const pipelineData = dynamicPhases.map(phase => {
     const workloadForPhase = workload?.by_specialty?.[phase];
     const pendingCount = workloadForPhase?.pending || 0;
     const inProgressCount = workloadForPhase?.in_progress || 0;
     const completedCount = workloadForPhase?.completed || 0;
+    const taskInfo = workflowTaskMap[phase];
 
     return {
-      name: phase.replace('_', ' '),
+      phase_code: phase,
+      name: taskInfo?.name || phase.replace('_', ' '),
+      color: taskInfo?.color || '#0a4b94',
       count: pendingCount + inProgressCount, // Active tasks in pipeline
       pending: pendingCount,
       inProgress: inProgressCount,
@@ -4537,6 +4559,7 @@ const AdminDashboard = () => {
         {activeTab === 'allocation' && (
           <AllocationTab
             specialists={specialists}
+            workflowTasks={workflowTasks}
             allocationSubTab={allocationSubTab}
             setAllocationSubTab={setAllocationSubTab}
             updatingAllocation={updatingAllocation}
@@ -4736,8 +4759,10 @@ const AdminDashboard = () => {
                   gap: '8px',
                   marginTop: '8px',
                 }}>
-                  {SPECIALTY_TYPES.map((type) => {
+                  {dynamicPhases.map((type) => {
                     const isSelected = formData.specialty_types?.includes(type);
+                    const taskInfo = workflowTaskMap[type];
+                    const phaseColor = taskInfo?.color || colors.chaseBlue;
                     return (
                       <label
                         key={type}
@@ -4750,9 +4775,10 @@ const AdminDashboard = () => {
                           cursor: 'pointer',
                           transition: 'all 0.2s',
                           background: isSelected
-                            ? `${colors.chaseBlue}15`
+                            ? `${phaseColor}15`
                             : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'),
-                          border: `2px solid ${isSelected ? colors.chaseBlue : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')}`,
+                          border: `2px solid ${isSelected ? phaseColor : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')}`,
+                          borderLeft: `4px solid ${phaseColor}`,
                         }}
                       >
                         <input
@@ -4771,17 +4797,17 @@ const AdminDashboard = () => {
                           style={{
                             width: '16px',
                             height: '16px',
-                            accentColor: colors.chaseBlue,
+                            accentColor: phaseColor,
                           }}
                         />
                         <span style={{
                           fontSize: '12px',
                           fontWeight: isSelected ? '600' : '500',
                           color: isSelected
-                            ? colors.chaseBlue
+                            ? phaseColor
                             : (isDark ? '#94a3b8' : '#64748b'),
                         }}>
-                          {type.replace('_', ' ')}
+                          {taskInfo?.name || type.replace('_', ' ')}
                         </span>
                       </label>
                     );
@@ -7793,6 +7819,49 @@ const AdminDashboard = () => {
                           outline: 'none',
                         }}
                       />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      marginBottom: '6px',
+                    }}>
+                      Default Specialist (Optional)
+                    </label>
+                    <select
+                      value={workflowFormData.default_specialist_id || ''}
+                      onChange={(e) => setWorkflowFormData(prev => ({
+                        ...prev,
+                        default_specialist_id: e.target.value ? parseInt(e.target.value) : null
+                      }))}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
+                        background: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                        color: isDark ? '#e2e8f0' : '#1e293b',
+                        fontSize: '14px',
+                        outline: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="">-- No default specialist --</option>
+                      {specialists.filter(s => s.role !== 'admin' && s.is_active).map(specialist => (
+                        <option key={specialist.id} value={specialist.id}>
+                          {specialist.full_name}
+                        </option>
+                      ))}
+                    </select>
+                    <div style={{
+                      fontSize: '11px',
+                      color: isDark ? '#64748b' : '#94a3b8',
+                      marginTop: '4px',
+                    }}>
+                      This specialist will be automatically allocated to this phase
                     </div>
                   </div>
                 </div>

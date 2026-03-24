@@ -2,7 +2,7 @@
  * Workflow Configuration Tab Component for Admin Dashboard
  * Manages workflow tasks, subtasks, and checklists
  */
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   LuPlus,
   LuPencil,
@@ -15,8 +15,10 @@ import {
   LuCircleCheckBig,
   LuUserCheck,
   LuWorkflow,
+  LuSparkles,
 } from 'react-icons/lu';
 import { COLORS } from './adminStyles';
+import { reorderWorkflowTasks } from '../../services/api';
 
 const WorkflowConfigTab = ({
   workflowTasks,
@@ -41,6 +43,125 @@ const WorkflowConfigTab = ({
   styles,
 }) => {
   const colors = COLORS;
+
+  // Drag and drop state
+  const [draggedTaskId, setDraggedTaskId] = useState(null);
+  const [dragOverTaskId, setDragOverTaskId] = useState(null);
+  const [dropPosition, setDropPosition] = useState(null); // 'above' or 'below'
+  const dragCounter = useRef(0);
+
+  // Check if task is new (created within last 5 minutes)
+  const isNewTask = (task) => {
+    if (!task.created_at) return false;
+    const createdAt = new Date(task.created_at);
+    const now = new Date();
+    const diffMinutes = (now - createdAt) / (1000 * 60);
+    return diffMinutes < 5;
+  };
+
+  // Handle drag start
+  const handleDragStart = (e, taskId) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', taskId.toString());
+    // Add a slight delay to allow the drag image to be captured
+    setTimeout(() => {
+      e.target.style.opacity = '0.5';
+    }, 0);
+  };
+
+  // Handle drag end
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1';
+    setDraggedTaskId(null);
+    setDragOverTaskId(null);
+    setDropPosition(null);
+    dragCounter.current = 0;
+  };
+
+  // Handle drag over
+  const handleDragOver = (e, taskId) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    if (taskId === draggedTaskId) return;
+
+    // Calculate if drop should be above or below
+    const rect = e.currentTarget.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const position = e.clientY < midY ? 'above' : 'below';
+
+    setDragOverTaskId(taskId);
+    setDropPosition(position);
+  };
+
+  // Handle drag enter
+  const handleDragEnter = (e, taskId) => {
+    e.preventDefault();
+    dragCounter.current++;
+    if (taskId !== draggedTaskId) {
+      setDragOverTaskId(taskId);
+    }
+  };
+
+  // Handle drag leave
+  const handleDragLeave = (e) => {
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setDragOverTaskId(null);
+      setDropPosition(null);
+    }
+  };
+
+  // Handle drop
+  const handleDrop = async (e, targetTaskId) => {
+    e.preventDefault();
+
+    if (!draggedTaskId || draggedTaskId === targetTaskId) {
+      setDraggedTaskId(null);
+      setDragOverTaskId(null);
+      setDropPosition(null);
+      return;
+    }
+
+    // Calculate new order
+    const currentTasks = [...workflowTasks];
+    const draggedIndex = currentTasks.findIndex(t => t.id === draggedTaskId);
+    const targetIndex = currentTasks.findIndex(t => t.id === targetTaskId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Remove dragged task
+    const [draggedTask] = currentTasks.splice(draggedIndex, 1);
+
+    // Calculate new position
+    let newIndex = targetIndex;
+    if (dropPosition === 'below') {
+      newIndex = draggedIndex < targetIndex ? targetIndex : targetIndex + 1;
+    } else {
+      newIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    }
+
+    // Insert at new position
+    currentTasks.splice(newIndex, 0, draggedTask);
+
+    // Create order updates
+    const taskOrders = currentTasks.map((task, index) => ({
+      id: task.id,
+      order_index: index
+    }));
+
+    try {
+      await reorderWorkflowTasks(taskOrders);
+      await fetchWorkflowTasks();
+    } catch (error) {
+      console.error('Failed to reorder tasks:', error);
+    }
+
+    setDraggedTaskId(null);
+    setDragOverTaskId(null);
+    setDropPosition(null);
+  };
 
   return (
     <div style={styles.card}>
@@ -118,16 +239,57 @@ const WorkflowConfigTab = ({
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {workflowTasks.map((task, taskIndex) => (
+            {workflowTasks.map((task, taskIndex) => {
+              const taskIsNew = isNewTask(task);
+              const isDragging = draggedTaskId === task.id;
+              const isDragOver = dragOverTaskId === task.id;
+
+              return (
               <div
                 key={task.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, task.id)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => handleDragOver(e, task.id)}
+                onDragEnter={(e) => handleDragEnter(e, task.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, task.id)}
                 style={{
                   background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                  border: `1px solid ${isDragOver ? colors.chaseBlue : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')}`,
                   borderRadius: '12px',
                   overflow: 'hidden',
+                  opacity: isDragging ? 0.5 : 1,
+                  transform: isDragOver ? 'scale(1.01)' : 'scale(1)',
+                  transition: 'all 0.2s ease',
+                  position: 'relative',
                 }}
               >
+                {/* Drop indicator line */}
+                {isDragOver && dropPosition === 'above' && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    left: 0,
+                    right: 0,
+                    height: '4px',
+                    background: colors.chaseBlue,
+                    borderRadius: '2px',
+                    zIndex: 10,
+                  }} />
+                )}
+                {isDragOver && dropPosition === 'below' && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    left: 0,
+                    right: 0,
+                    height: '4px',
+                    background: colors.chaseBlue,
+                    borderRadius: '2px',
+                    zIndex: 10,
+                  }} />
+                )}
                 {/* Task Header */}
                 <div
                   style={{
@@ -143,7 +305,15 @@ const WorkflowConfigTab = ({
                   onClick={() => setExpandedTasks(prev => ({ ...prev, [task.id]: !prev[task.id] }))}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                    <LuGripVertical size={16} style={{ opacity: 0.3, cursor: 'grab' }} />
+                    <LuGripVertical
+                      size={16}
+                      style={{
+                        opacity: 0.5,
+                        cursor: 'grab',
+                        color: isDark ? '#94a3b8' : '#64748b',
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    />
                     <div
                       style={{
                         width: '28px',
@@ -165,8 +335,31 @@ const WorkflowConfigTab = ({
                         fontSize: '14px',
                         fontWeight: '600',
                         color: isDark ? '#e2e8f0' : '#1e293b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
                       }}>
                         {task.name}
+                        {taskIsNew && (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '2px 8px',
+                            borderRadius: '10px',
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: '#ffffff',
+                            fontSize: '10px',
+                            fontWeight: '700',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                            boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)',
+                            animation: 'pulse 2s infinite',
+                          }}>
+                            <LuSparkles size={10} />
+                            NEW
+                          </span>
+                        )}
                       </div>
                       <div style={{
                         fontSize: '12px',
@@ -633,7 +826,8 @@ const WorkflowConfigTab = ({
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

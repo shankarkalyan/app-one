@@ -24,6 +24,7 @@ import { COLORS, SPECIALTY_TYPES } from './adminStyles';
 
 const AllocationTab = ({
   specialists,
+  workflowTasks = [], // New prop for dynamic phases
   allocationSubTab,
   setAllocationSubTab,
   updatingAllocation,
@@ -290,9 +291,12 @@ const AllocationTab = ({
               );
             })()}
 
-            {/* Phase Buckets */}
+            {/* Phase Buckets - Now driven by workflow tasks */}
             <div style={styles.allocationContainer}>
-              {SPECIALTY_TYPES.map((phase) => {
+              {(workflowTasks.length > 0 ? workflowTasks : SPECIALTY_TYPES.map(p => ({ phase_code: p, name: p.replace('_', ' '), color: '#0a4b94' }))).map((task) => {
+                const phase = typeof task === 'string' ? task : task.phase_code;
+                const phaseName = typeof task === 'string' ? task.replace('_', ' ') : task.name;
+                const phaseColor = typeof task === 'string' ? '#0a4b94' : (task.color || '#0a4b94');
                 const phaseSpecialists = specialists.filter(s =>
                   s.role !== 'admin' && (
                     s.specialty_type === phase ||
@@ -307,6 +311,7 @@ const AllocationTab = ({
                     style={{
                       ...styles.allocationBucket,
                       ...(isOver ? styles.allocationBucketDragOver : {}),
+                      borderTop: `3px solid ${phaseColor}`,
                     }}
                     onDragOver={(e) => {
                       e.preventDefault();
@@ -322,7 +327,7 @@ const AllocationTab = ({
                     }}
                   >
                     <div style={styles.bucketHeader}>
-                      <span style={styles.bucketTitle}>{phase.replace('_', ' ')}</span>
+                      <span style={{ ...styles.bucketTitle, color: phaseColor }}>{phaseName}</span>
                       <span style={styles.bucketCount}>{phaseSpecialists.length}</span>
                     </div>
                     <div style={styles.bucketContent}>

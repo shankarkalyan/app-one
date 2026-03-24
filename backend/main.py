@@ -67,6 +67,8 @@ from models.api_models import (
     UpdateTaskSLARequest,
     CreateWorkflowTaskRequest,
     UpdateWorkflowTaskRequest,
+    ReorderTasksRequest,
+    ReorderSubtasksRequest,
 )
 from services.auth import (
     hash_password,
@@ -2956,6 +2958,7 @@ async def get_workflow_tasks(db: Session = Depends(get_db)):
             "color": task.color,
             "icon": task.icon,
             "sla_hours": task.sla_hours,
+            "created_at": task.created_at.isoformat() if task.created_at else None,
             "subtasks": subtasks_data,
         })
 
@@ -2967,28 +2970,107 @@ async def create_workflow_task(
     request: CreateWorkflowTaskRequest,
     db: Session = Depends(get_db)
 ):
-    """Create a new workflow task definition."""
+    """Create a new workflow task definition. New tasks are created at the top."""
     # Check if phase_code already exists
     existing = db.query(WorkflowTaskDefinition).filter(
         WorkflowTaskDefinition.phase_code == request.phase_code
     ).first()
+
     if existing:
-        raise HTTPException(status_code=400, detail=f"Phase code '{request.phase_code}' already exists")
+        if existing.is_active:
+            raise HTTPException(status_code=400, detail=f"Phase code '{request.phase_code}' already exists")
+        else:
+            # Reactivate the soft-deleted task with new data
+            existing.name = request.name
+            existing.description = request.description
+            existing.color = request.color
+            existing.icon = request.icon
+            existing.is_active = True
+            existing.created_at = datetime.utcnow()
+            existing.updated_at = datetime.utcnow()
 
-    # Get max order_index
-    max_order = db.query(WorkflowTaskDefinition).count()
+            # Shift all existing active tasks down
+            active_tasks = db.query(WorkflowTaskDefinition).filter(
+                WorkflowTaskDefinition.is_active == True,
+                WorkflowTaskDefinition.id != existing.id
+            ).all()
+            for active_task in active_tasks:
+                active_task.order_index += 1
 
+            existing.order_index = 0
+            db.commit()
+            db.refresh(existing)
+
+            # If a specialist was assigned, update their allocation
+            assigned_specialist = None
+            if request.default_specialist_id:
+                specialist = db.query(Specialist).filter(
+                    Specialist.id == request.default_specialist_id
+                ).first()
+                if specialist:
+                    specialist.specialty_type = request.phase_code
+                    current_types = specialist.specialty_types or []
+                    if request.phase_code not in current_types:
+                        specialist.specialty_types = current_types + [request.phase_code]
+                    specialist.updated_at = datetime.utcnow()
+                    db.commit()
+                    assigned_specialist = {
+                        "id": specialist.id,
+                        "full_name": specialist.full_name,
+                    }
+
+            return {
+                "id": existing.id,
+                "name": existing.name,
+                "description": existing.description,
+                "phase_code": existing.phase_code,
+                "order_index": existing.order_index,
+                "color": existing.color,
+                "icon": existing.icon,
+                "created_at": existing.created_at.isoformat() if existing.created_at else None,
+                "assigned_specialist": assigned_specialist,
+                "subtasks": [],
+            }
+
+    # Shift all existing tasks down by incrementing their order_index
+    existing_tasks = db.query(WorkflowTaskDefinition).filter(
+        WorkflowTaskDefinition.is_active == True
+    ).all()
+    for existing_task in existing_tasks:
+        existing_task.order_index += 1
+
+    # Create new task at the top with order_index = 0
     task = WorkflowTaskDefinition(
         name=request.name,
         phase_code=request.phase_code,
         description=request.description,
         color=request.color,
         icon=request.icon,
-        order_index=max_order,
+        order_index=0,
     )
     db.add(task)
     db.commit()
     db.refresh(task)
+
+    # If a specialist was assigned, update their allocation
+    assigned_specialist = None
+    if request.default_specialist_id:
+        specialist = db.query(Specialist).filter(
+            Specialist.id == request.default_specialist_id
+        ).first()
+        if specialist:
+            # Update specialist's specialty_type to the new phase
+            specialist.specialty_type = request.phase_code
+            # Add to specialty_types if not already present
+            current_types = specialist.specialty_types or []
+            if request.phase_code not in current_types:
+                specialist.specialty_types = current_types + [request.phase_code]
+            specialist.updated_at = datetime.utcnow()
+            db.commit()
+            assigned_specialist = {
+                "id": specialist.id,
+                "full_name": specialist.full_name,
+            }
 
     return {
         "id": task.id,
@@ -2998,8 +3080,28 @@ async def create_workflow_task(
         "order_index": task.order_index,
         "color": task.color,
         "icon": task.icon,
+        "created_at": task.created_at.isoformat() if task.created_at else None,
+        "assigned_specialist": assigned_specialist,
         "subtasks": [],
     }
+
+
+@app.put("/api/admin/workflow-tasks/reorder", tags=["Workflow Config"])
+async def reorder_workflow_tasks(
+    request: ReorderTasksRequest,
+    db: Session = Depends(get_db)
+):
+    """Reorder workflow tasks."""
+    for item in request.task_orders:
+        task = db.query(WorkflowTaskDefinition).filter(
+            WorkflowTaskDefinition.id == item.id
+        ).first()
+        if task:
+            task.order_index = item.order_index
+            task.updated_at = datetime.utcnow()
+
+    db.commit()
+    return {"message": "Tasks reordered"}
 
 
 @app.put("/api/admin/workflow-tasks/{task_id}", tags=["Workflow Config"])
@@ -3236,36 +3338,18 @@ async def delete_checklist_item(item_id: int, db: Session = Depends(get_db)):
     return {"message": "Checklist item deleted", "id": item_id}
 
 
-@app.put("/api/admin/workflow-tasks/reorder", tags=["Workflow Config"])
-async def reorder_workflow_tasks(
-    task_orders: List[dict],  # [{"id": 1, "order_index": 0}, ...]
-    db: Session = Depends(get_db)
-):
-    """Reorder workflow tasks."""
-    for item in task_orders:
-        task = db.query(WorkflowTaskDefinition).filter(
-            WorkflowTaskDefinition.id == item["id"]
-        ).first()
-        if task:
-            task.order_index = item["order_index"]
-            task.updated_at = datetime.utcnow()
-
-    db.commit()
-    return {"message": "Tasks reordered"}
-
-
 @app.put("/api/admin/subtasks/reorder", tags=["Workflow Config"])
 async def reorder_subtasks(
-    subtask_orders: List[dict],  # [{"id": 1, "order_index": 0}, ...]
+    request: ReorderSubtasksRequest,
     db: Session = Depends(get_db)
 ):
     """Reorder subtasks within a task."""
-    for item in subtask_orders:
+    for item in request.subtask_orders:
         subtask = db.query(SubTaskDefinition).filter(
-            SubTaskDefinition.id == item["id"]
+            SubTaskDefinition.id == item.id
         ).first()
         if subtask:
-            subtask.order_index = item["order_index"]
+            subtask.order_index = item.order_index
             subtask.updated_at = datetime.utcnow()
 
     db.commit()

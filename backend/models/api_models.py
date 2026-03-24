@@ -295,6 +295,7 @@ class CreateWorkflowTaskRequest(BaseModel):
     description: Optional[str] = None
     color: str = "#0a4b94"
     icon: Optional[str] = None
+    default_specialist_id: Optional[int] = None  # Specialist to auto-allocate to this phase
 
 
 class UpdateWorkflowTaskRequest(BaseModel):
@@ -332,6 +333,28 @@ class UpdateSubtaskRequest(BaseModel):
 class UpdateTaskSLARequest(BaseModel):
     """Request to update SLA for a workflow task."""
     sla_hours: Optional[float] = None  # SLA in hours (e.g., 24.0 for 24 hours)
+
+
+class TaskOrderItem(BaseModel):
+    """Single task order item for reordering."""
+    id: int
+    order_index: int
+
+
+class ReorderTasksRequest(BaseModel):
+    """Request to reorder workflow tasks."""
+    task_orders: List[TaskOrderItem]
+
+
+class SubtaskOrderItem(BaseModel):
+    """Single subtask order item for reordering."""
+    id: int
+    order_index: int
+
+
+class ReorderSubtasksRequest(BaseModel):
+    """Request to reorder subtasks."""
+    subtask_orders: List[SubtaskOrderItem]
 
 
 class CreateChecklistItemRequest(BaseModel):
