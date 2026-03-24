@@ -65,6 +65,8 @@ from models.api_models import (
     CreateChecklistItemRequest,
     UpdateChecklistItemRequest,
     UpdateTaskSLARequest,
+    CreateWorkflowTaskRequest,
+    UpdateWorkflowTaskRequest,
 )
 from services.auth import (
     hash_password,
@@ -2962,30 +2964,26 @@ async def get_workflow_tasks(db: Session = Depends(get_db)):
 
 @app.post("/api/admin/workflow-tasks", tags=["Workflow Config"])
 async def create_workflow_task(
-    name: str,
-    phase_code: str,
-    description: Optional[str] = None,
-    color: str = "#0a4b94",
-    icon: Optional[str] = None,
+    request: CreateWorkflowTaskRequest,
     db: Session = Depends(get_db)
 ):
     """Create a new workflow task definition."""
     # Check if phase_code already exists
     existing = db.query(WorkflowTaskDefinition).filter(
-        WorkflowTaskDefinition.phase_code == phase_code
+        WorkflowTaskDefinition.phase_code == request.phase_code
     ).first()
     if existing:
-        raise HTTPException(status_code=400, detail=f"Phase code '{phase_code}' already exists")
+        raise HTTPException(status_code=400, detail=f"Phase code '{request.phase_code}' already exists")
 
     # Get max order_index
     max_order = db.query(WorkflowTaskDefinition).count()
 
     task = WorkflowTaskDefinition(
-        name=name,
-        phase_code=phase_code,
-        description=description,
-        color=color,
-        icon=icon,
+        name=request.name,
+        phase_code=request.phase_code,
+        description=request.description,
+        color=request.color,
+        icon=request.icon,
         order_index=max_order,
     )
     db.add(task)
@@ -3007,12 +3005,7 @@ async def create_workflow_task(
 @app.put("/api/admin/workflow-tasks/{task_id}", tags=["Workflow Config"])
 async def update_workflow_task(
     task_id: int,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
-    color: Optional[str] = None,
-    icon: Optional[str] = None,
-    order_index: Optional[int] = None,
-    sla_hours: Optional[float] = None,
+    request: UpdateWorkflowTaskRequest,
     db: Session = Depends(get_db)
 ):
     """Update a workflow task definition."""
@@ -3022,18 +3015,18 @@ async def update_workflow_task(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    if name is not None:
-        task.name = name
-    if description is not None:
-        task.description = description
-    if color is not None:
-        task.color = color
-    if icon is not None:
-        task.icon = icon
-    if order_index is not None:
-        task.order_index = order_index
-    if sla_hours is not None:
-        task.sla_hours = sla_hours if sla_hours > 0 else None
+    if request.name is not None:
+        task.name = request.name
+    if request.description is not None:
+        task.description = request.description
+    if request.color is not None:
+        task.color = request.color
+    if request.icon is not None:
+        task.icon = request.icon
+    if request.order_index is not None:
+        task.order_index = request.order_index
+    if request.sla_hours is not None:
+        task.sla_hours = request.sla_hours if request.sla_hours > 0 else None
 
     task.updated_at = datetime.utcnow()
     db.commit()

@@ -288,6 +288,26 @@ class CompleteTaskRequest(BaseModel):
     data: Optional[Dict[str, Any]] = None
 
 
+class CreateWorkflowTaskRequest(BaseModel):
+    """Request to create a workflow task."""
+    name: str
+    phase_code: str
+    description: Optional[str] = None
+    color: str = "#0a4b94"
+    icon: Optional[str] = None
+
+
+class UpdateWorkflowTaskRequest(BaseModel):
+    """Request to update a workflow task."""
+    name: Optional[str] = None
+    phase_code: Optional[str] = None
+    description: Optional[str] = None
+    color: Optional[str] = None
+    icon: Optional[str] = None
+    order_index: Optional[int] = None
+    sla_hours: Optional[float] = None
+
+
 class CreateSubtaskRequest(BaseModel):
     """Request to create a subtask."""
     name: str
