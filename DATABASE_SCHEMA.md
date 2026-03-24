@@ -24,129 +24,181 @@ This document describes the database schema for the HLT Loan Assumption Workflow
 
 ## Entity Relationship Diagram
 
+### Diagram Legend
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              HLT LOAN ASSUMPTION WORKFLOW                                │
-│                                  DATABASE SCHEMA                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────────────────┐       ┌──────────────────────┐       ┌──────────────────────┐
-│   LoanApplication    │       │    WorkflowState     │       │   AgentExecution     │
-├──────────────────────┤       ├──────────────────────┤       ├──────────────────────┤
-│ PK id                │       │ PK id                │       │ PK id                │
-│ UK application_id    │◄──────│ FK application_id    │       │ FK application_id    │──────►│
-│    customer_name     │       │    state_json (JSON) │       │    agent_name        │
-│    customer_email    │       │    checkpoint_name   │       │    agent_type        │
-│    customer_phone    │       │    phase             │       │    phase             │
-│    ssn_last_four     │       │    created_at        │       │    input_state (JSON)│
-│    property_address  │       └──────────────────────┘       │    output_state(JSON)│
-│    loan_amount       │                                      │    decision          │
-│    original_borrower │       ┌──────────────────────┐       │    status            │
-│    current_phase     │       │   TransactionLog     │       │    error_message     │
-│    current_node      │       ├──────────────────────┤       │    started_at        │
-│    status            │       │ PK id                │       │    completed_at      │
-│    end_state         │◄──────│ FK application_id    │       │    duration_ms       │
-│    created_at        │       │    event_type        │       └──────────────────────┘
-│    updated_at        │       │    event_name        │
-│    completed_at      │       │    description       │
-└──────────────────────┘       │    data (JSON)       │
-         │                     │    previous_value    │
-         │                     │    new_value (JSON)  │
-         │                     │    source_agent      │
-         │                     │    source_node       │
-         │                     │    timestamp         │
-         │                     └──────────────────────┘
-         │
-         │                     ┌──────────────────────┐
-         │                     │      HumanTask       │
-         │                     ├──────────────────────┤
-         └────────────────────►│ PK id                │
-                               │ FK application_id    │
-                               │    task_type         │
-                               │    task_description  │
-                               │    checkpoint        │
-                               │    context_data(JSON)│
-                               │    assigned_to       │
-                               │    response (JSON)   │
-                               │    decision          │
-                               │    notes             │
-                               │    status            │
-                               │    is_manual_update  │
-                               │    manual_update_by  │
-                               │    created_at        │
-                               │    assigned_at       │
-                               │    completed_at      │
-                               └──────────────────────┘
-
-┌──────────────────────┐       ┌──────────────────────┐       ┌──────────────────────┐
-│     Specialist       │       │   SpecialistTask     │       │    SubtaskNote       │
-├──────────────────────┤       ├──────────────────────┤       ├──────────────────────┤
-│ PK id                │◄──────│ PK id                │◄──────│ PK id                │
-│ UK username          │       │ FK application_id    │───────│ FK task_id           │
-│    password_hash     │       │ FK specialist_id     │       │    subtask_num       │
-│    full_name         │       │    phase             │       │    note_text         │
-│    email             │       │    task_title        │       │ FK author_id         │──►│
-│    specialty_type    │       │    task_description  │       │    created_at        │
-│    specialty_types   │       │    priority          │       └──────────────────────┘
-│    dual_phase        │       │    status            │
-│    dual_phases (JSON)│       │    completion_notes  │
-│    role              │       │    completion_data   │
-│    is_active         │       │    created_at        │
-│    created_at        │       │    assigned_at       │
-│    last_login_at     │       │    started_at        │
-└──────────────────────┘       │    completed_at      │
-                               │    due_date          │
-                               └──────────────────────┘
-
-┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│                           WORKFLOW CONFIGURATION TABLES                                   │
-└──────────────────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────────────────┐       ┌──────────────────────┐       ┌──────────────────────┐
-│WorkflowTaskDefinition│       │  SubTaskDefinition   │       │ChecklistItemDefinition│
-├──────────────────────┤       ├──────────────────────┤       ├──────────────────────┤
-│ PK id                │◄──────│ PK id                │◄──────│ PK id                │
-│    name              │       │ FK task_id           │       │ FK subtask_id        │
-│    description       │       │    name              │       │    name              │
-│ UK phase_code        │       │    description       │       │    description       │
-│    order_index       │       │    order_index       │       │    order_index       │
-│    sla_hours         │       │ FK default_specialist│       │    is_required       │
-│    color             │       │    estimated_duration│       │    activity_category │
-│    icon              │       │    sla_hours         │       │    is_active         │
-│    is_active         │       │    is_required       │       │    created_at        │
-│    created_at        │       │    is_active         │       │    updated_at        │
-│    updated_at        │       │    created_at        │       └──────────────────────┘
-│ FK created_by        │       │    updated_at        │
-└──────────────────────┘       └──────────────────────┘
-
-┌──────────────────────┐       ┌──────────────────────┐
-│  AllocationHistory   │       │    MockAPICall       │
-├──────────────────────┤       ├──────────────────────┤
-│ PK id                │       │ PK id                │
-│    event_type        │       │    application_id    │
-│ FK specialist_id     │       │    api_name          │
-│    specialist_name   │       │    endpoint          │
-│    from_phase        │       │    method            │
-│    to_phase          │       │    request_data(JSON)│
-│ FK task_id           │       │    response_data     │
-│    application_id    │       │    status_code       │
-│    from_specialist_id│       │    timestamp         │
-│    from_specialist_nm│       │    duration_ms       │
-│    to_specialist_id  │       └──────────────────────┘
-│    to_specialist_name│
-│    reason            │
-│    reason_details    │
-│ FK performed_by_id   │
-│    performed_by_name │
-│    created_at        │
-└──────────────────────┘
-
-Legend:
-  PK = Primary Key
-  FK = Foreign Key
-  UK = Unique Key
-  ─► = References (Foreign Key relationship)
+┌─────────────┐
+│ TABLE_NAME  │     PK = Primary Key      1 ──────── * = One-to-Many
+├─────────────┤     FK = Foreign Key      1 ──────── 1 = One-to-One
+│ PK column   │     UK = Unique Key
+│ FK column   │
+└─────────────┘
 ```
+
+---
+
+### 1. CORE APPLICATION TABLES
+
+```
+                                    ┌─────────────────────────┐
+                                    │    LOAN_APPLICATIONS    │
+                                    ├─────────────────────────┤
+                                    │ PK  id                  │
+                                    │ UK  application_id      │
+                                    │     customer_name       │
+                                    │     customer_email      │
+                                    │     loan_amount         │
+                                    │     current_phase       │
+                                    │     status              │
+                                    └───────────┬─────────────┘
+                                                │
+                 ┌──────────────────────────────┼──────────────────────────────┐
+                 │                              │                              │
+                 │ 1                          1 │ 1                          1 │
+                 ▼ *                            ▼ *                            ▼ *
+    ┌────────────────────────┐    ┌────────────────────────┐    ┌────────────────────────┐
+    │    WORKFLOW_STATES     │    │   AGENT_EXECUTIONS     │    │   TRANSACTION_LOGS     │
+    ├────────────────────────┤    ├────────────────────────┤    ├────────────────────────┤
+    │ PK  id                 │    │ PK  id                 │    │ PK  id                 │
+    │ FK  application_id ────┼────│ FK  application_id ────┼────│ FK  application_id     │
+    │     state_json (JSON)  │    │     agent_name         │    │     event_type         │
+    │     checkpoint_name    │    │     status             │    │     data (JSON)        │
+    │     phase              │    │     input_state (JSON) │    │     timestamp          │
+    └────────────────────────┘    └────────────────────────┘    └────────────────────────┘
+
+                                                │
+                                              1 │
+                                                ▼ *
+                                   ┌────────────────────────┐
+                                   │      HUMAN_TASKS       │
+                                   ├────────────────────────┤
+                                   │ PK  id                 │
+                                   │ FK  application_id     │
+                                   │     task_type          │
+                                   │     status             │
+                                   │     decision           │
+                                   └────────────────────────┘
+```
+
+---
+
+### 2. SPECIALIST & TASK MANAGEMENT TABLES
+
+```
+    ┌────────────────────────┐
+    │      SPECIALISTS       │
+    ├────────────────────────┤
+    │ PK  id                 │
+    │ UK  username           │
+    │     full_name          │
+    │     specialty_types    │
+    │     role               │
+    └───────────┬────────────┘
+                │
+                │ 1
+                ▼ *
+    ┌────────────────────────┐         ┌────────────────────────┐
+    │   SPECIALIST_TASKS     │         │    LOAN_APPLICATIONS   │
+    ├────────────────────────┤         ├────────────────────────┤
+    │ PK  id                 │    *    │ (from Core Tables)     │
+    │ FK  specialist_id ─────┼─────────│                        │
+    │ FK  application_id ────┼────── 1 │                        │
+    │     phase              │         └────────────────────────┘
+    │     task_title         │
+    │     status             │
+    │     due_date           │
+    └───────────┬────────────┘
+                │
+                │ 1
+                ▼ *
+    ┌────────────────────────┐         ┌────────────────────────┐
+    │     SUBTASK_NOTES      │         │      SPECIALISTS       │
+    ├────────────────────────┤         ├────────────────────────┤
+    │ PK  id                 │    *    │ (Author Reference)     │
+    │ FK  task_id ───────────┼─────────│                        │
+    │ FK  author_id ─────────┼────── 1 │                        │
+    │     subtask_num        │         └────────────────────────┘
+    │     note_text          │
+    └────────────────────────┘
+```
+
+---
+
+### 3. WORKFLOW CONFIGURATION TABLES
+
+```
+    ┌─────────────────────────────┐
+    │  WORKFLOW_TASK_DEFINITIONS  │
+    ├─────────────────────────────┤
+    │ PK  id                      │
+    │ UK  phase_code              │
+    │     name                    │
+    │     sla_hours               │
+    │     order_index             │
+    └─────────────┬───────────────┘
+                  │
+                  │ 1
+                  ▼ *
+    ┌─────────────────────────────┐
+    │    SUBTASK_DEFINITIONS      │
+    ├─────────────────────────────┤
+    │ PK  id                      │
+    │ FK  task_id                 │
+    │ FK  default_specialist_id ──┼──────┐
+    │     name                    │      │
+    │     estimated_duration      │      │     ┌────────────────────────┐
+    │     is_required             │      │     │      SPECIALISTS       │
+    └─────────────┬───────────────┘      │  1  ├────────────────────────┤
+                  │                      └─────│ (Optional Default)     │
+                  │ 1                          └────────────────────────┘
+                  ▼ *
+    ┌─────────────────────────────┐
+    │ CHECKLIST_ITEM_DEFINITIONS  │
+    ├─────────────────────────────┤
+    │ PK  id                      │
+    │ FK  subtask_id              │
+    │     name                    │
+    │     activity_category       │
+    │     is_required             │
+    └─────────────────────────────┘
+```
+
+---
+
+### 4. AUDIT & LOGGING TABLES
+
+```
+    ┌────────────────────────┐                    ┌────────────────────────┐
+    │   ALLOCATION_HISTORY   │                    │     MOCK_API_CALLS     │
+    ├────────────────────────┤                    ├────────────────────────┤
+    │ PK  id                 │                    │ PK  id                 │
+    │ FK  specialist_id ─────┼──┐                 │     application_id     │
+    │ FK  task_id            │  │                 │     api_name           │
+    │ FK  performed_by_id ───┼──┤                 │     request_data       │
+    │     event_type         │  │                 │     response_data      │
+    │     from_phase         │  │  ┌────────────┐ │     status_code        │
+    │     to_phase           │  └──│ SPECIALISTS│ └────────────────────────┘
+    │     reason             │     └────────────┘
+    └────────────────────────┘
+```
+
+---
+
+### 5. COMPLETE RELATIONSHIP SUMMARY
+
+| Parent Table | Child Table | Relationship | Foreign Key |
+|--------------|-------------|--------------|-------------|
+| loan_applications | workflow_states | 1 : Many | application_id |
+| loan_applications | agent_executions | 1 : Many | application_id |
+| loan_applications | transaction_logs | 1 : Many | application_id |
+| loan_applications | human_tasks | 1 : Many | application_id |
+| loan_applications | specialist_tasks | 1 : Many | application_id |
+| specialists | specialist_tasks | 1 : Many | specialist_id |
+| specialists | subtask_notes | 1 : Many | author_id |
+| specialist_tasks | subtask_notes | 1 : Many | task_id |
+| workflow_task_definitions | subtask_definitions | 1 : Many | task_id |
+| subtask_definitions | checklist_item_definitions | 1 : Many | subtask_id |
+| specialists | allocation_history | 1 : Many | specialist_id |
+| specialists | subtask_definitions | 1 : Many (optional) | default_specialist_id |
 
 ---
 
