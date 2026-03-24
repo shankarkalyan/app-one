@@ -41,11 +41,13 @@ import {
   LuTimer,
   LuSun,
   LuMoon,
+  LuFileCheck,
 } from 'react-icons/lu';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
 import { getApplication, getAgentExecutions, getWorkflowTasks } from '../services/api';
+import UnderwritingReviewModal from '../components/UnderwritingReviewModal';
 import { format, formatDistanceToNow, differenceInMilliseconds, isPast } from 'date-fns';
 
 // Phase configuration for workflow progress
@@ -162,6 +164,9 @@ const SpecialistWorkbench = () => {
   const [savingNote, setSavingNote] = useState(false); // Loading state for saving notes
   const [workflowDefinitions, setWorkflowDefinitions] = useState({}); // Workflow definitions from API
   const [loadingWorkflow, setLoadingWorkflow] = useState(true); // Loading state for workflow definitions
+  const [showReviewModal, setShowReviewModal] = useState(false); // Underwriting review modal
+  const [selectedTaskForReview, setSelectedTaskForReview] = useState(null); // Task being reviewed
+  const [reviewSubmitting, setReviewSubmitting] = useState(false); // Submitting review decision
 
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const { isDark, toggleTheme } = useTheme();
@@ -357,6 +362,60 @@ const SpecialistWorkbench = () => {
       console.error('Failed to complete task:', error);
     }
     setActionLoading(null);
+  };
+
+  // Open underwriting review modal
+  const handleOpenReviewModal = async (task) => {
+    // Ensure we have the task details loaded
+    if (!taskDetails[task.application_id]) {
+      await fetchTaskDetails(task);
+    }
+    setSelectedTaskForReview(task);
+    setShowReviewModal(true);
+  };
+
+  // Handle approve decision from modal
+  const handleApproveDecision = async (notes) => {
+    if (!selectedTaskForReview) return;
+
+    setReviewSubmitting(true);
+    try {
+      await api.post(`/specialist/tasks/${selectedTaskForReview.id}/complete`, {
+        notes: `APPROVED by ${user?.full_name}. ${notes || ''}`.trim(),
+        data: { decision: 'approve', decided_by: user?.full_name },
+      });
+      // Clear cached details and refresh
+      setTaskDetails(prev => ({ ...prev, [selectedTaskForReview.application_id]: null }));
+      await fetchData();
+      setShowReviewModal(false);
+      setSelectedTaskForReview(null);
+      setExpandedTask(null);
+    } catch (error) {
+      console.error('Failed to approve:', error);
+    }
+    setReviewSubmitting(false);
+  };
+
+  // Handle reject decision from modal
+  const handleRejectDecision = async (notes) => {
+    if (!selectedTaskForReview) return;
+
+    setReviewSubmitting(true);
+    try {
+      await api.post(`/specialist/tasks/${selectedTaskForReview.id}/complete`, {
+        notes: `REJECTED by ${user?.full_name}. ${notes || ''}`.trim(),
+        data: { decision: 'reject', decided_by: user?.full_name },
+      });
+      // Clear cached details and refresh
+      setTaskDetails(prev => ({ ...prev, [selectedTaskForReview.application_id]: null }));
+      await fetchData();
+      setShowReviewModal(false);
+      setSelectedTaskForReview(null);
+      setExpandedTask(null);
+    } catch (error) {
+      console.error('Failed to reject:', error);
+    }
+    setReviewSubmitting(false);
   };
 
   const handleLogout = async () => {
@@ -1428,36 +1487,52 @@ const SpecialistWorkbench = () => {
                   </span>
                 )}
               </div>
-              <button
-                style={{
-                  ...styles.continueButton,
-                  opacity: canComplete && actionLoading !== task.id ? 1 : 0.5,
-                  cursor: canComplete && actionLoading !== task.id ? 'pointer' : 'not-allowed',
-                  background: canComplete
-                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                    : (isDark ? 'rgba(100, 116, 139, 0.3)' : 'rgba(100, 116, 139, 0.2)'),
-                  boxShadow: canComplete ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none',
-                }}
-                onClick={() => {
-                  if (canComplete) {
-                    handleCompleteTask(task.id, task.application_id);
-                    // Clear completed subtasks for this task after completing
-                    setCompletedSubtasks(prev => {
-                      const newState = { ...prev };
-                      delete newState[task.id];
-                      return newState;
-                    });
-                  }
-                }}
-                disabled={!canComplete || actionLoading === task.id}
-              >
-                {actionLoading === task.id ? (
-                  <LuRefreshCw size={20} style={{ animation: 'spin 1s linear infinite' }} />
-                ) : (
-                  <LuArrowRight size={20} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {/* Review Document & Decide button for UNDERWRITING/HUMAN_DECISION phases */}
+                {(task.phase === 'UNDERWRITING' || task.phase === 'HUMAN_DECISION') && canComplete && (
+                  <button
+                    style={{
+                      ...styles.continueButton,
+                      background: 'linear-gradient(135deg, #117ACA 0%, #0D6AB8 100%)',
+                      boxShadow: '0 4px 12px rgba(17, 122, 202, 0.3)',
+                    }}
+                    onClick={() => handleOpenReviewModal(task)}
+                  >
+                    <LuFileCheck size={20} />
+                    Review Document & Decide
+                  </button>
                 )}
-                {allSubtasksCompleted ? 'Complete Phase & Continue' : 'Continue to Next Phase'}
-              </button>
+                <button
+                  style={{
+                    ...styles.continueButton,
+                    opacity: canComplete && actionLoading !== task.id ? 1 : 0.5,
+                    cursor: canComplete && actionLoading !== task.id ? 'pointer' : 'not-allowed',
+                    background: canComplete
+                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                      : (isDark ? 'rgba(100, 116, 139, 0.3)' : 'rgba(100, 116, 139, 0.2)'),
+                    boxShadow: canComplete ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none',
+                  }}
+                  onClick={() => {
+                    if (canComplete) {
+                      handleCompleteTask(task.id, task.application_id);
+                      // Clear completed subtasks for this task after completing
+                      setCompletedSubtasks(prev => {
+                        const newState = { ...prev };
+                        delete newState[task.id];
+                        return newState;
+                      });
+                    }
+                  }}
+                  disabled={!canComplete || actionLoading === task.id}
+                >
+                  {actionLoading === task.id ? (
+                    <LuRefreshCw size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                  ) : (
+                    <LuArrowRight size={20} />
+                  )}
+                  {allSubtasksCompleted ? 'Complete Phase & Continue' : 'Continue to Next Phase'}
+                </button>
+              </div>
             </div>
           );
         })()}
@@ -1931,6 +2006,21 @@ const SpecialistWorkbench = () => {
           }
         `}
       </style>
+
+      {/* Underwriting Review Modal */}
+      <UnderwritingReviewModal
+        isOpen={showReviewModal}
+        onClose={() => {
+          setShowReviewModal(false);
+          setSelectedTaskForReview(null);
+        }}
+        onApprove={handleApproveDecision}
+        onReject={handleRejectDecision}
+        applicationData={selectedTaskForReview ? taskDetails[selectedTaskForReview.application_id]?.application : null}
+        executionData={selectedTaskForReview ? taskDetails[selectedTaskForReview.application_id]?.executions : []}
+        isDark={isDark}
+        isSubmitting={reviewSubmitting}
+      />
     </div>
   );
 };

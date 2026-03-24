@@ -20,9 +20,10 @@ function AppContent() {
       fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif'
     }}>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<ApplicationList />} />
         <Route path="/applications" element={<ApplicationList />} />
         <Route path="/applications/:id" element={<ApplicationDetail />} />
+        <Route path="/workflow" element={<Dashboard />} />
         <Route path="/new" element={<NewApplication />} />
         <Route path="/login" element={<Login />} />
         <Route path="/workbench" element={<SpecialistWorkbench />} />
