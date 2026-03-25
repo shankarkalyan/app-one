@@ -1,4 +1,4 @@
-"""Quick migration script to allow NULL specialty_type, create allocation_history table, and add ssn_last_four column."""
+"""Quick migration script for database schema updates."""
 import sqlite3
 import os
 
@@ -12,7 +12,9 @@ def migrate():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Check if ssn_last_four column exists in loan_applications
+    # ============================================
+    # 1. Add ssn_last_four to loan_applications
+    # ============================================
     cursor.execute("PRAGMA table_info(loan_applications)")
     columns = [c[1] for c in cursor.fetchall()]
     if 'ssn_last_four' not in columns:
@@ -22,6 +24,39 @@ def migrate():
     else:
         print("ssn_last_four column already exists.")
 
+    # ============================================
+    # 2. Add new columns to specialists table
+    # ============================================
+    cursor.execute("PRAGMA table_info(specialists)")
+    specialist_columns = [c[1] for c in cursor.fetchall()]
+
+    # Add specialty_types column (JSON list)
+    if 'specialty_types' not in specialist_columns:
+        print("Adding specialty_types column to specialists...")
+        cursor.execute("ALTER TABLE specialists ADD COLUMN specialty_types JSON DEFAULT '[]'")
+        print("specialty_types column added.")
+    else:
+        print("specialty_types column already exists.")
+
+    # Add dual_phase column
+    if 'dual_phase' not in specialist_columns:
+        print("Adding dual_phase column to specialists...")
+        cursor.execute("ALTER TABLE specialists ADD COLUMN dual_phase BOOLEAN DEFAULT 0")
+        print("dual_phase column added.")
+    else:
+        print("dual_phase column already exists.")
+
+    # Add dual_phases column (JSON list)
+    if 'dual_phases' not in specialist_columns:
+        print("Adding dual_phases column to specialists...")
+        cursor.execute("ALTER TABLE specialists ADD COLUMN dual_phases JSON DEFAULT '[]'")
+        print("dual_phases column added.")
+    else:
+        print("dual_phases column already exists.")
+
+    # ============================================
+    # 3. Create allocation_history table
+    # ============================================
     # Check if allocation_history table exists
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='allocation_history'")
     if not cursor.fetchone():
@@ -54,53 +89,9 @@ def migrate():
     else:
         print("allocation_history table already exists.")
 
-    # SQLite doesn't support ALTER COLUMN, so we need to recreate the table
-    # But first check if specialty_type already allows NULL
-    cursor.execute("PRAGMA table_info(specialists)")
-    columns = cursor.fetchall()
-    specialty_col = next((c for c in columns if c[1] == 'specialty_type'), None)
-
-    if specialty_col and specialty_col[3] == 1:  # notnull = 1 means NOT NULL
-        print("Migrating specialists table to allow NULL specialty_type...")
-
-        # Get all data
-        cursor.execute("SELECT * FROM specialists")
-        rows = cursor.fetchall()
-        col_names = [desc[0] for desc in cursor.description]
-
-        # Rename old table
-        cursor.execute("ALTER TABLE specialists RENAME TO specialists_old")
-
-        # Create new table with nullable specialty_type
-        cursor.execute('''
-            CREATE TABLE specialists (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username VARCHAR(100) UNIQUE NOT NULL,
-                password_hash VARCHAR(255) NOT NULL,
-                full_name VARCHAR(200) NOT NULL,
-                email VARCHAR(200),
-                specialty_type VARCHAR(50),
-                role VARCHAR(50) DEFAULT 'specialist',
-                is_active BOOLEAN DEFAULT 1,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                last_login_at DATETIME
-            )
-        ''')
-
-        # Copy data
-        for row in rows:
-            placeholders = ','.join(['?' for _ in row])
-            cursor.execute(f"INSERT INTO specialists VALUES ({placeholders})", row)
-
-        # Drop old table
-        cursor.execute("DROP TABLE specialists_old")
-        print("specialists table migrated successfully.")
-    else:
-        print("specialists table already allows NULL specialty_type.")
-
     conn.commit()
     conn.close()
-    print("Migration complete!")
+    print("\nMigration complete!")
 
 if __name__ == "__main__":
     migrate()
