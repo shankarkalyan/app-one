@@ -23,6 +23,8 @@ import {
   LuPencil,
   LuTrash2,
   LuBook,
+  LuArrowLeftRight,
+  LuClipboardList,
 } from 'react-icons/lu';
 import { COLORS, SPECIALTY_TYPES } from './adminStyles';
 
@@ -60,14 +62,60 @@ const AllocationTab = ({
   showDeleteConfirm,
   loading,
   allAdminTasks = [], // All tasks for displaying in directory
+  onInBucketTaskReassign, // Callback for reassigning tasks within same bucket
   isDark,
   styles,
 }) => {
-  // Local state for tasks popup
+  // Local state for tasks popup (Directory)
   const [tasksPopup, setTasksPopup] = React.useState(null); // { specialist, tasks }
+
+  // Local state for in-bucket task management
+  const [taskManagementPanel, setTaskManagementPanel] = React.useState(null); // { specialist, phase, tasks }
+  const [reassigningTaskId, setReassigningTaskId] = React.useState(null);
 
   const onTaskCountClick = (specialist, tasks) => {
     setTasksPopup({ specialist, tasks });
+  };
+
+  // Open task management panel for a specialist in a bucket
+  const openTaskManagement = (specialist, phase) => {
+    const specialistTasks = allAdminTasks.filter(t =>
+      t.specialist_id === specialist.id && t.phase === phase
+    );
+    setTaskManagementPanel({ specialist, phase, tasks: specialistTasks });
+  };
+
+  // Get other specialists in the same bucket for reassignment
+  const getOtherSpecialistsInBucket = (phase, currentSpecialistId) => {
+    return specialists.filter(s =>
+      s.role !== 'admin' &&
+      s.id !== currentSpecialistId &&
+      (
+        s.specialty_type === phase ||
+        (s.dual_phase && s.dual_phases && s.dual_phases.includes(phase))
+      )
+    );
+  };
+
+  // Handle task reassignment within bucket
+  const handleInBucketReassign = async (taskId, newSpecialistId) => {
+    setReassigningTaskId(taskId);
+    try {
+      if (onInBucketTaskReassign) {
+        await onInBucketTaskReassign(taskId, newSpecialistId);
+        // Update local state
+        setTaskManagementPanel(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            tasks: prev.tasks.filter(t => t.id !== taskId)
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Failed to reassign task:', error);
+    }
+    setReassigningTaskId(null);
   };
   const colors = COLORS;
 
@@ -463,12 +511,49 @@ const AllocationTab = ({
                                   </span>
                                 )}
                               </span>
-                              <span style={styles.specialistTasks}>
-                                {isDualPhase
-                                  ? `${specialist.dual_phases.map(p => p.replace(/_/g, ' ')).join(' + ')}`
-                                  : `${taskCount} active task${taskCount !== 1 ? 's' : ''}`
-                                }
-                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={styles.specialistTasks}>
+                                  {isDualPhase
+                                    ? `${specialist.dual_phases.map(p => p.replace(/_/g, ' ')).join(' + ')}`
+                                    : `${taskCount} active task${taskCount !== 1 ? 's' : ''}`
+                                  }
+                                </span>
+                                {/* Task management button - only show if specialist has tasks */}
+                                {taskCount > 0 && !isDualPhase && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      openTaskManagement(specialist, phase);
+                                    }}
+                                    style={{
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      border: 'none',
+                                      background: `${colors.chaseBlue}20`,
+                                      color: colors.chaseBlue,
+                                      cursor: 'pointer',
+                                      fontSize: '9px',
+                                      fontWeight: '600',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                      transition: 'all 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.background = colors.chaseBlue;
+                                      e.currentTarget.style.color = '#fff';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.background = `${colors.chaseBlue}20`;
+                                      e.currentTarget.style.color = colors.chaseBlue;
+                                    }}
+                                    title="Manage tasks"
+                                  >
+                                    <LuArrowLeftRight size={10} />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                             {/* Delete button for dual-phase specialists */}
                             {isDualPhase && (
@@ -1577,6 +1662,252 @@ const AllocationTab = ({
                     </span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Task Management Panel - For reassigning tasks within same bucket */}
+        {taskManagementPanel && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+            }}
+            onClick={() => setTaskManagementPanel(null)}
+          >
+            <div
+              style={{
+                background: isDark ? '#1e293b' : '#ffffff',
+                borderRadius: '16px',
+                padding: '0',
+                maxWidth: '550px',
+                width: '90%',
+                maxHeight: '80vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div style={{
+                padding: '20px 24px',
+                borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+                background: isDark ? 'rgba(24, 95, 165, 0.1)' : 'rgba(24, 95, 165, 0.05)',
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      background: `linear-gradient(135deg, ${colors.chaseBlue} 0%, ${colors.cyan} 100%)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: '700',
+                      fontSize: '18px',
+                    }}>
+                      {taskManagementPanel.specialist.full_name?.charAt(0) || 'S'}
+                    </div>
+                    <div>
+                      <div style={{
+                        fontSize: '17px',
+                        fontWeight: '700',
+                        color: isDark ? '#f1f5f9' : '#1e293b',
+                      }}>
+                        {taskManagementPanel.specialist.full_name || taskManagementPanel.specialist.username}
+                      </div>
+                      <div style={{
+                        fontSize: '12px',
+                        color: isDark ? '#64748b' : '#94a3b8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}>
+                        <LuClipboardList size={12} />
+                        {taskManagementPanel.tasks.length} task{taskManagementPanel.tasks.length !== 1 ? 's' : ''} in {taskManagementPanel.phase.replace(/_/g, ' ')}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setTaskManagementPanel(null)}
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <LuX size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '20px 24px',
+              }}>
+                {taskManagementPanel.tasks.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '40px 20px',
+                    color: isDark ? '#64748b' : '#94a3b8',
+                  }}>
+                    <LuClipboardList size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
+                    <div style={{ fontSize: '14px', fontWeight: '500' }}>No tasks in this phase</div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      color: isDark ? '#64748b' : '#94a3b8',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      marginBottom: '4px',
+                    }}>
+                      Reassign tasks to another specialist
+                    </div>
+
+                    {taskManagementPanel.tasks.map((task) => {
+                      const otherSpecialists = getOtherSpecialistsInBucket(taskManagementPanel.phase, taskManagementPanel.specialist.id);
+                      const isReassigning = reassigningTaskId === task.id;
+
+                      return (
+                        <div
+                          key={task.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '14px 16px',
+                            borderRadius: '12px',
+                            background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                            opacity: isReassigning ? 0.6 : 1,
+                            transition: 'all 0.2s',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                            <div style={{
+                              width: '10px',
+                              height: '10px',
+                              borderRadius: '50%',
+                              background: task.status === 'IN_PROGRESS' ? colors.primary : colors.warning,
+                              flexShrink: 0,
+                            }} />
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: isDark ? '#e2e8f0' : '#1e293b',
+                              }}>
+                                {task.application_id || `Task #${task.id}`}
+                              </div>
+                              <div style={{
+                                fontSize: '11px',
+                                color: isDark ? '#64748b' : '#94a3b8',
+                              }}>
+                                {task.status?.replace(/_/g, ' ') || 'ASSIGNED'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Reassign dropdown */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {otherSpecialists.length > 0 ? (
+                              <select
+                                disabled={isReassigning}
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    handleInBucketReassign(task.id, parseInt(e.target.value));
+                                  }
+                                }}
+                                value=""
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}`,
+                                  background: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                                  color: isDark ? '#e2e8f0' : '#1e293b',
+                                  fontSize: '12px',
+                                  cursor: isReassigning ? 'wait' : 'pointer',
+                                  minWidth: '140px',
+                                }}
+                              >
+                                <option value="">
+                                  {isReassigning ? 'Reassigning...' : 'Reassign to...'}
+                                </option>
+                                {otherSpecialists.map((spec) => (
+                                  <option key={spec.id} value={spec.id}>
+                                    {spec.full_name || spec.username}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span style={{
+                                fontSize: '11px',
+                                color: isDark ? '#64748b' : '#94a3b8',
+                                fontStyle: 'italic',
+                              }}>
+                                No other specialists
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div style={{
+                padding: '16px 24px',
+                borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+                background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+              }}>
+                <button
+                  onClick={() => setTaskManagementPanel(null)}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: colors.chaseBlue,
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Done
+                </button>
               </div>
             </div>
           </div>

@@ -327,6 +327,46 @@ const AdminDashboard = () => {
     }
   };
 
+  // Handle in-bucket task reassignment (same phase, different specialist)
+  const handleInBucketTaskReassign = async (taskId, newSpecialistId) => {
+    try {
+      await api.post(`/admin/tasks/${taskId}/reassign`, {
+        new_specialist_id: newSpecialistId,
+      });
+
+      // Log the reassignment
+      const task = allAdminTasks.find(t => t.id === taskId);
+      const newSpecialist = specialists.find(s => s.id === newSpecialistId);
+      const oldSpecialist = specialists.find(s => s.id === task?.specialist_id);
+
+      api.post('/admin/allocation-history', {
+        event_type: 'TASK_REASSIGNMENT',
+        specialist_id: newSpecialistId,
+        specialist_name: newSpecialist?.full_name || newSpecialist?.username || 'Unknown',
+        from_phase: task?.phase,
+        to_phase: task?.phase,
+        reason: 'in_bucket_reassignment',
+        details: `Task ${task?.application_id || taskId} reassigned from ${oldSpecialist?.full_name || 'Unknown'} to ${newSpecialist?.full_name || 'Unknown'} within ${task?.phase?.replace(/_/g, ' ')}`,
+      }).catch(err => console.log('Failed to log task reassignment:', err));
+
+      setToastMessage({
+        text: `Task reassigned to ${newSpecialist?.full_name || newSpecialist?.username}`,
+        type: 'success',
+      });
+
+      // Refresh data
+      await fetchData();
+      fetchAllTasks().catch(() => {});
+    } catch (error) {
+      console.error('Failed to reassign task:', error);
+      setToastMessage({
+        text: 'Failed to reassign task. Please try again.',
+        type: 'error',
+      });
+      throw error;
+    }
+  };
+
   // Fetch workflow tasks for Workflow Config tab
   const fetchWorkflowTasks = async () => {
     setLoadingWorkflow(true);
@@ -4517,6 +4557,7 @@ const AdminDashboard = () => {
             showDeleteConfirm={showDeleteConfirm}
             loading={loading}
             allAdminTasks={allAdminTasks}
+            onInBucketTaskReassign={handleInBucketTaskReassign}
             isDark={isDark}
             styles={styles}
           />
