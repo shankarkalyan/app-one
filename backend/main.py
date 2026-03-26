@@ -1770,8 +1770,16 @@ async def update_specialist(
     if request.email is not None:
         specialist.email = request.email
 
+    # Check if explicitly moving to NOT_ALLOCATED (empty specialty_type with preserved certificates)
+    explicit_unallocate = request.specialty_type is not None and (request.specialty_type == '' or request.specialty_type == 'NOT_ALLOCATED')
+
+    if explicit_unallocate:
+        # Moving to NOT_ALLOCATED - preserve certificates (specialty_types) but clear allocation
+        specialist.specialty_type = "NOT_ALLOCATED"
+        if request.specialty_types is not None:
+            specialist.specialty_types = request.specialty_types  # Preserve certificates
     # Handle specialty_types (new multi-select field)
-    if request.specialty_types is not None:
+    elif request.specialty_types is not None:
         specialist.specialty_types = request.specialty_types
         # Update legacy field for backward compatibility
         if request.specialty_types:
@@ -1780,14 +1788,10 @@ async def update_specialist(
             specialist.specialty_type = "NOT_ALLOCATED"
     # Legacy single specialty_type field (for backward compatibility)
     elif request.specialty_type is not None:
-        # Empty string means unallocated - store as "NOT_ALLOCATED"
-        new_type = request.specialty_type if request.specialty_type else "NOT_ALLOCATED"
+        new_type = request.specialty_type
         specialist.specialty_type = new_type
         # Also update specialty_types list
-        if new_type == "NOT_ALLOCATED":
-            specialist.specialty_types = []
-        else:
-            specialist.specialty_types = [new_type]
+        specialist.specialty_types = [new_type]
 
     if request.is_active is not None:
         specialist.is_active = request.is_active
