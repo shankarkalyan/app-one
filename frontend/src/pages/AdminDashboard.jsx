@@ -2139,8 +2139,11 @@ const AdminDashboard = () => {
 
     // Check if moving to a new phase (not NOT_ALLOCATED) with active tasks
     // This triggers the Phase Transfer Modal for multi-certified specialists
+    // SKIP if coming FROM NOT_ALLOCATED - direct move allowed
     const taskCount = (specialist.pending_tasks_count || 0) + (specialist.in_progress_tasks_count || 0);
-    if (newPhase !== 'NOT_ALLOCATED' && taskCount > 0) {
+    const comingFromUnallocated = currentPhase === 'NOT_ALLOCATED' || currentPhase === '' || !currentPhase;
+
+    if (newPhase !== 'NOT_ALLOCATED' && taskCount > 0 && !comingFromUnallocated) {
       // Fetch actual tasks for this specialist
       setPhaseTransferLoading(true);
       try {
@@ -2175,8 +2178,8 @@ const AdminDashboard = () => {
       return;
     }
 
-    // If no active tasks, move immediately with toast notification
-    if (newPhase !== 'NOT_ALLOCATED' && taskCount === 0) {
+    // If coming from NOT_ALLOCATED or no active tasks, move immediately with toast notification
+    if (newPhase !== 'NOT_ALLOCATED' && (taskCount === 0 || comingFromUnallocated)) {
       await executeAllocationChange(specialistId, newPhase);
       setToastMessage({
         text: `${specialist.full_name || specialist.username} moved to ${newPhase.replace(/_/g, ' ')}`,
