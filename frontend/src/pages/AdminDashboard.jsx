@@ -2266,9 +2266,10 @@ const AdminDashboard = () => {
       }
 
       // Update specialist allocation
+      // IMPORTANT: Preserve specialty_types (certificates) - only change allocation
       const updateData = newPhase === 'NOT_ALLOCATED'
-        ? { specialty_type: '' }
-        : { specialty_type: newPhase };
+        ? { specialty_type: '', specialty_types: specialist?.specialty_types || [] }
+        : { specialty_type: newPhase, specialty_types: specialist?.specialty_types || [] };
 
       await api.put(`/admin/specialists/${specialistId}`, updateData);
 
@@ -2540,8 +2541,10 @@ const AdminDashboard = () => {
       }
 
       // Update specialist to remove dual-phase status
+      // IMPORTANT: Preserve specialty_types (certificates) - only change allocation
       await api.put(`/admin/specialists/${specialist.id}`, {
         specialty_type: phaseToKeep,
+        specialty_types: specialist.specialty_types || [], // Preserve certificates
         dual_phase: false,
         dual_phases: [],
       });
