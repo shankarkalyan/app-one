@@ -2156,12 +2156,34 @@ const AdminDashboard = () => {
           ...(inProgressRes.data || []),
         ];
 
-        // Open Phase Transfer Modal
+        // Filter tasks that need reallocation (tasks for a different phase than destination)
+        // Tasks matching the destination phase will move with the specialist
+        const tasksNeedingReallocation = allTasks.filter(task => task.phase !== newPhase);
+        const tasksMovingWithSpecialist = allTasks.filter(task => task.phase === newPhase);
+
+        // If no tasks need reallocation, move directly
+        if (tasksNeedingReallocation.length === 0) {
+          setPhaseTransferLoading(false);
+          await executeAllocationChange(specialistId, newPhase);
+          const keepingTasksMsg = tasksMovingWithSpecialist.length > 0
+            ? ` (keeping ${tasksMovingWithSpecialist.length} ${newPhase.replace(/_/g, ' ')} task${tasksMovingWithSpecialist.length !== 1 ? 's' : ''})`
+            : '';
+          setToastMessage({
+            text: `${specialist.full_name || specialist.username} moved to ${newPhase.replace(/_/g, ' ')}${keepingTasksMsg}`,
+            type: 'success'
+          });
+          setDraggedSpecialist(null);
+          setDragOverBucket(null);
+          return;
+        }
+
+        // Open Phase Transfer Modal with only tasks that need reallocation
         setPhaseTransferData({
           specialist,
           currentPhase,
           targetPhase: newPhase,
-          tasks: allTasks,
+          tasks: tasksNeedingReallocation,
+          tasksKeeping: tasksMovingWithSpecialist,
         });
         setPhaseTransferStep(1);
         setPhaseTransferOption('reassign');
@@ -5771,7 +5793,7 @@ const AdminDashboard = () => {
                     gap: '16px',
                     marginBottom: '24px',
                   }}>
-                    {/* Current phase card (amber) */}
+                    {/* Tasks needing reallocation (amber) */}
                     <div style={{
                       background: '#FAEEDA',
                       borderRadius: '12px',
@@ -5785,8 +5807,12 @@ const AdminDashboard = () => {
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                         marginBottom: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
                       }}>
-                        Current · {phaseTransferData.currentPhase.replace(/_/g, ' ')}
+                        <LuTriangleAlert size={12} />
+                        Tasks to Reassign
                       </div>
                       <div style={{
                         display: 'flex',
@@ -5808,9 +5834,14 @@ const AdminDashboard = () => {
                               padding: '8px 12px',
                             }}
                           >
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#92400e' }}>
-                              {task.application_id || `Task #${task.id}`}
-                            </span>
+                            <div>
+                              <span style={{ fontSize: '12px', fontWeight: '600', color: '#92400e' }}>
+                                {task.application_id || `Task #${task.id}`}
+                              </span>
+                              <span style={{ fontSize: '10px', color: '#b45309', marginLeft: '6px' }}>
+                                ({task.phase?.replace(/_/g, ' ')})
+                              </span>
+                            </div>
                             <span style={{
                               fontSize: '10px',
                               fontWeight: '600',
@@ -5829,43 +5860,102 @@ const AdminDashboard = () => {
                         fontWeight: '600',
                         color: '#92400e',
                       }}>
-                        {phaseTransferData.tasks.length} active task{phaseTransferData.tasks.length !== 1 ? 's' : ''}
+                        {phaseTransferData.tasks.length} task{phaseTransferData.tasks.length !== 1 ? 's' : ''} need reassignment
                       </div>
                     </div>
 
-                    {/* Target phase card (secondary) */}
+                    {/* Tasks moving with specialist (green) OR empty state */}
                     <div style={{
-                      background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                      background: (phaseTransferData.tasksKeeping?.length > 0)
+                        ? (isDark ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.08)')
+                        : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'),
                       borderRadius: '12px',
                       padding: '16px',
-                      border: `2px dashed ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
+                      border: (phaseTransferData.tasksKeeping?.length > 0)
+                        ? '2px solid #22c55e'
+                        : `2px dashed ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
                       display: 'flex',
                       flexDirection: 'column',
                     }}>
                       <div style={{
                         fontSize: '11px',
                         fontWeight: '700',
-                        color: isDark ? '#64748b' : '#94a3b8',
+                        color: (phaseTransferData.tasksKeeping?.length > 0) ? '#16a34a' : (isDark ? '#64748b' : '#94a3b8'),
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                         marginBottom: '12px',
-                      }}>
-                        New · {phaseTransferData.targetPhase.replace(/_/g, ' ')}
-                      </div>
-                      <div style={{
-                        flex: 1,
                         display: 'flex',
-                        flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        color: isDark ? '#475569' : '#94a3b8',
+                        gap: '6px',
                       }}>
-                        <LuClock size={32} style={{ marginBottom: '8px', opacity: 0.5 }} strokeDasharray="4 2" />
-                        <span style={{ fontSize: '12px', textAlign: 'center' }}>
-                          No tasks yet<br />
-                          <span style={{ fontSize: '11px', opacity: 0.7 }}>New tasks will queue here</span>
-                        </span>
+                        {(phaseTransferData.tasksKeeping?.length > 0) ? (
+                          <><LuCircleCheck size={12} /> Tasks Moving With You</>
+                        ) : (
+                          <>New · {phaseTransferData.targetPhase.replace(/_/g, ' ')}</>
+                        )}
                       </div>
+                      {(phaseTransferData.tasksKeeping?.length > 0) ? (
+                        <>
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            marginBottom: '12px',
+                            maxHeight: '120px',
+                            overflowY: 'auto',
+                          }}>
+                            {phaseTransferData.tasksKeeping.map((task) => (
+                              <div
+                                key={task.id}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  background: 'rgba(255,255,255,0.7)',
+                                  borderRadius: '8px',
+                                  padding: '8px 12px',
+                                }}
+                              >
+                                <span style={{ fontSize: '12px', fontWeight: '600', color: '#166534' }}>
+                                  {task.application_id || `Task #${task.id}`}
+                                </span>
+                                <span style={{
+                                  fontSize: '10px',
+                                  fontWeight: '600',
+                                  padding: '3px 8px',
+                                  borderRadius: '6px',
+                                  background: '#86efac',
+                                  color: '#166534',
+                                }}>
+                                  KEEPING
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            color: '#166534',
+                          }}>
+                            {phaseTransferData.tasksKeeping.length} task{phaseTransferData.tasksKeeping.length !== 1 ? 's' : ''} will move with you
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: isDark ? '#475569' : '#94a3b8',
+                        }}>
+                          <LuClock size={32} style={{ marginBottom: '8px', opacity: 0.5 }} strokeDasharray="4 2" />
+                          <span style={{ fontSize: '12px', textAlign: 'center' }}>
+                            No tasks yet<br />
+                            <span style={{ fontSize: '11px', opacity: 0.7 }}>New tasks will queue here</span>
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
