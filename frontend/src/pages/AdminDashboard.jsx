@@ -4886,8 +4886,23 @@ const AdminDashboard = () => {
                     <div style={{ fontSize: '16px', fontWeight: '700', color: isDark ? '#f1f5f9' : '#1e293b', marginBottom: '6px' }}>
                       Reassign Tasks
                     </div>
-                    <div style={{ fontSize: '14px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                      Drag tasks to other specialists in <strong style={{ color: colors.chaseBlue }}>{reallocationData.currentPhase?.replace('_', ' ')}</strong> phase
+                    <div style={{ fontSize: '14px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '8px' }}>
+                      Drag tasks to specialists certified for <strong style={{ color: colors.chaseBlue }}>{reallocationData.currentPhase?.replace('_', ' ')}</strong>
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      gap: '16px',
+                      fontSize: '11px',
+                      color: isDark ? '#64748b' : '#94a3b8',
+                    }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: colors.success }} />
+                        Same bucket
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: colors.orange }} />
+                        Different bucket (certified)
+                      </span>
                     </div>
                   </div>
 
@@ -4965,23 +4980,54 @@ const AdminDashboard = () => {
                       )}
                     </div>
 
-                    {/* Target specialists */}
+                    {/* Target specialists - show all certified specialists */}
                     <div style={styles.taskList}>
                       <div style={styles.taskListTitle}>
                         <LuUsers size={14} />
-                        Available Specialists
+                        Available Specialists (Certified for {reallocationData.currentPhase?.replace('_', ' ')})
                       </div>
-                      {specialists
-                        .filter(s =>
+                      {(() => {
+                        // Get all specialists certified for the current phase
+                        const certifiedSpecialists = specialists.filter(s =>
                           s.role !== 'admin' &&
                           s.id !== reallocationData.specialist.id &&
-                          s.specialty_type === reallocationData.currentPhase
-                        )
-                        .map((targetSpec) => {
+                          ((s.specialty_types || []).includes(reallocationData.currentPhase) ||
+                           s.specialty_type === reallocationData.currentPhase)
+                        );
+
+                        // Sort: same bucket first, then by task count
+                        const sortedSpecialists = [...certifiedSpecialists].sort((a, b) => {
+                          const aInSameBucket = a.specialty_type === reallocationData.currentPhase;
+                          const bInSameBucket = b.specialty_type === reallocationData.currentPhase;
+                          if (aInSameBucket && !bInSameBucket) return -1;
+                          if (!aInSameBucket && bInSameBucket) return 1;
+                          return ((a.pending_tasks_count || 0) + (a.in_progress_tasks_count || 0)) -
+                                 ((b.pending_tasks_count || 0) + (b.in_progress_tasks_count || 0));
+                        });
+
+                        if (sortedSpecialists.length === 0) {
+                          return (
+                            <div style={{
+                              textAlign: 'center',
+                              padding: '20px',
+                              color: isDark ? '#64748b' : '#94a3b8',
+                              fontSize: '13px',
+                            }}>
+                              No other specialists certified for this phase.
+                              <br />
+                              <span style={{ color: colors.warning }}>Tasks will remain unassigned.</span>
+                            </div>
+                          );
+                        }
+
+                        return sortedSpecialists.map((targetSpec) => {
                           const assignedTasks = Object.entries(taskReassignments)
                             .filter(([_, specId]) => specId === targetSpec.id)
                             .map(([taskId]) => taskId);
                           const isOver = dragOverSpecialist === targetSpec.id;
+                          const currentTaskCount = (targetSpec.pending_tasks_count || 0) + (targetSpec.in_progress_tasks_count || 0);
+                          const isInDifferentBucket = targetSpec.specialty_type !== reallocationData.currentPhase;
+                          const hasHighWorkload = currentTaskCount >= 5;
 
                           return (
                             <div
@@ -4989,6 +5035,9 @@ const AdminDashboard = () => {
                               style={{
                                 ...styles.targetSpecialistCard,
                                 ...(isOver ? styles.targetSpecialistCardOver : {}),
+                                borderLeft: isInDifferentBucket
+                                  ? `3px solid ${colors.orange}`
+                                  : `3px solid ${colors.success}`,
                               }}
                               onDragOver={(e) => {
                                 e.preventDefault();
@@ -5025,7 +5074,7 @@ const AdminDashboard = () => {
                                 setDraggedTask(null);
                               }}
                             >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
                                 <div style={{
                                   ...styles.specialistAvatar,
                                   width: '32px',
@@ -5034,12 +5083,34 @@ const AdminDashboard = () => {
                                 }}>
                                   {targetSpec.full_name?.charAt(0)?.toUpperCase() || targetSpec.username?.charAt(0)?.toUpperCase()}
                                 </div>
-                                <div>
-                                  <div style={{ fontSize: '13px', fontWeight: '600', color: isDark ? '#e2e8f0' : '#1e293b' }}>
-                                    {targetSpec.full_name || targetSpec.username}
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '13px', fontWeight: '600', color: isDark ? '#e2e8f0' : '#1e293b' }}>
+                                      {targetSpec.full_name || targetSpec.username}
+                                    </span>
+                                    {isInDifferentBucket && (
+                                      <span style={{
+                                        fontSize: '9px',
+                                        fontWeight: '700',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                        background: `${colors.orange}20`,
+                                        color: colors.orange,
+                                      }}>
+                                        {targetSpec.specialty_type?.replace('_', ' ') || 'UNALLOCATED'}
+                                      </span>
+                                    )}
                                   </div>
-                                  <div style={{ fontSize: '11px', color: isDark ? '#64748b' : '#94a3b8' }}>
-                                    {(targetSpec.pending_tasks_count || 0) + (targetSpec.in_progress_tasks_count || 0)} current tasks
+                                  <div style={{
+                                    fontSize: '11px',
+                                    color: hasHighWorkload ? colors.warning : (isDark ? '#64748b' : '#94a3b8'),
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                  }}>
+                                    {hasHighWorkload && <LuTriangleAlert size={10} />}
+                                    {currentTaskCount} current task{currentTaskCount !== 1 ? 's' : ''}
+                                    {hasHighWorkload && ' (high workload)'}
                                   </div>
                                 </div>
                               </div>
@@ -5051,23 +5122,8 @@ const AdminDashboard = () => {
                               )}
                             </div>
                           );
-                        })}
-                      {specialists.filter(s =>
-                        s.role !== 'admin' &&
-                        s.id !== reallocationData.specialist.id &&
-                        s.specialty_type === reallocationData.currentPhase
-                      ).length === 0 && (
-                        <div style={{
-                          textAlign: 'center',
-                          padding: '20px',
-                          color: isDark ? '#64748b' : '#94a3b8',
-                          fontSize: '13px',
-                        }}>
-                          No other specialists in this phase.
-                          <br />
-                          <span style={{ color: colors.warning }}>Tasks will remain unassigned.</span>
-                        </div>
-                      )}
+                        });
+                      })()}
                     </div>
                   </div>
                 </>
