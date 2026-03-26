@@ -2413,8 +2413,10 @@ const AdminDashboard = () => {
         }
 
         // Then move the specialist to the new phase
+        // IMPORTANT: Preserve specialty_types (certificates) - only change allocation
         await api.put(`/admin/specialists/${specialist.id}`, {
           specialty_type: targetPhase,
+          specialty_types: specialist.specialty_types || [],
         });
 
         // Log the phase transfer
