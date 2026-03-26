@@ -1770,28 +1770,34 @@ async def update_specialist(
     if request.email is not None:
         specialist.email = request.email
 
-    # Check if explicitly moving to NOT_ALLOCATED (empty specialty_type with preserved certificates)
+    # Handle allocation updates - prioritize explicit specialty_type if sent
+    # This allows changing allocation (specialty_type) while preserving certificates (specialty_types)
+
+    # Check if explicitly moving to NOT_ALLOCATED
     explicit_unallocate = request.specialty_type is not None and (request.specialty_type == '' or request.specialty_type == 'NOT_ALLOCATED')
 
     if explicit_unallocate:
-        # Moving to NOT_ALLOCATED - preserve certificates (specialty_types) but clear allocation
+        # Moving to NOT_ALLOCATED - preserve certificates but clear allocation
         specialist.specialty_type = "NOT_ALLOCATED"
         if request.specialty_types is not None:
-            specialist.specialty_types = request.specialty_types  # Preserve certificates
-    # Handle specialty_types (new multi-select field)
+            specialist.specialty_types = request.specialty_types
+    elif request.specialty_type is not None and request.specialty_types is not None:
+        # Both sent - use explicit specialty_type for allocation, preserve specialty_types (certificates)
+        specialist.specialty_type = request.specialty_type
+        specialist.specialty_types = request.specialty_types
     elif request.specialty_types is not None:
+        # Only specialty_types sent (certificate update)
         specialist.specialty_types = request.specialty_types
         # Update legacy field for backward compatibility
         if request.specialty_types:
             specialist.specialty_type = request.specialty_types[0]
         else:
             specialist.specialty_type = "NOT_ALLOCATED"
-    # Legacy single specialty_type field (for backward compatibility)
     elif request.specialty_type is not None:
-        new_type = request.specialty_type
-        specialist.specialty_type = new_type
-        # Also update specialty_types list
-        specialist.specialty_types = [new_type]
+        # Only specialty_type sent (legacy single field)
+        specialist.specialty_type = request.specialty_type
+        # Also update specialty_types list for backward compatibility
+        specialist.specialty_types = [request.specialty_type]
 
     if request.is_active is not None:
         specialist.is_active = request.is_active
