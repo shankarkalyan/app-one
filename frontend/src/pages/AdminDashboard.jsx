@@ -2031,8 +2031,8 @@ const AdminDashboard = () => {
     setFormError('');
     setSaving(true);
 
-    // Validate specialty_types
-    if (!formData.specialty_types || formData.specialty_types.length === 0) {
+    // Validate specialty_types (only required for non-admin users)
+    if (formData.role !== 'admin' && (!formData.specialty_types || formData.specialty_types.length === 0)) {
       setFormError('Please select at least one specialty type');
       setSaving(false);
       return;
@@ -2046,7 +2046,8 @@ const AdminDashboard = () => {
         }
         delete updateData.username;
         // Ensure specialty_type is set to first specialty_types for backward compatibility
-        updateData.specialty_type = updateData.specialty_types[0] || 'NOT_ALLOCATED';
+        // Admins don't need specialty_types
+        updateData.specialty_type = formData.role === 'admin' ? 'NOT_ALLOCATED' : (updateData.specialty_types[0] || 'NOT_ALLOCATED');
         await api.put(`/admin/specialists/${editingSpecialist.id}`, updateData);
       } else {
         if (!formData.password || formData.password.length < 6) {
@@ -2055,9 +2056,11 @@ const AdminDashboard = () => {
           return;
         }
         // Ensure specialty_type is set for backward compatibility
+        // Admins don't need specialty_types
         const saveData = {
           ...formData,
-          specialty_type: formData.specialty_types[0] || 'NOT_ALLOCATED',
+          specialty_type: formData.role === 'admin' ? 'NOT_ALLOCATED' : (formData.specialty_types[0] || 'NOT_ALLOCATED'),
+          specialty_types: formData.role === 'admin' ? [] : formData.specialty_types,
         };
         await api.post('/admin/specialists', saveData);
       }
@@ -4650,13 +4653,23 @@ const AdminDashboard = () => {
                     );
                   })}
                 </div>
-                {formData.specialty_types?.length === 0 && (
+                {formData.role !== 'admin' && formData.specialty_types?.length === 0 && (
                   <div style={{
                     marginTop: '8px',
                     fontSize: '12px',
                     color: colors.warning,
                   }}>
                     Please select at least one specialty type
+                  </div>
+                )}
+                {formData.role === 'admin' && (
+                  <div style={{
+                    marginTop: '8px',
+                    fontSize: '12px',
+                    color: isDark ? '#64748b' : '#94a3b8',
+                    fontStyle: 'italic',
+                  }}>
+                    Certifications are optional for Admin users
                   </div>
                 )}
               </div>
