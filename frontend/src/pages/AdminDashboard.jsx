@@ -4370,179 +4370,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Specialists Table */}
-        <div style={styles.card}>
-          <div style={styles.cardHeader}>
-            <div style={styles.cardTitle}>
-              <LuUsers size={18} color={colors.purple} />
-              Specialists ({filteredSpecialists.length})
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={styles.searchBar}>
-                <LuSearch size={16} color={isDark ? '#64748b' : '#94a3b8'} />
-                <input
-                  type="text"
-                  placeholder="Search specialists..."
-                  style={styles.searchInput}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <button
-                style={{
-                  ...styles.actionBtn,
-                  background: 'linear-gradient(135deg, #003B73 0%, #117ACA 100%)',
-                  color: '#fff',
-                }}
-                onClick={openCreateModal}
-              >
-                <LuPlus size={14} />
-                Add New
-              </button>
-            </div>
-          </div>
-          <div style={styles.tableContainer}>
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '60px', color: isDark ? '#64748b' : '#94a3b8' }}>
-                <LuRefreshCw size={32} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
-                <p>Loading specialists...</p>
-              </div>
-            ) : (
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.th}>Specialist</th>
-                    <th style={styles.th}>Username</th>
-                    <th style={styles.th}>Specialty</th>
-                    <th style={styles.th}>Role</th>
-                    <th style={styles.th}>Tasks</th>
-                    <th style={styles.th}>Status</th>
-                    <th style={styles.th}>Last Active</th>
-                    <th style={styles.th}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredSpecialists.map((specialist) => (
-                    <tr key={specialist.id}>
-                      <td style={styles.td}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '10px',
-                            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.cyan} 100%)`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#fff',
-                            fontWeight: '700',
-                            fontSize: '14px',
-                          }}>
-                            {specialist.full_name?.charAt(0) || 'S'}
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: '600' }}>{specialist.full_name}</div>
-                            {specialist.email && (
-                              <div style={{ fontSize: '12px', color: isDark ? '#64748b' : '#94a3b8' }}>
-                                {specialist.email}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ ...styles.td, fontFamily: 'monospace', fontSize: '13px' }}>
-                        {specialist.username}
-                      </td>
-                      <td style={styles.td}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '200px' }}>
-                          {(specialist.specialty_types && specialist.specialty_types.length > 0) ? (
-                            specialist.specialty_types.map((type, idx) => (
-                              <span
-                                key={idx}
-                                style={{
-                                  ...styles.badge,
-                                  background: 'linear-gradient(135deg, #003B73 0%, #117ACA 100%)',
-                                  color: '#ffffff',
-                                  fontSize: '10px',
-                                  padding: '3px 8px',
-                                }}
-                              >
-                                {type?.replace('_', ' ')}
-                              </span>
-                            ))
-                          ) : (
-                            <span style={{
-                              ...styles.badge,
-                              background: specialist.specialty_type === 'NOT_ALLOCATED'
-                                ? `${colors.orange}20`
-                                : 'linear-gradient(135deg, #003B73 0%, #117ACA 100%)',
-                              color: specialist.specialty_type === 'NOT_ALLOCATED' ? colors.orange : '#fff',
-                            }}>
-                              {specialist.specialty_type?.replace('_', ' ') || 'NOT ALLOCATED'}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td style={styles.td}>
-                        <span style={{
-                          ...styles.badge,
-                          background: `${colors.purple}20`,
-                          color: colors.purple,
-                        }}>
-                          {specialist.role}
-                        </span>
-                      </td>
-                      <td style={styles.td}>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                          <span style={{ color: colors.primary, fontWeight: '600' }}>
-                            {specialist.pending_tasks_count || 0} <span style={{ fontWeight: '400', color: isDark ? '#64748b' : '#94a3b8' }}>pending</span>
-                          </span>
-                          <span style={{ color: colors.warning, fontWeight: '600' }}>
-                            {specialist.in_progress_tasks_count || 0} <span style={{ fontWeight: '400', color: isDark ? '#64748b' : '#94a3b8' }}>active</span>
-                          </span>
-                        </div>
-                      </td>
-                      <td style={styles.td}>
-                        <span style={{
-                          ...styles.badge,
-                          background: specialist.is_active ? `${colors.success}20` : `${colors.danger}20`,
-                          color: specialist.is_active ? colors.success : colors.danger,
-                        }}>
-                          {specialist.is_active ? (
-                            <><LuCircle size={8} fill="currentColor" /> Active</>
-                          ) : (
-                            <><LuCircleX size={12} /> Inactive</>
-                          )}
-                        </span>
-                      </td>
-                      <td style={{ ...styles.td, color: isDark ? '#64748b' : '#94a3b8', fontSize: '13px' }}>
-                        {specialist.last_login_at
-                          ? format(new Date(specialist.last_login_at), 'MMM d, h:mm a')
-                          : 'Never'}
-                      </td>
-                      <td style={styles.td}>
-                        <button
-                          style={styles.actionBtn}
-                          onClick={() => openEditModal(specialist)}
-                          title="Edit"
-                        >
-                          <LuPencil size={14} />
-                        </button>
-                        <button
-                          style={{ ...styles.actionBtn, color: colors.danger }}
-                          onClick={() => handleDelete(specialist)}
-                          title="Deactivate"
-                        >
-                          <LuTrash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
         </>
         )}
 
@@ -4585,6 +4412,13 @@ const AdminDashboard = () => {
             timelineChartRef={timelineChartRef}
             tasksCompletedChartRef={tasksCompletedChartRef}
             flowChartRef={flowChartRef}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filteredSpecialists={filteredSpecialists}
+            openCreateModal={openCreateModal}
+            openEditModal={openEditModal}
+            showDeleteConfirm={showDeleteConfirm}
+            loading={loading}
             isDark={isDark}
             styles={styles}
           />

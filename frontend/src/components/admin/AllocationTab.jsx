@@ -19,6 +19,10 @@ import {
   LuUserCheck,
   LuArrowUpRight,
   LuGitBranch,
+  LuPlus,
+  LuPencil,
+  LuTrash2,
+  LuBook,
 } from 'react-icons/lu';
 import { COLORS, SPECIALTY_TYPES } from './adminStyles';
 
@@ -47,6 +51,14 @@ const AllocationTab = ({
   timelineChartRef,
   tasksCompletedChartRef,
   flowChartRef,
+  // New props for Directory sub-tab
+  searchQuery,
+  setSearchQuery,
+  filteredSpecialists,
+  openCreateModal,
+  openEditModal,
+  showDeleteConfirm,
+  loading,
   isDark,
   styles,
 }) => {
@@ -170,6 +182,30 @@ const AllocationTab = ({
           >
             <LuClock size={16} />
             History
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: '600',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: allocationSubTab === 'directory'
+                ? (isDark ? colors.chaseBlue : colors.chaseBlue)
+                : 'transparent',
+              color: allocationSubTab === 'directory'
+                ? '#ffffff'
+                : (isDark ? '#94a3b8' : '#64748b'),
+            }}
+            onClick={() => setAllocationSubTab('directory')}
+          >
+            <LuBook size={16} />
+            Directory
           </button>
         </div>
 
@@ -1117,6 +1153,209 @@ const AllocationTab = ({
                 </div>
               );
             })()}
+          </div>
+        )}
+
+        {/* Directory Sub-Tab - Specialists Table */}
+        {allocationSubTab === 'directory' && (
+          <div style={{ minHeight: '200px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '16px',
+                fontWeight: '700',
+                color: isDark ? '#f1f5f9' : '#1e293b',
+              }}>
+                <LuUsers size={18} color={colors.chaseBlue} />
+                Specialist Directory ({filteredSpecialists?.length || 0})
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={styles.searchBar}>
+                  <LuSearch size={16} color={isDark ? '#64748b' : '#94a3b8'} />
+                  <input
+                    type="text"
+                    placeholder="Search specialists..."
+                    style={styles.searchInput}
+                    value={searchQuery || ''}
+                    onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <button
+                  style={{
+                    ...styles.actionBtn,
+                    background: 'linear-gradient(135deg, #003B73 0%, #117ACA 100%)',
+                    color: '#fff',
+                  }}
+                  onClick={openCreateModal}
+                >
+                  <LuPlus size={14} />
+                  Add New
+                </button>
+              </div>
+            </div>
+            <div style={styles.tableContainer}>
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '60px', color: isDark ? '#64748b' : '#94a3b8' }}>
+                  <LuRefreshCw size={32} style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
+                  <p>Loading specialists...</p>
+                </div>
+              ) : (
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>Specialist</th>
+                      <th style={styles.th}>Username</th>
+                      <th style={styles.th}>Certifications</th>
+                      <th style={styles.th}>Role</th>
+                      <th style={styles.th}>Tasks</th>
+                      <th style={styles.th}>Status</th>
+                      <th style={styles.th}>Last Active</th>
+                      <th style={styles.th}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(filteredSpecialists || []).map((specialist) => (
+                      <tr key={specialist.id}>
+                        <td style={styles.td}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '10px',
+                              background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.cyan} 100%)`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#fff',
+                              fontWeight: '700',
+                              fontSize: '14px',
+                            }}>
+                              {specialist.full_name?.charAt(0) || 'S'}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: '600' }}>{specialist.full_name}</div>
+                              {specialist.email && (
+                                <div style={{ fontSize: '12px', color: isDark ? '#64748b' : '#94a3b8' }}>
+                                  {specialist.email}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ ...styles.td, fontFamily: 'monospace', fontSize: '13px' }}>
+                          {specialist.username}
+                        </td>
+                        <td style={styles.td}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '200px' }}>
+                            {(specialist.specialty_types && specialist.specialty_types.length > 0) ? (
+                              specialist.specialty_types.map((type, idx) => (
+                                <span
+                                  key={idx}
+                                  style={{
+                                    ...styles.badge,
+                                    background: 'linear-gradient(135deg, #003B73 0%, #117ACA 100%)',
+                                    color: '#ffffff',
+                                    fontSize: '10px',
+                                    padding: '3px 8px',
+                                  }}
+                                >
+                                  {type?.replace('_', ' ')}
+                                </span>
+                              ))
+                            ) : (
+                              <span style={{
+                                ...styles.badge,
+                                background: specialist.specialty_type === 'NOT_ALLOCATED'
+                                  ? `${colors.orange}20`
+                                  : 'linear-gradient(135deg, #003B73 0%, #117ACA 100%)',
+                                color: specialist.specialty_type === 'NOT_ALLOCATED' ? colors.orange : '#fff',
+                              }}>
+                                {specialist.specialty_type?.replace('_', ' ') || 'NOT ALLOCATED'}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={styles.td}>
+                          <span style={{
+                            ...styles.badge,
+                            background: `${colors.purple}20`,
+                            color: colors.purple,
+                          }}>
+                            {specialist.role}
+                          </span>
+                        </td>
+                        <td style={styles.td}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              ...styles.badge,
+                              background: `${colors.warning}15`,
+                              color: colors.warning,
+                            }}>
+                              {specialist.pending_tasks_count || 0} pending
+                            </span>
+                            <span style={{
+                              ...styles.badge,
+                              background: `${colors.primary}15`,
+                              color: colors.primary,
+                            }}>
+                              {specialist.in_progress_tasks_count || 0} active
+                            </span>
+                          </div>
+                        </td>
+                        <td style={styles.td}>
+                          <span style={{
+                            ...styles.badge,
+                            background: specialist.is_active ? `${colors.success}20` : `${colors.error}20`,
+                            color: specialist.is_active ? colors.success : colors.error,
+                          }}>
+                            {specialist.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td style={{ ...styles.td, fontSize: '12px', color: isDark ? '#64748b' : '#94a3b8' }}>
+                          {specialist.last_login_at
+                            ? new Date(specialist.last_login_at).toLocaleDateString()
+                            : 'Never'}
+                        </td>
+                        <td style={styles.td}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              style={{
+                                ...styles.actionBtn,
+                                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                              }}
+                              onClick={() => openEditModal && openEditModal(specialist)}
+                              title="Edit"
+                            >
+                              <LuPencil size={14} />
+                            </button>
+                            {specialist.role !== 'admin' && (
+                              <button
+                                style={{
+                                  ...styles.actionBtn,
+                                  background: `${colors.error}15`,
+                                  color: colors.error,
+                                }}
+                                onClick={() => showDeleteConfirm && showDeleteConfirm('specialist', specialist, specialist.full_name)}
+                                title="Delete"
+                              >
+                                <LuTrash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         )}
       </div>
