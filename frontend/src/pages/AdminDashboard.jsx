@@ -142,6 +142,7 @@ const AdminDashboard = () => {
   const [dragOverSpecialist, setDragOverSpecialist] = useState(null);
   const [specialistTasks, setSpecialistTasks] = useState([]); // Actual tasks for the specialist
   const [loadingTasks, setLoadingTasks] = useState(false);
+  const [allAdminTasks, setAllAdminTasks] = useState([]); // All tasks for directory view
   const [allocationHistory, setAllocationHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [allocationSubTab, setAllocationSubTab] = useState('buckets'); // 'buckets', 'analytics', 'history'
@@ -310,6 +311,22 @@ const AdminDashboard = () => {
     }
   };
 
+  // Fetch all tasks for directory view
+  const fetchAllTasks = async () => {
+    try {
+      const [assignedRes, inProgressRes] = await Promise.all([
+        api.get('/tasks', { params: { status: 'ASSIGNED', page_size: 500 } }),
+        api.get('/tasks', { params: { status: 'IN_PROGRESS', page_size: 500 } }),
+      ]);
+      const assigned = assignedRes.data?.tasks || assignedRes.data || [];
+      const inProgress = inProgressRes.data?.tasks || inProgressRes.data || [];
+      setAllAdminTasks([...assigned, ...inProgress]);
+    } catch (error) {
+      console.error('Failed to fetch all tasks:', error);
+      setAllAdminTasks([]);
+    }
+  };
+
   // Fetch workflow tasks for Workflow Config tab
   const fetchWorkflowTasks = async () => {
     setLoadingWorkflow(true);
@@ -332,11 +349,12 @@ const AdminDashboard = () => {
     }
   }, [isAuthenticated]);
 
-  // Fetch allocation history and task stats when allocation tab is active
+  // Fetch allocation history, task stats, and all tasks when allocation tab is active
   useEffect(() => {
     if (activeTab === 'allocation' && isAuthenticated) {
       fetchAllocationHistory();
       fetchSpecialistTaskStats();
+      fetchAllTasks();
     }
   }, [activeTab, isAuthenticated]);
 
@@ -1994,6 +2012,9 @@ const AdminDashboard = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchData();
+    if (activeTab === 'allocation') {
+      fetchAllTasks().catch(() => {});
+    }
     setRefreshing(false);
   };
 
@@ -2135,6 +2156,27 @@ const AdminDashboard = () => {
       setDraggedSpecialist(null);
       setDragOverBucket(null);
       return;
+    }
+
+    // Prevent moving if this is the last specialist in the source bucket
+    const sourcePhase = currentPhase;
+    if (sourcePhase && sourcePhase !== 'NOT_ALLOCATED' && sourcePhase !== '') {
+      const specialistsInSourceBucket = specialists.filter(s =>
+        s.role !== 'admin' && (
+          s.specialty_type === sourcePhase ||
+          (s.dual_phase && s.dual_phases && s.dual_phases.includes(sourcePhase))
+        )
+      );
+
+      if (specialistsInSourceBucket.length <= 1) {
+        setToastMessage({
+          text: `Cannot move ${specialist.full_name || specialist.username}. At least one specialist must remain in ${sourcePhase.replace(/_/g, ' ')}.`,
+          type: 'error',
+        });
+        setDraggedSpecialist(null);
+        setDragOverBucket(null);
+        return;
+      }
     }
 
     // Check if moving to a new phase (not NOT_ALLOCATED) with active tasks
@@ -2315,8 +2357,9 @@ const AdminDashboard = () => {
       }).catch(err => console.log('Failed to log allocation event:', err));
 
       await fetchData();
-      // Refresh history in background
+      // Refresh history and tasks in background
       fetchAllocationHistory().catch(() => {});
+      fetchAllTasks().catch(() => {});
     } catch (error) {
       console.error('Failed to update specialist allocation:', error);
       alert('Failed to update specialist allocation. Please try again.');
@@ -2466,6 +2509,7 @@ const AdminDashboard = () => {
 
       // Refresh data
       await fetchData();
+      fetchAllTasks().catch(() => {});
 
       // Close modal
       handlePhaseTransferCancel();
@@ -2482,6 +2526,24 @@ const AdminDashboard = () => {
 
   // Dual-Phase Removal Modal handlers
   const handleDualRemovalOpen = async (specialist, fromPhase) => {
+    // Check if removing from this phase would leave the bucket empty
+    const specialistsInPhase = specialists.filter(s =>
+      s.role !== 'admin' &&
+      s.id !== specialist.id && // Exclude the specialist being removed
+      (
+        s.specialty_type === fromPhase ||
+        (s.dual_phase && s.dual_phases && s.dual_phases.includes(fromPhase))
+      )
+    );
+
+    if (specialistsInPhase.length === 0) {
+      setToastMessage({
+        text: `Cannot remove ${specialist.full_name || specialist.username} from ${fromPhase.replace(/_/g, ' ')}. At least one specialist must remain in this phase.`,
+        type: 'error',
+      });
+      return;
+    }
+
     // Fetch tasks for both phases
     setDualRemovalLoading(true);
     try {
@@ -2597,6 +2659,7 @@ const AdminDashboard = () => {
 
       // Refresh data
       await fetchData();
+      fetchAllTasks().catch(() => {});
 
       // Close modal
       handleDualRemovalCancel();
@@ -2636,6 +2699,10 @@ const AdminDashboard = () => {
   // Check if all tasks are assigned (for Step 2A validation)
   const allTasksAssigned = phaseTransferData?.tasks?.length > 0 &&
     Object.keys(phaseTransferAssignments).length === phaseTransferData.tasks.length;
+
+  // Check if all tasks are assigned in Reallocation Modal
+  const allReallocationTasksAssigned = specialistTasks.length === 0 ||
+    Object.keys(taskReassignments).length === specialistTasks.length;
 
   // Calculate statistics from workload data for accuracy
   const totalPendingTasks = workload?.by_specialty ? Object.values(workload.by_specialty).reduce((sum, s) => sum + (s.pending || 0), 0) : 0;
@@ -4449,6 +4516,7 @@ const AdminDashboard = () => {
             openEditModal={openEditModal}
             showDeleteConfirm={showDeleteConfirm}
             loading={loading}
+            allAdminTasks={allAdminTasks}
             isDark={isDark}
             styles={styles}
           />
@@ -5212,6 +5280,31 @@ const AdminDashboard = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Warning if not all tasks assigned */}
+                  {!allReallocationTasksAssigned && (
+                    <div style={{
+                      marginTop: '16px',
+                      padding: '12px 16px',
+                      background: isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      color: '#ef4444',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                    }}>
+                      <LuCircleAlert size={18} />
+                      <span>
+                        All tasks must be reassigned before confirming.
+                        <strong style={{ marginLeft: '4px' }}>
+                          ({Object.keys(taskReassignments).length}/{specialistTasks.length} assigned)
+                        </strong>
+                      </span>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -5288,11 +5381,11 @@ const AdminDashboard = () => {
                     style={{
                       ...styles.modalActionBtn,
                       ...styles.actionBtnPrimary,
-                      opacity: !reallocationReason ? 0.5 : 1,
-                      cursor: !reallocationReason ? 'not-allowed' : 'pointer',
+                      opacity: (!reallocationReason || !allReallocationTasksAssigned) ? 0.5 : 1,
+                      cursor: (!reallocationReason || !allReallocationTasksAssigned) ? 'not-allowed' : 'pointer',
                     }}
                     onClick={handleReallocationConfirm}
-                    disabled={!reallocationReason || updatingAllocation}
+                    disabled={!reallocationReason || !allReallocationTasksAssigned || updatingAllocation}
                   >
                     {updatingAllocation ? (
                       <>
@@ -7443,6 +7536,31 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Warning if not all tasks assigned */}
+                  {!allDualRemovalTasksHandled && (
+                    <div style={{
+                      marginTop: '16px',
+                      padding: '12px 16px',
+                      background: isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      color: '#ef4444',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                    }}>
+                      <LuCircleAlert size={18} />
+                      <span>
+                        All tasks in the removed phase must be reassigned before confirming.
+                        <strong style={{ marginLeft: '4px' }}>
+                          ({Object.keys(dualRemovalAssignments).length}/{dualRemovalData.tasksInRemovedPhase?.length || 0} assigned)
+                        </strong>
+                      </span>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -7532,7 +7650,7 @@ const AdminDashboard = () => {
                 {dualRemovalStep === 3 && (
                   <button
                     onClick={handleDualRemovalConfirm}
-                    disabled={dualRemovalLoading}
+                    disabled={dualRemovalLoading || !allDualRemovalTasksHandled}
                     style={{
                       padding: '12px 24px',
                       borderRadius: '10px',
@@ -7541,8 +7659,8 @@ const AdminDashboard = () => {
                       color: '#ffffff',
                       fontSize: '14px',
                       fontWeight: '600',
-                      cursor: dualRemovalLoading ? 'not-allowed' : 'pointer',
-                      opacity: dualRemovalLoading ? 0.7 : 1,
+                      cursor: (dualRemovalLoading || !allDualRemovalTasksHandled) ? 'not-allowed' : 'pointer',
+                      opacity: (dualRemovalLoading || !allDualRemovalTasksHandled) ? 0.5 : 1,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',

@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -2099,6 +2100,54 @@ async def assign_task(
         application_id=task.application_id,
         specialist_id=task.specialist_id,
         specialist_name=specialist.full_name if specialist else None,
+        phase=task.phase,
+        task_title=task.task_title,
+        task_description=task.task_description,
+        priority=task.priority,
+        status=task.status,
+        created_at=task.created_at,
+        assigned_at=task.assigned_at,
+        started_at=task.started_at,
+        completed_at=task.completed_at,
+        due_date=task.due_date,
+    )
+
+
+class AdminReassignTaskRequest(BaseModel):
+    """Request to reassign a task (admin endpoint)."""
+    new_specialist_id: int
+
+
+@app.post("/api/admin/tasks/{task_id}/reassign", response_model=SpecialistTaskResponse, tags=["Admin"])
+async def admin_reassign_task(
+    task_id: int,
+    request: AdminReassignTaskRequest,
+    db: Session = Depends(get_db),
+):
+    """Admin endpoint to reassign a task to a different specialist."""
+    task = db.query(SpecialistTask).filter(SpecialistTask.id == task_id).first()
+
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    new_specialist = db.query(Specialist).filter(Specialist.id == request.new_specialist_id).first()
+    if not new_specialist:
+        raise HTTPException(status_code=404, detail="Target specialist not found")
+
+    # Update the task assignment
+    old_specialist_id = task.specialist_id
+    task.specialist_id = request.new_specialist_id
+    task.assigned_at = datetime.utcnow()
+    task.status = "ASSIGNED"  # Reset to assigned status
+
+    db.commit()
+    db.refresh(task)
+
+    return SpecialistTaskResponse(
+        id=task.id,
+        application_id=task.application_id,
+        specialist_id=task.specialist_id,
+        specialist_name=new_specialist.full_name if new_specialist else None,
         phase=task.phase,
         task_title=task.task_title,
         task_description=task.task_description,

@@ -59,9 +59,16 @@ const AllocationTab = ({
   openEditModal,
   showDeleteConfirm,
   loading,
+  allAdminTasks = [], // All tasks for displaying in directory
   isDark,
   styles,
 }) => {
+  // Local state for tasks popup
+  const [tasksPopup, setTasksPopup] = React.useState(null); // { specialist, tasks }
+
+  const onTaskCountClick = (specialist, tasks) => {
+    setTasksPopup({ specialist, tasks });
+  };
   const colors = COLORS;
 
   return (
@@ -1292,22 +1299,84 @@ const AllocationTab = ({
                           </span>
                         </td>
                         <td style={styles.td}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{
-                              ...styles.badge,
-                              background: `${colors.warning}15`,
-                              color: colors.warning,
-                            }}>
-                              {specialist.pending_tasks_count || 0} pending
-                            </span>
-                            <span style={{
-                              ...styles.badge,
-                              background: `${colors.primary}15`,
-                              color: colors.primary,
-                            }}>
-                              {specialist.in_progress_tasks_count || 0} active
-                            </span>
-                          </div>
+                          {(() => {
+                            const specialistTasks = allAdminTasks.filter(t => t.specialist_id === specialist.id);
+                            const taskCount = specialistTasks.length;
+                            const uniquePhases = [...new Set(specialistTasks.map(t => t.phase).filter(Boolean))];
+                            const isMultiPhase = uniquePhases.length > 1;
+
+                            if (taskCount === 0) {
+                              return (
+                                <span style={{
+                                  fontSize: '12px',
+                                  color: isDark ? '#64748b' : '#94a3b8',
+                                  fontStyle: 'italic',
+                                }}>
+                                  No tasks
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '6px',
+                                  cursor: 'pointer',
+                                  padding: '6px 10px',
+                                  borderRadius: '8px',
+                                  background: isMultiPhase
+                                    ? 'linear-gradient(90deg, rgba(24, 95, 165, 0.1) 50%, rgba(13, 148, 136, 0.1) 50%)'
+                                    : `${colors.primary}08`,
+                                  border: isMultiPhase
+                                    ? '1px solid rgba(24, 95, 165, 0.25)'
+                                    : `1px solid ${colors.primary}20`,
+                                }}
+                                onClick={() => onTaskCountClick(specialist, specialistTasks)}
+                                title="Click to view tasks"
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{
+                                    fontSize: '13px',
+                                    fontWeight: '700',
+                                    color: colors.primary,
+                                  }}>
+                                    {taskCount} task{taskCount !== 1 ? 's' : ''}
+                                  </span>
+                                  {isMultiPhase && (
+                                    <span style={{
+                                      fontSize: '9px',
+                                      fontWeight: '700',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      background: 'linear-gradient(135deg, #185FA5 0%, #0d9488 100%)',
+                                      color: '#fff',
+                                    }}>
+                                      MULTI
+                                    </span>
+                                  )}
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                  {uniquePhases.map((phase, idx) => (
+                                    <span
+                                      key={idx}
+                                      style={{
+                                        fontSize: '9px',
+                                        fontWeight: '600',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                        background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
+                                        color: isDark ? '#94a3b8' : '#64748b',
+                                      }}
+                                    >
+                                      {phase.replace(/_/g, ' ')}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td style={styles.td}>
                           <span style={{
@@ -1355,6 +1424,160 @@ const AllocationTab = ({
                   </tbody>
                 </table>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Tasks Popup Modal */}
+        {tasksPopup && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+            }}
+            onClick={() => setTasksPopup(null)}
+          >
+            <div
+              style={{
+                background: isDark ? '#1e293b' : '#ffffff',
+                borderRadius: '16px',
+                padding: '24px',
+                maxWidth: '500px',
+                width: '90%',
+                maxHeight: '70vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '20px',
+                paddingBottom: '16px',
+                borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.cyan} 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    fontWeight: '700',
+                    fontSize: '16px',
+                  }}>
+                    {tasksPopup.specialist.full_name?.charAt(0) || 'S'}
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      color: isDark ? '#f1f5f9' : '#1e293b',
+                    }}>
+                      {tasksPopup.specialist.full_name || tasksPopup.specialist.username}
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: isDark ? '#64748b' : '#94a3b8',
+                    }}>
+                      {tasksPopup.tasks.length} assigned task{tasksPopup.tasks.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setTasksPopup(null)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                    color: isDark ? '#94a3b8' : '#64748b',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LuX size={18} />
+                </button>
+              </div>
+
+              {/* Task List */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+              }}>
+                {tasksPopup.tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: task.status === 'IN_PROGRESS' ? colors.primary : colors.warning,
+                      }} />
+                      <div>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: isDark ? '#e2e8f0' : '#1e293b',
+                        }}>
+                          {task.application_id || `Task #${task.id}`}
+                        </div>
+                        <div style={{
+                          fontSize: '11px',
+                          color: isDark ? '#64748b' : '#94a3b8',
+                        }}>
+                          {task.phase?.replace(/_/g, ' ') || 'Unknown Phase'}
+                        </div>
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: '10px',
+                      fontWeight: '600',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: task.status === 'IN_PROGRESS'
+                        ? `${colors.primary}15`
+                        : `${colors.warning}15`,
+                      color: task.status === 'IN_PROGRESS' ? colors.primary : colors.warning,
+                    }}>
+                      {task.status?.replace(/_/g, ' ') || 'ASSIGNED'}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
